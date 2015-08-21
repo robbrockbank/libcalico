@@ -15,13 +15,11 @@
 from etcd import EtcdKeyNotFound, EtcdAlreadyExist
 
 from netaddr import IPAddress, IPNetwork
-from types import NoneType
 import socket
-import json
 import logging
 
 from pycalico.datastore_datatypes import IPPool
-from pycalico.datastore import CALICO_V_PATH, DatastoreClient, handle_errors
+from pycalico.datastore import DatastoreClient
 
 from pycalico.datastore_errors import PoolNotFound
 from pycalico.block import (AllocationBlock,

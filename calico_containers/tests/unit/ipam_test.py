@@ -22,6 +22,7 @@ from pycalico.ipam import (IPAMClient, BlockReaderWriter,
                            CASError, NoFreeBlocksError, _datastore_key)
 from pycalico.block import AllocationBlock
 from pycalico.datastore_datatypes import IPPool
+from pycalico.datastore_errors import PoolNotFound
 from block_test import _test_block_empty_v4, _test_block_empty_v6
 
 network = IPNetwork("192.168.25.0/24")
@@ -420,6 +421,17 @@ class TestIPAMClient(unittest.TestCase):
         json_dict = json.loads(m_result.value)
         assert_equal(json_dict[AllocationBlock.ALLOCATIONS][55], 0)
 
+
+    def test_assign_address_no_pool(self):
+        """
+        Mainline test of assign_address().
+        """
+
+        self.m_etcd_client.read.side_effect = EtcdKeyNotFound
+
+        ip0 = IPAddress("10.11.12.55")
+        self.assertRaises(PoolNotFound, self.client.assign_address, None, ip0)
+
     def test_assign_address_fails(self):
         """
         Test assign_address() when it fails.
@@ -436,6 +448,17 @@ class TestIPAMClient(unittest.TestCase):
         success = self.client.assign_address(pool, ip0)
         assert_false(success)
         assert_false(self.m_etcd_client.update.called)
+
+    def test_unassign_address_no_pool(self):
+        """
+        Mainline test of assign_address().
+        """
+
+        self.m_etcd_client.read.side_effect = EtcdKeyNotFound
+
+        ip0 = IPAddress("10.11.12.55")
+        self.assertRaises(PoolNotFound, self.client.unassign_address,
+                          None, ip0)
 
     def test_release_basic(self):
         """
@@ -860,4 +883,3 @@ class TestBlockReaderWriter(unittest.TestCase):
             # Spot check last call is the last subnet in 10.11.0.0/16 pool.
             assert_equal(self.m_etcd_client.read.call_args[0][0],
                          _datastore_key(IPNetwork("10.11.255.0/24")))
-
