@@ -72,7 +72,7 @@ class BlockReaderWriter(DatastoreClient):
         if block.db_result is not None:
             try:
                 self.etcd_client.update(block.update_result())
-            except EtcdAlreadyExist:
+            except ValueError:
                 raise CASError(str(block.cidr))
         else:
             # Block is new.  Write it with prevExist=False
