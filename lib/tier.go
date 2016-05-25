@@ -7,6 +7,7 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/coreos/etcd/client"
 	"github.com/ghodss/yaml"
 	"golang.org/x/net/context"
 )
