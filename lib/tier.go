@@ -204,6 +204,6 @@ func createDefaultTier(etcd client.KeysAPI) error {
 	tb, _ := json.Marshal(ts)
 
 	//TODO: Handle already exists, for now just overwrite the default each time
-	_, err := etcd.Set(context.Background(), "/calico/v1/policy/tier/default", string(tb), &client.SetOptions{})
+	_, err := etcd.Set(context.Background(), "/calico/v1/policy/tier/default/metadata", string(tb), &client.SetOptions{})
 	return err
 }
