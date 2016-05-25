@@ -1,22 +1,23 @@
 package libcalico
 
 import (
-	"errors"
-	"log"
-	"fmt"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"log"
+	"regexp"
+
 	"github.com/ghodss/yaml"
 	"golang.org/x/net/context"
-	"regexp"
 )
 
 var policyRE = regexp.MustCompile(`/calico/v1/policy/tier/[^/]*/policy/[^/]*`)
 
 type TierQualified struct {
-	Kind string `json:"kind"`
-	Version string `json:"version"`
+	Kind     string     `json:"kind"`
+	Version  string     `json:"version"`
 	Metadata PolicyMeta `json:"metadata"`
-	Spec PolicySpec `json:"spec"`
+	Spec     PolicySpec `json:"spec"`
 }
 
 type TierMeta struct {
@@ -29,10 +30,10 @@ type TierSpec struct {
 }
 
 type PolicyQualified struct {
-	Kind string `json:"kind"`
-	Version string `json:"version"`
+	Kind     string     `json:"kind"`
+	Version  string     `json:"version"`
 	Metadata PolicyMeta `json:"metadata"`
-	Spec PolicySpec `json:"spec"`
+	Spec     PolicySpec `json:"spec"`
 }
 
 type PolicyMeta struct {
@@ -41,39 +42,38 @@ type PolicyMeta struct {
 }
 
 type PolicySpec struct {
-	Order string `json:"order"`
-	InboundRules []Rule `json:"inbound_rules"`
+	Order         string `json:"order"`
+	InboundRules  []Rule `json:"inbound_rules"`
 	OutboundRules []Rule `json:"outbound_rules"`
 }
 
 type Rule struct {
 	Action string `json:"action"`
 
-	Protocol string `json:"protocol,omitempty"`
-	SrcTag string `json:"src_tag,omitempty"`
-	SrcNet string `json:"src_net,omitempty"`
+	Protocol    string `json:"protocol,omitempty"`
+	SrcTag      string `json:"src_tag,omitempty"`
+	SrcNet      string `json:"src_net,omitempty"`
 	SrcSelector string `json:"src_selector,omitempty"`
-	SrcPorts []int `json:"src_ports,omitempty"`
-	DstTag string `json:"dst_tag,omitempty"`
+	SrcPorts    []int  `json:"src_ports,omitempty"`
+	DstTag      string `json:"dst_tag,omitempty"`
 	DstSelector string `json:"dst_selector,omitempty"`
-	DstNet string `json:"dst_net,omitempty"`
-	DstPorts []int `json:"dst_ports,omitempty"`
-	IcmpType int `json:"icmp_type,omitempty"`
-	IcmpCode int `json:"icmp_code,omitempty"`
+	DstNet      string `json:"dst_net,omitempty"`
+	DstPorts    []int  `json:"dst_ports,omitempty"`
+	IcmpType    int    `json:"icmp_type,omitempty"`
+	IcmpCode    int    `json:"icmp_code,omitempty"`
 
-	NotProtocol string `json:"!protocol,omitempty"`
-	NotSrcTag string `json:"!src_tag,omitempty"`
-	NotSrcNet string `json:"!src_net,omitempty"`
+	NotProtocol    string `json:"!protocol,omitempty"`
+	NotSrcTag      string `json:"!src_tag,omitempty"`
+	NotSrcNet      string `json:"!src_net,omitempty"`
 	NotSrcSelector string `json:"!src_selector,omitempty"`
-	NotSrcPorts []int `json:"!src_ports,omitempty"`
-	NotDstTag string `json:"!dst_tag,omitempty"`
+	NotSrcPorts    []int  `json:"!src_ports,omitempty"`
+	NotDstTag      string `json:"!dst_tag,omitempty"`
 	NotDstSelector string `json:"!dst_selector,omitempty"`
-	NotDstNet string `json:"!dst_net,omitempty"`
-	NotDstPorts []int `json:"!dst_ports,omitempty"`
-	NotIcmpType int `json:"!icmp_type,omitempty"`
-	NotIcmpCode int `json:"!icmp_code,omitempty"`
+	NotDstNet      string `json:"!dst_net,omitempty"`
+	NotDstPorts    []int  `json:"!dst_ports,omitempty"`
+	NotIcmpType    int    `json:"!icmp_type,omitempty"`
+	NotIcmpCode    int    `json:"!icmp_code,omitempty"`
 }
-
 
 func LoadPolicy(policyBytes []byte) (*PolicyQualified, error) {
 	var pq PolicyQualified
@@ -94,7 +94,6 @@ func LoadPolicy(policyBytes []byte) (*PolicyQualified, error) {
 
 	return &pq, nil
 }
-
 
 func CreateOrReplacePolicy(etcd client.KeysAPI, pq *PolicyQualified, replace bool) error {
 
@@ -125,7 +124,6 @@ func CreateOrReplacePolicy(etcd client.KeysAPI, pq *PolicyQualified, replace boo
 	return err
 }
 
-
 func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error) {
 	var pqs []PolicyQualified
 
@@ -134,9 +132,9 @@ func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error
 		actualTierName = "default"
 	}
 
-	resp, err := etcd.Get(context.Background(), fmt.Sprintf("/calico/v1/policy/tier/%s/policy", actualTierName), &client.GetOptions{Recursive:true})
+	resp, err := etcd.Get(context.Background(), fmt.Sprintf("/calico/v1/policy/tier/%s/policy", actualTierName), &client.GetOptions{Recursive: true})
 	if err != nil {
-		if ! client.IsKeyNotFound(err) {
+		if !client.IsKeyNotFound(err) {
 			return nil, error
 		}
 		return policies, nil
@@ -159,17 +157,16 @@ func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error
 				pm.Tier = tierName
 			}
 			pq := PolicyQualified{
-				Kind: "policy",
-				Version: "v1",
+				Kind:     "policy",
+				Version:  "v1",
 				Metadata: pm,
-				Spec: ps,
+				Spec:     ps,
 			}
 			pqs = append(pqs, pq)
 		}
 	}
 	return policies
 }
-
 
 func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	var pq PolicyQualified
@@ -180,7 +177,7 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	}
 	pk := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s", tierName, pm.Name)
 
-	resp, err := etcd.Get(context.Background(), pk), nil)
+	resp, err := etcd.Get(context.Background(), pk, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +190,6 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	return &pq, nil
 }
 
-
 func DeletePolicy(etcd client.KeysAPI, pm PolicyMeta) error {
 	var pq PolicyQualified
 
@@ -203,10 +199,9 @@ func DeletePolicy(etcd client.KeysAPI, pm PolicyMeta) error {
 	}
 	pk := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s", tierName, pm.Name)
 
-	_, err := etcd.Delete(context.Background(), pk), nil)
+	_, err := etcd.Delete(context.Background(), pk, nil)
 	return err
 }
-
 
 func createDefaultTier(etcd client.KeysAPI) error {
 	ts := TierSpec{Order: 1000}

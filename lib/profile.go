@@ -2,8 +2,9 @@ package libcalico
 
 import (
 	"encoding/json"
-	"github.com/coreos/etcd/client"
 	"fmt"
+
+	"github.com/coreos/etcd/client"
 	"golang.org/x/net/context"
 )
 
@@ -18,13 +19,13 @@ type Rule struct {
 }
 
 type Profile struct {
-	ID    string `json:"-"`
+	ID    string   `json:"-"`
 	Tags  []string `json:"tags"`
-	Rules Rules `json:"rules"`
+	Rules Rules    `json:"rules"`
 }
 
 func ProfileExists(id string, etcd client.KeysAPI) (bool, error) {
-	_, err := etcd.Get(context.Background(), "/calico/v1/policy/profile/" + id, &client.GetOptions{})
+	_, err := etcd.Get(context.Background(), "/calico/v1/policy/profile/"+id, &client.GetOptions{})
 	if err != nil {
 		if client.IsKeyNotFound(err) {
 			return false, nil

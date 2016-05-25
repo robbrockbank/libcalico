@@ -1,8 +1,9 @@
 package libcalico
 
 import (
-	"github.com/coreos/etcd/client"
 	"fmt"
+
+	"github.com/coreos/etcd/client"
 	"golang.org/x/net/context"
 )
 
@@ -15,7 +16,7 @@ type Workload struct {
 func (w *Workload) Delete(etcd client.KeysAPI) error {
 	key := fmt.Sprintf("/calico/v1/host/%s/workload/%s/%s", w.Hostname, w.OrchestratorID, w.WorkloadID)
 
-	if _, err := etcd.Delete(context.Background(), key, &client.DeleteOptions{Recursive:true, Dir:true}); err != nil {
+	if _, err := etcd.Delete(context.Background(), key, &client.DeleteOptions{Recursive: true, Dir: true}); err != nil {
 		return err
 	}
 	return nil

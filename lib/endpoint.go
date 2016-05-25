@@ -2,11 +2,11 @@ package libcalico
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"regexp"
+
 	"github.com/coreos/etcd/client"
-	"fmt"
-	"github.com/satori/go.uuid"
 	"golang.org/x/net/context"
 )
 
@@ -14,15 +14,15 @@ var re = regexp.MustCompile(`/calico/v1/host/[^/]*?/workload/[^/]*/([^/]*)/endpo
 
 type Endpoint struct {
 	Hostname       string            `json:"-"`
-	OrchestratorID string `json:"-"`
-	WorkloadID     string `json:"-"`
-	EndpointID     string `json:"-"`
-	State          string `json:"state"`
-	Name           string `json:"name"`
-	Mac            string `json:"mac"`
-	ProfileID      []string `json:"profile_ids"`
-	IPv4Nets       []string `json:"ipv4_nets"`
-	IPv6Nets       []string `json:"ipv6_nets"`
+	OrchestratorID string            `json:"-"`
+	WorkloadID     string            `json:"-"`
+	EndpointID     string            `json:"-"`
+	State          string            `json:"state"`
+	Name           string            `json:"name"`
+	Mac            string            `json:"mac"`
+	ProfileID      []string          `json:"profile_ids"`
+	IPv4Nets       []string          `json:"ipv4_nets"`
+	IPv6Nets       []string          `json:"ipv6_nets"`
 	Labels         map[string]string `json:"labels,omitempty"`
 }
 
@@ -141,7 +141,7 @@ func (e *Endpoint) Write(etcd client.KeysAPI) error {
 
 func GetEndpoint(etcd client.KeysAPI, w Workload) (bool, Endpoint, error) {
 	key := fmt.Sprintf("/calico/v1/host/%s/workload/%s/%s/endpoint/", w.Hostname, w.OrchestratorID, w.WorkloadID)
-	resp, err := etcd.Get(context.Background(), key, &client.GetOptions{Recursive:true})
+	resp, err := etcd.Get(context.Background(), key, &client.GetOptions{Recursive: true})
 	if err != nil {
 		if client.IsKeyNotFound(err) {
 			return false, Endpoint{}, nil
@@ -161,10 +161,10 @@ func GetEndpoint(etcd client.KeysAPI, w Workload) (bool, Endpoint, error) {
 					endpointID := matches[4]
 
 					endpoint := Endpoint{
-						Hostname:hostname,
-						OrchestratorID:orchestratorID,
-						WorkloadID:workloadID,
-						EndpointID:endpointID}
+						Hostname:       hostname,
+						OrchestratorID: orchestratorID,
+						WorkloadID:     workloadID,
+						EndpointID:     endpointID}
 
 					err := json.Unmarshal([]byte(node.Value), &endpoint)
 					if err != nil {

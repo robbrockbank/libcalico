@@ -1,8 +1,9 @@
 package libcalico
 
 import (
-	"github.com/coreos/etcd/client"
 	"strings"
+
+	"github.com/coreos/etcd/client"
 )
 
 func GetKeysAPI(etcdAuthority, etcdEndpoint string) (client.KeysAPI, error) {
