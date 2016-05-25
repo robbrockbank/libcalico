@@ -27,7 +27,7 @@ type TierMeta struct {
 }
 
 type TierSpec struct {
-	Order int   `json:"order"`
+	Order int `json:"order"`
 }
 
 type PolicyQualified struct {
