@@ -27,7 +27,7 @@ type TierMeta struct {
 }
 
 type TierSpec struct {
-	Order string `json:"order"`
+	Order int   `json:"order"`
 }
 
 type PolicyQualified struct {
@@ -43,7 +43,7 @@ type PolicyMeta struct {
 }
 
 type PolicySpec struct {
-	Order         string `json:"order"`
+	Order         int    `json:"order"`
 	InboundRules  []Rule `json:"inbound_rules"`
 	OutboundRules []Rule `json:"outbound_rules"`
 }
@@ -118,9 +118,9 @@ func CreateOrReplacePolicy(etcd client.KeysAPI, pq *PolicyQualified, replace boo
 	// Write the policy object to etcd.  If replacing policy, the we expect the policy to
 	// already exist, otherwise we expect it to not exist.
 	if replace {
-		err = etcd.Update(context.Background(), pk, string(pb))
+		_, err = etcd.Update(context.Background(), pk, string(pb))
 	} else {
-		err = etcd.Create(context.Background(), pk, string(pb))
+		_, err = etcd.Create(context.Background(), pk, string(pb))
 	}
 	return err
 }
@@ -163,7 +163,7 @@ func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error
 			pqs = append(pqs, pq)
 		}
 	}
-	return pqs
+	return pqs, nil
 }
 
 func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
@@ -180,7 +180,7 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 		return nil, err
 	}
 
-	err = json.Unmarshal([]byte(resp.node.Value), &pq)
+	err = json.Unmarshal([]byte(resp.Node.Value), &pq)
 	if err != nil {
 		return nil, err
 	}
