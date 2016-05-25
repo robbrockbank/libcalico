@@ -189,8 +189,6 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 }
 
 func DeletePolicy(etcd client.KeysAPI, pm PolicyMeta) error {
-	var pq PolicyQualified
-
 	tierName := pm.Tier
 	if tierName == "" {
 		tierName = "default"
