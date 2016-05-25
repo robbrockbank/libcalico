@@ -75,12 +75,12 @@ type Rule struct {
 }
 
 
-func LoadPolicy(policyString string) (*PolicyQualified, error) {
+func LoadPolicy(policyBytes []byte) (*PolicyQualified, error) {
 	var pq PolicyQualified
 	var err error
 
 	// Load the policy string.  This should be a fully qualified set of policy.
-	err = yaml.Unmarshall([]byte(policyString), &pq)
+	err = yaml.Unmarshall(policyBytes, &pq)
 	if err != nil {
 		return nil, err
 	}
@@ -117,17 +117,12 @@ func CreateOrReplacePolicy(etcd client.KeysAPI, pq *PolicyQualified, replace boo
 
 	// Write the policy object to etcd.  If replacing policy, the we expect the policy to
 	// already exist, otherwise we expect it to not exist.
-	var options client.SetOptions
 	if replace {
-		options = client.SetOptions{PrevExist: PrevExist}
+		err = etcd.Update(context.Background(), pk, string(pb))
 	} else {
-		options = client.SetOptions{PrevExist: PrevNoExist}
+		err = etcd.Create(context.Background(), pk, string(pb))
 	}
-	if _, err := etcd.Set(context.Background(), pk, string(pb), &options); err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 
@@ -185,7 +180,7 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	}
 	pk := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s", tierName, pm.Name)
 
-	resp, err := etcd.Get(context.Background(), pk), &client.GetOptions{})
+	resp, err := etcd.Get(context.Background(), pk), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -196,6 +191,20 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	}
 
 	return &pq, nil
+}
+
+
+func DeletePolicy(etcd client.KeysAPI, pm PolicyMeta) error {
+	var pq PolicyQualified
+
+	tierName := pm.Tier
+	if tierName == nil {
+		tierName = "default"
+	}
+	pk := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s", tierName, pm.Name)
+
+	_, err := etcd.Delete(context.Background(), pk), nil)
+	return err
 }
 
 
