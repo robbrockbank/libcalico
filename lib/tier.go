@@ -136,9 +136,9 @@ func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error
 	resp, err := etcd.Get(context.Background(), fmt.Sprintf("/calico/v1/policy/tier/%s/policy", actualTierName), &client.GetOptions{Recursive: true})
 	if err != nil {
 		if !client.IsKeyNotFound(err) {
-			return nil, error
+			return nil, err
 		}
-		return policies, nil
+		return pqs, nil
 	}
 
 	for _, node := range resp.Node.Nodes {
@@ -163,7 +163,7 @@ func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error
 			pqs = append(pqs, pq)
 		}
 	}
-	return policies
+	return pqs
 }
 
 func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
