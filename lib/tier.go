@@ -81,7 +81,7 @@ func LoadPolicy(policyBytes []byte) (*PolicyQualified, error) {
 	var err error
 
 	// Load the policy string.  This should be a fully qualified set of policy.
-	err = yaml.Unmarshall(policyBytes, &pq)
+	err = yaml.Unmarshal(policyBytes, &pq)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func CreateOrReplacePolicy(etcd client.KeysAPI, pq *PolicyQualified, replace boo
 
 	// If the default tier is specified, or no tier is specified we may need to create the default.
 	tierName := pq.Metadata.Tier
-	if tierName == "default" || tierName == nil {
+	if tierName == "default" || tierName == "" {
 		err = createDefaultTier(etcd)
 		tierName = "default"
 	}
@@ -129,7 +129,7 @@ func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error
 	var pqs []PolicyQualified
 
 	actualTierName := tierName
-	if actualTierName == nil {
+	if actualTierName == "" {
 		actualTierName = "default"
 	}
 
@@ -153,10 +153,7 @@ func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error
 			if err != nil {
 				log.Fatal(err)
 			}
-			pm := PolicyMeta{Name: policyName}
-			if tierName != nil {
-				pm.Tier = tierName
-			}
+			pm := PolicyMeta{Name: policyName, Tier: tierName}
 			pq := PolicyQualified{
 				Kind:     "policy",
 				Version:  "v1",
@@ -173,7 +170,7 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	var pq PolicyQualified
 
 	tierName := pm.Tier
-	if tierName == nil {
+	if tierName == "" {
 		tierName = "default"
 	}
 	pk := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s", tierName, pm.Name)
@@ -195,7 +192,7 @@ func DeletePolicy(etcd client.KeysAPI, pm PolicyMeta) error {
 	var pq PolicyQualified
 
 	tierName := pm.Tier
-	if tierName == nil {
+	if tierName == "" {
 		tierName = "default"
 	}
 	pk := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s", tierName, pm.Name)
