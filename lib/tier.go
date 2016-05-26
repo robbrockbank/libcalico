@@ -145,7 +145,7 @@ func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyResource, error)
 	for _, node := range resp.Node.Nodes {
 		var ps PolicySpec
 
-		var re = regexp.MustCompile(`/calico/v1/policy/tier/([^/]+?)/policy/([^/]+?)`)
+		var re = regexp.MustCompile(`/calico/v1/policy/tier/([^/]+)/policy/([^/]+)`)
 		matches := re.FindStringSubmatch(node.Key)
 		if matches != nil {
 			policyName := matches[2]
