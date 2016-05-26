@@ -179,11 +179,13 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("Policy: %v", resp.Node.Value)
 
 	err = json.Unmarshal([]byte(resp.Node.Value), &pq)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("Policy: %v", pq)
 
 	return &pq, nil
 }
