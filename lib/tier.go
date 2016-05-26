@@ -46,6 +46,7 @@ type PolicySpec struct {
 	Order         int    `json:"order"`
 	InboundRules  []Rule `json:"inbound_rules"`
 	OutboundRules []Rule `json:"outbound_rules"`
+	Selector string `json:"selector"`
 }
 
 type Rule struct {
@@ -168,6 +169,7 @@ func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error
 
 func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	var pq PolicyQualified
+	var ps PolicySpec
 
 	tierName := pm.Tier
 	if tierName == "" {
@@ -180,12 +182,16 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 		return nil, err
 	}
 
-	err = json.Unmarshal([]byte(resp.Node.Value), &pq.Spec)
+	err = json.Unmarshal([]byte(resp.Node.Value), &ps)
 	if err != nil {
 		return nil, err
 	}
-	pq.Metadata = pm
-	pq.Kind = "policy"
+	pq = PolicyQualified{
+		Kind:     "policy",
+		Version:  "v1",
+		Metadata: pm,
+		Spec:     ps,
+	}
 
 	return &pq, nil
 }
