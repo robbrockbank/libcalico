@@ -175,19 +175,17 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	}
 	pk := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s", tierName, pm.Name)
 
-	fmt.Println("Policy key: ", pk)
-	resp, err := etcd.Get(context.Background(), pk, nil)
+	resp, err := etcd.Get(context.Background(), ps, nil)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Policy: ", resp.Node.Value)
 
-	err = json.Unmarshal([]byte(resp.Node.Value), &pq)
+	err = json.Unmarshal([]byte(resp.Node.Value), &pq.Spec)
 	if err != nil {
 		return nil, err
 	}
-	y, _ := yaml.Marshal(pq)
-	fmt.Println("Policy: ", string(y))
+	pq.Metadata = pm
+	pq.Kind = "policy"
 
 	return &pq, nil
 }
