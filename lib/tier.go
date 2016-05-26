@@ -186,8 +186,8 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	if err != nil {
 		return nil, err
 	}
-	y, _ := string(yaml.Marshal(pq))
-	fmt.Println("Policy: ", y)
+	y, _ := yaml.Marshal(pq)
+	fmt.Println("Policy: ", string(y))
 
 	return &pq, nil
 }
