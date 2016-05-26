@@ -175,7 +175,7 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	}
 	pk := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s", tierName, pm.Name)
 
-	resp, err := etcd.Get(context.Background(), ps, nil)
+	resp, err := etcd.Get(context.Background(), pk, nil)
 	if err != nil {
 		return nil, err
 	}
