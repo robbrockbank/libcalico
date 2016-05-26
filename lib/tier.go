@@ -14,14 +14,14 @@ import (
 
 var policyRE = regexp.MustCompile(`/calico/v1/policy/tier/[^/]*/policy/[^/]*`)
 
-type TierQualified struct {
+type TierResource struct {
 	Kind     string     `json:"kind"`
 	Version  string     `json:"version"`
-	Metadata PolicyMeta `json:"metadata"`
+	Metadata PolicyMetadata `json:"metadata"`
 	Spec     PolicySpec `json:"spec"`
 }
 
-type TierMeta struct {
+type TierMetadata struct {
 	Name string `json:"name"`
 	Tier string `json:"tier,omitempty"`
 }
@@ -30,14 +30,14 @@ type TierSpec struct {
 	Order int `json:"order"`
 }
 
-type PolicyQualified struct {
+type PolicyResource struct {
 	Kind     string     `json:"kind"`
 	Version  string     `json:"version"`
-	Metadata PolicyMeta `json:"metadata"`
+	Metadata PolicyMetadata `json:"metadata"`
 	Spec     PolicySpec `json:"spec"`
 }
 
-type PolicyMeta struct {
+type PolicyMetadata struct {
 	Name string `json:"name"`
 	Tier string `json:"tier,omitempty"`
 }
@@ -77,8 +77,8 @@ type Rule struct {
 	NotIcmpCode    int    `json:"!icmp_code,omitempty"`
 }
 
-func LoadPolicy(policyBytes []byte) (*PolicyQualified, error) {
-	var pq PolicyQualified
+func LoadPolicy(policyBytes []byte) (*PolicyResource, error) {
+	var pq PolicyResource
 	var err error
 
 	// Load the policy string.  This should be a fully qualified set of policy.
@@ -97,7 +97,7 @@ func LoadPolicy(policyBytes []byte) (*PolicyQualified, error) {
 	return &pq, nil
 }
 
-func CreateOrReplacePolicy(etcd client.KeysAPI, pq *PolicyQualified, replace bool) error {
+func CreateOrReplacePolicy(etcd client.KeysAPI, pq *PolicyResource, replace bool) error {
 
 	var err error
 
@@ -126,8 +126,8 @@ func CreateOrReplacePolicy(etcd client.KeysAPI, pq *PolicyQualified, replace boo
 	return err
 }
 
-func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error) {
-	var pqs []PolicyQualified
+func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyResource, error) {
+	var pqs []PolicyResource
 
 	actualTierName := tierName
 	if actualTierName == "" {
@@ -154,8 +154,8 @@ func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error
 			if err != nil {
 				log.Fatal(err)
 			}
-			pm := PolicyMeta{Name: policyName, Tier: tierName}
-			pq := PolicyQualified{
+			pm := PolicyMetadata{Name: policyName, Tier: tierName}
+			pq := PolicyResource{
 				Kind:     "policy",
 				Version:  "v1",
 				Metadata: pm,
@@ -167,8 +167,8 @@ func GetPolicies(etcd client.KeysAPI, tierName string) ([]PolicyQualified, error
 	return pqs, nil
 }
 
-func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
-	var pq PolicyQualified
+func GetPolicy(etcd client.KeysAPI, pm PolicyMetadata) (*PolicyResource, error) {
+	var pq PolicyResource
 	var ps PolicySpec
 
 	tierName := pm.Tier
@@ -186,7 +186,7 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	if err != nil {
 		return nil, err
 	}
-	pq = PolicyQualified{
+	pq = PolicyResource{
 		Kind:     "policy",
 		Version:  "v1",
 		Metadata: pm,
@@ -196,7 +196,7 @@ func GetPolicy(etcd client.KeysAPI, pm PolicyMeta) (*PolicyQualified, error) {
 	return &pq, nil
 }
 
-func DeletePolicy(etcd client.KeysAPI, pm PolicyMeta) error {
+func DeletePolicy(etcd client.KeysAPI, pm PolicyMetadata) error {
 	tierName := pm.Tier
 	if tierName == "" {
 		tierName = "default"
