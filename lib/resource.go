@@ -135,5 +135,5 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 		return nil, err
 	}
 
-	return r, nil
+	return &r, nil
 }
