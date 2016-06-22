@@ -9,7 +9,6 @@ import (
 	"github.com/coreos/etcd/client"
 	"github.com/ghodss/yaml"
 	"github.com/kelseyhightower/envconfig"
-	"fmt"
 )
 
 type ClientConfig struct {
