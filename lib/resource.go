@@ -95,11 +95,11 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 	fmt.Printf("Parsed type metadata: %v\n", tm)
 
 	// Handle unversioned resources explicitly (currently just the list type).
-	var r unversioned.Resource
+	var r *unversioned.Resource
 	if tm.Kind == "list" {
 		fmt.Printf("Processing list type")
-		r = unversioned.ResourceList(&unversioned.ListMetadata{}, &unversioned.ListSpec{})
-		err = yaml.Unmarshal(b, &r)
+		r = &unversioned.ResourceList(&unversioned.ListMetadata{}, &unversioned.ListSpec{})
+		err = yaml.Unmarshal(b, r)
 		if err != nil {
 			return nil, err
 		}
@@ -127,13 +127,13 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 		// Now that we have a concrete type unmarshal into that resource type.
 		fmt.Printf("Processing type %s\n", tm.Kind)
 		r, err = api.CreateResourceManager().NewResource(tm)
-		err = yaml.Unmarshal(b, &r)
+		err = yaml.Unmarshal(b, r)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	fmt.Printf("Parsed: %v\n", r)
+	fmt.Printf("Parsed: %v\n", *r)
 
 	// Validate the data in the structures.
 	_, err = govalidator.ValidateStruct(r)
