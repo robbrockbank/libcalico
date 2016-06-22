@@ -19,7 +19,7 @@ import (
 // If a list of resources is specified, they are saved in the list order, and this function
 // returns after saving all resources, or after hitting an error.  The function returns the
 // number of resources successfully updated.
-func SaveResource(etcd client.KeysAPI, r unversioned.Resource, canCreate, canReplace bool) (int, error) {
+func SaveResource(etcd client.KeysAPI, r *unversioned.Resource, canCreate, canReplace bool) (int, error) {
 	return 0, nil
 }
 
@@ -33,7 +33,7 @@ func SaveResource(etcd client.KeysAPI, r unversioned.Resource, canCreate, canRep
 // If a list of resources is specified, they are saved in the list order, and this function
 // returns after saving all resources, or after hitting an error.  The function returns the
 // number of resources successfully updated.
-func LoadResource(etcd client.KeysAPI, r unversioned.Resource) (*unversioned.Resource, error) {
+func LoadResource(etcd client.KeysAPI, r *unversioned.Resource) (*unversioned.Resource, error) {
 	return nil, nil
 }
 
@@ -48,7 +48,7 @@ func LoadResource(etcd client.KeysAPI, r unversioned.Resource) (*unversioned.Res
 // If a list of resources is specified, they are deleted in the list order, and this function
 // returns after saving all resources, or after hitting an error.  The function returns the
 // number of resources successfully deleted.
-func DeleteResource(etcd client.KeysAPI, r unversioned.Resource, ignoreNotPresent bool) (int, error) {
+func DeleteResource(etcd client.KeysAPI, r *unversioned.Resource, ignoreNotPresent bool) (int, error) {
 	return 0, nil
 }
 
