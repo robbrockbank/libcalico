@@ -9,6 +9,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/api/unversioned"
+	"fmt"
 )
 
 // Save the resource in the datastore:
@@ -91,10 +92,12 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("Parsed type metadata: %v\n", tm)
 
 	// Handle unversioned resources explicitly (currently just the list type).
 	var r unversioned.Resource
 	if tm.Kind == "list" {
+		fmt.Printf("Processing list type")
 		r = unversioned.ResourceList(&unversioned.ListMetadata{}, &unversioned.ListSpec{})
 		err = yaml.Unmarshal(b, &r)
 		if err != nil {
@@ -122,12 +125,15 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 		ls.List = rl
 	} else {
 		// Now that we have a concrete type unmarshal into that resource type.
+		fmt.Printf("Processing type %s", tm.Kind)
 		r, err := api.CreateResourceManager().NewResource(tm)
 		err = yaml.Unmarshal(b, &r)
 		if err != nil {
 			return nil, err
 		}
 	}
+
+	fmt.Printf("Parsed type %v", r)
 
 	// Validate the data in the structures.
 	_, err = govalidator.ValidateStruct(r)

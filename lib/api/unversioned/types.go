@@ -10,7 +10,7 @@ package unversioned
 //
 type TypeMetadata struct {
 	Kind    string `json:"kind"`
-	Version string `json:"version"`
+	APIVersion string `json:"apiVersion"`
 }
 
 // ---- Generic resource type ----

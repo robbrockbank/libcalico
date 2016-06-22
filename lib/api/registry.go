@@ -38,8 +38,10 @@ func (rm *ResourceManager) NewResource(tm unversioned.TypeMetadata) (*unversione
 	var new unversioned.Resource
 	rh, ok := rm.ResourceHelper[tm]
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("Unknown resource type (%s) and version (%s)", tm.Kind, tm.Version))
+		return nil, errors.New(fmt.Sprintf("Unknown resource type (%s) and version (%s)", tm.Kind, tm.APIVersion))
 	}
+	fmt.Printf("Found resource helper: %v\n", rh)
 	new = deepcopy.Iface(rh.EmptyResource).(unversioned.Resource)
+	fmt.Printf("Returning resource: %v\n", new)
 	return &new, nil
 }
