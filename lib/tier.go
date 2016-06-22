@@ -14,69 +14,7 @@ import (
 
 var policyRE = regexp.MustCompile(`/calico/v1/policy/tier/[^/]*/policy/[^/]*`)
 
-type TierResource struct {
-	Kind     string     `json:"kind"`
-	Version  string     `json:"version"`
-	Metadata PolicyMetadata `json:"metadata"`
-	Spec     PolicySpec `json:"spec"`
-}
-
-type TierMetadata struct {
-	Name string `json:"name"`
-	Tier string `json:"tier,omitempty"`
-}
-
-type TierSpec struct {
-	Order int `json:"order"`
-}
-
-type PolicyResource struct {
-	Kind     string     `json:"kind"`
-	Version  string     `json:"version"`
-	Metadata PolicyMetadata `json:"metadata"`
-	Spec     PolicySpec `json:"spec"`
-}
-
-type PolicyMetadata struct {
-	Name string `json:"name"`
-	Tier string `json:"tier,omitempty"`
-}
-
-type PolicySpec struct {
-	Order         int    `json:"order"`
-	InboundRules  []Rule `json:"inbound_rules"`
-	OutboundRules []Rule `json:"outbound_rules"`
-	Selector string `json:"selector"`
-}
-
-type Rule struct {
-	Action string `json:"action"`
-
-	Protocol    string `json:"protocol,omitempty"`
-	SrcTag      string `json:"src_tag,omitempty"`
-	SrcNet      string `json:"src_net,omitempty"`
-	SrcSelector string `json:"src_selector,omitempty"`
-	SrcPorts    []int  `json:"src_ports,omitempty"`
-	DstTag      string `json:"dst_tag,omitempty"`
-	DstSelector string `json:"dst_selector,omitempty"`
-	DstNet      string `json:"dst_net,omitempty"`
-	DstPorts    []int  `json:"dst_ports,omitempty"`
-	IcmpType    int    `json:"icmp_type,omitempty"`
-	IcmpCode    int    `json:"icmp_code,omitempty"`
-
-	NotProtocol    string `json:"!protocol,omitempty"`
-	NotSrcTag      string `json:"!src_tag,omitempty"`
-	NotSrcNet      string `json:"!src_net,omitempty"`
-	NotSrcSelector string `json:"!src_selector,omitempty"`
-	NotSrcPorts    []int  `json:"!src_ports,omitempty"`
-	NotDstTag      string `json:"!dst_tag,omitempty"`
-	NotDstSelector string `json:"!dst_selector,omitempty"`
-	NotDstNet      string `json:"!dst_net,omitempty"`
-	NotDstPorts    []int  `json:"!dst_ports,omitempty"`
-	NotIcmpType    int    `json:"!icmp_type,omitempty"`
-	NotIcmpCode    int    `json:"!icmp_code,omitempty"`
-}
-
+/*
 func LoadPolicy(policyBytes []byte) (*PolicyResource, error) {
 	var pq PolicyResource
 	var err error
@@ -215,3 +153,4 @@ func createDefaultTier(etcd client.KeysAPI) error {
 	_, err := etcd.Set(context.Background(), "/calico/v1/policy/tier/default/metadata", string(tb), &client.SetOptions{})
 	return err
 }
+*/

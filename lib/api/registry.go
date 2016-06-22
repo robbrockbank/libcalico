@@ -1,0 +1,43 @@
+package api
+
+import (
+	"errors"
+	"github.com/projectcalico/libcalico/lib/api/unversioned"
+	"github.com/projectcalico/libcalico/lib/api/v1"
+	"github.com/mohae/utilitybelt/deepcopy"
+	"github.com/ghodss/yaml"
+)
+
+type ResourceManager struct {
+	ResourceHelper map[unversioned.TypeMetadata]ResourceHelper
+}
+
+
+
+type ResourceHelper struct {
+	EmptyResource         unversioned.Resource
+}
+
+
+func (rm *ResourceManager) registerResource(r unversioned.Resource) {
+	rm.ResourceHelper[r.TypeMetadata] = r
+}
+
+
+func ResourceManager() *ResourceManager {
+	rm := &ResourceManager{}
+	rm.registerResource(v1.ResourceTier(&v1.TierMetadata{}, &v1.TierSpec{}))
+	rm.registerResource(v1.ResourcePolicy(&v1.PolicyMetadata{}, &v1.PolicySpec{}))
+	rm.registerResource(v1.ResourceProfile(&v1.ProfileMetadata{}, &v1.ProfileSpec{}))
+	rm.registerResource(v1.ResourceHostEndpoint(&v1.HostEndpointMetadata{}, &v1.HostEndpointSpec{}))
+	return rm
+}
+
+
+func (rm *ResourceManager) NewResource(tm unversioned.TypeMetadata) (*unversioned.Resource, error) {
+	rh, ok := rm.ResourceHelper[tm]
+	if !ok {
+		return nil, errors.New("Unknown resource type (%s) and version (%s)", tm.Kind, tm.Version)
+	}
+	return &deepcopy.DeepCopy(rh.EmptyResource)
+}

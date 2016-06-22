@@ -1,18 +1,39 @@
 package libcalico
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/coreos/etcd/client"
+	"github.com/kelseyhightower/envconfig"
+	"github.com/ghodss/yaml"
+	"io/ioutil"
+	"k8s.io/kubernetes/third_party/golang/go/doc/testdata"
 )
 
-func GetKeysAPI(etcdAuthority, etcdEndpoint string) (client.KeysAPI, error) {
-	etcdLocation := []string{"http://127.0.0.1:2379"}
-	if etcdAuthority != "" {
-		etcdLocation = []string{"http://" + etcdAuthority}
+
+type ClientConfig struct {
+	Authority string  `json:"etcdAuthority" envconfig:"ETCD_AUTHORITY" default:"127.0.0.1:2379"`
+	Endpoints string `json:"etcdEndpoints" envconfig:"ETCD_ENDPOINTS"`
+	Username string `json:"etcdUsername" envconfig:"ETCD_USERNAME"`
+	Password string `json:"etcdPassword" envconfig:"ETCD_PASSWORD"`
+}
+
+
+func (cc *ClientConfig) GetKeysAPI() (client.KeysAPI, error) {
+	etcdLocation := []string{}
+
+	// Determine the location from the authority or the endpoints.  The endpoints
+	// takes precedence if both are specified.
+	if cc.Authority != "" {
+		etcdLocation = []string{"http://" + cc.Authority}
 	}
-	if etcdEndpoint != "" {
-		etcdLocation = strings.Split(etcdEndpoint, ",")
+	if cc.Endpoints != "" {
+		etcdLocation = strings.Split(cc.Endpoints, ",")
+	}
+
+	if len(etcdLocation) == 0 {
+		return nil, errors.New("no etcd authority or endpoints specified")
 	}
 
 	// Create etcd client
@@ -24,4 +45,40 @@ func GetKeysAPI(etcdAuthority, etcdEndpoint string) (client.KeysAPI, error) {
 		return nil, err
 	}
 	return client.NewKeysAPI(c), nil
+}
+
+
+// Load the client config from the specified file (if it exists), falling back
+// to environment variables for non-specified fields.
+func LoadClientConfig(f string) (*ClientConfig, err) {
+	var c ClientConfig
+
+	b, err := ioutil.ReadFile(f)
+	if err == nil {
+		err := yaml.Unmarshal(b, &c)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = envconfig.Process("calico", &c)
+	if err != nil {
+		return nil, err
+	}
+
+	return &c, err
+}
+
+
+// Get the etcd keys API.  The access details will be searched for in the following
+// order:
+// -  The specified file (if it exists)
+// -  The environment variables
+// -  System default values
+func GetKeysAPI(f string) (client.KeysAPI, error) {
+	cc, err := LoadClientConfig(f)
+	if err != nil {
+		return nil, err
+	}
+	return cc.GetKeysAPI()
 }
