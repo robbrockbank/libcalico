@@ -9,6 +9,7 @@ import (
 	"github.com/coreos/etcd/client"
 	"github.com/ghodss/yaml"
 	"github.com/kelseyhightower/envconfig"
+	"fmt"
 )
 
 type ClientConfig struct {
@@ -57,11 +58,13 @@ func LoadClientConfig(f string) (*ClientConfig, error) {
 			return nil, err
 		}
 	}
+	fmt.Sprintf("%v\n", c)
 
 	err = envconfig.Process("calico", &c)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Sprintf("%v\n", c)
 
 	return &c, err
 }
