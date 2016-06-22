@@ -161,7 +161,7 @@ func (order *Order) String() string {
 func (order Order) MarshalJSON() ([]byte, error) {
 	switch order.Kind {
 	case OrderInt:
-		return json.Marshal(order.IntVal), nil
+		return json.Marshal(order.IntVal)
 	case OrderDefault:
 		return []byte("default"), nil
 	default:
