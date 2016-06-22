@@ -16,7 +16,7 @@ type TypeMetadata struct {
 // ---- Generic resource type ----
 //
 type Resource struct {
-	TypeMetadata 
+	TypeMetadata
 	Metadata     interface{} `json:"metadata,omitempty"`
 	Spec         interface{} `json:"spec,omitempty"`
 }

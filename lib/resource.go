@@ -126,7 +126,7 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 	} else {
 		// Now that we have a concrete type unmarshal into that resource type.
 		fmt.Printf("Processing type %s\n", tm.Kind)
-		r, err := api.CreateResourceManager().NewResource(tm)
+		r, err = api.CreateResourceManager().NewResource(tm)
 		err = yaml.Unmarshal(b, &r)
 		if err != nil {
 			return nil, err
