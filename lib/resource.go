@@ -138,10 +138,10 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 	fmt.Printf("Parsed: %v\n", *rp)
 
 	// Validate the data in the structures.
-	_, err = govalidator.ValidateStruct(r)
+	_, err = govalidator.ValidateStruct(*rp)
 	if err != nil {
 		return nil, err
 	}
 
-	return &r, nil
+	return rp, nil
 }
