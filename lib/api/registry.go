@@ -31,9 +31,11 @@ func CreateResourceManager() *ResourceManager {
 }
 
 func (rm *ResourceManager) NewResource(tm unversioned.TypeMetadata) (*unversioned.Resource, error) {
+	var new unversioned.Resource
 	rh, ok := rm.ResourceHelper[tm]
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("Unknown resource type (%s) and version (%s)", tm.Kind, tm.Version))
 	}
-	return &deepcopy.Iface(rh.EmptyResource).(unversioned.Resource), nil
+	new = deepcopy.Iface(rh.EmptyResource).(unversioned.Resource)
+	return &new, nil
 }
