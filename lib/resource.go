@@ -125,7 +125,7 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 		ls.List = rl
 	} else {
 		// Now that we have a concrete type unmarshal into that resource type.
-		fmt.Printf("Processing type %s", tm.Kind)
+		fmt.Printf("Processing type %s\n", tm.Kind)
 		r, err := api.CreateResourceManager().NewResource(tm)
 		err = yaml.Unmarshal(b, &r)
 		if err != nil {
@@ -133,7 +133,7 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 		}
 	}
 
-	fmt.Printf("Parsed type %v", r)
+	fmt.Printf("Parsed: %v\n", r)
 
 	// Validate the data in the structures.
 	_, err = govalidator.ValidateStruct(r)

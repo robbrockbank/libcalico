@@ -42,6 +42,6 @@ func (rm *ResourceManager) NewResource(tm unversioned.TypeMetadata) (*unversione
 	}
 	fmt.Printf("Found resource helper: %v\n", rh)
 	new = deepcopy.Iface(rh.EmptyResource).(unversioned.Resource)
-	fmt.Printf("Returning resource: %v\n", new)
+	fmt.Printf("Returning empty resource: %v\n", new)
 	return &new, nil
 }
