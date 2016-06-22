@@ -6,6 +6,7 @@ import (
 	"github.com/mohae/utilitybelt/deepcopy"
 	"github.com/projectcalico/libcalico/lib/api/unversioned"
 	"github.com/projectcalico/libcalico/lib/api/v1"
+	"fmt"
 )
 
 type ResourceManager struct {
@@ -17,10 +18,10 @@ type ResourceHelper struct {
 }
 
 func (rm *ResourceManager) registerResource(r unversioned.Resource) {
-	rm.ResourceHelper[r.TypeMetadata] = r
+	rm.ResourceHelper[r.TypeMetadata] = ResourceHelper{r}
 }
 
-func ResourceManager() *ResourceManager {
+func CreateResourceManager() *ResourceManager {
 	rm := &ResourceManager{}
 	rm.registerResource(v1.ResourceTier(&v1.TierMetadata{}, &v1.TierSpec{}))
 	rm.registerResource(v1.ResourcePolicy(&v1.PolicyMetadata{}, &v1.PolicySpec{}))
@@ -32,7 +33,7 @@ func ResourceManager() *ResourceManager {
 func (rm *ResourceManager) NewResource(tm unversioned.TypeMetadata) (*unversioned.Resource, error) {
 	rh, ok := rm.ResourceHelper[tm]
 	if !ok {
-		return nil, errors.New("Unknown resource type (%s) and version (%s)", tm.Kind, tm.Version)
+		return nil, errors.New(fmt.Sprintf("Unknown resource type (%s) and version (%s)", tm.Kind, tm.Version))
 	}
-	return &deepcopy.DeepCopy(rh.EmptyResource)
+	return &deepcopy.Iface(rh.EmptyResource).(unversioned.Resource), nil
 }
