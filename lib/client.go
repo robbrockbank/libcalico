@@ -47,7 +47,7 @@ func (cc *ClientConfig) GetKeysAPI() (client.KeysAPI, error) {
 
 // Load the client config from the specified file (if it exists), falling back
 // to environment variables for non-specified fields.
-func LoadClientConfig(f string) (*ClientConfig, err) {
+func LoadClientConfig(f string) (*ClientConfig, error) {
 	var c ClientConfig
 
 	b, err := ioutil.ReadFile(f)

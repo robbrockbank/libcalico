@@ -20,6 +20,7 @@ import (
 // returns after saving all resources, or after hitting an error.  The function returns the
 // number of resources successfully updated.
 func SaveResource(etcd client.KeysAPI, r unversioned.Resource, canCreate, canReplace bool) (int, error) {
+	return 0, nil
 }
 
 // Load the resource(s) from the datastore:
@@ -32,7 +33,8 @@ func SaveResource(etcd client.KeysAPI, r unversioned.Resource, canCreate, canRep
 // If a list of resources is specified, they are saved in the list order, and this function
 // returns after saving all resources, or after hitting an error.  The function returns the
 // number of resources successfully updated.
-func LoadResource(etcd client.KeysAPI, r unversioned.Resource) (unversioned.Resource, error) {
+func LoadResource(etcd client.KeysAPI, r unversioned.Resource) (*unversioned.Resource, error) {
+	return nil, nil
 }
 
 // Delete the resource(s) from the datastore:
@@ -47,6 +49,7 @@ func LoadResource(etcd client.KeysAPI, r unversioned.Resource) (unversioned.Reso
 // returns after saving all resources, or after hitting an error.  The function returns the
 // number of resources successfully deleted.
 func DeleteResource(etcd client.KeysAPI, r unversioned.Resource, ignoreNotPresent bool) (int, error) {
+	return 0, nil
 }
 
 // Create the Resource from the specified file f.
@@ -92,7 +95,7 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 	// Handle unversioned resources explicitly (currently just the list type).
 	var r unversioned.Resource
 	if tm.Kind == "list" {
-		r = unversioned.ResourceList(unversioned.ListMetadata{}, unversioned.ListSpec{})
+		r = unversioned.ResourceList(&unversioned.ListMetadata{}, &unversioned.ListSpec{})
 		err = yaml.Unmarshal(b, &r)
 		if err != nil {
 			return nil, err
@@ -102,7 +105,7 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 
 		// The resource list spec and meta data will be parsed into generic interfaces, so
 		// need to re-parse based on the type metadata for each.
-		for _, ri := range rl {
+		for _, ri := range ls.List {
 			rib, err := yaml.Marshal(ri)
 			if err != nil {
 				return nil, err
@@ -111,7 +114,7 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 			if err != nil {
 				return nil, err
 			}
-			rl = append(rl, ri)
+			rl = append(rl, *ri)
 		}
 
 		// Update the Resource List to be a list of concrete list types.  This allows
@@ -132,5 +135,5 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 		return nil, err
 	}
 
-	return r
+	return r, nil
 }
