@@ -53,6 +53,7 @@ func LoadClientConfig(f string) (*ClientConfig, error) {
 
 	b, err := ioutil.ReadFile(f)
 	if err == nil {
+		fmt.Sprintf("Parsing config file")
 		err := yaml.Unmarshal(b, &c)
 		if err != nil {
 			return nil, err
