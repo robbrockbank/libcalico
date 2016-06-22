@@ -55,19 +55,16 @@ func LoadClientConfig(f string) (*ClientConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("%v\n", c)
 
 	b, err := ioutil.ReadFile(f)
 	if err == nil {
-		fmt.Printf("Parsing config file")
 		err := yaml.Unmarshal(b, &c)
 		if err != nil {
 			return nil, err
 		}
 	}
-	fmt.Printf("%v\n", c)
 
-	return &c, err
+	return &c, nil
 }
 
 // Get the etcd keys API.  The access details will be searched for in the following
