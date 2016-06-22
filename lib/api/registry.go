@@ -13,6 +13,10 @@ type ResourceManager struct {
 	ResourceHelper map[unversioned.TypeMetadata]ResourceHelper
 }
 
+func NewResourceManager() *ResourceManager {
+	return &ResourceManager{make(map[unversioned.TypeMetadata]ResourceHelper)}
+}
+
 type ResourceHelper struct {
 	EmptyResource unversioned.Resource
 }
@@ -22,7 +26,7 @@ func (rm *ResourceManager) registerResource(r unversioned.Resource) {
 }
 
 func CreateResourceManager() *ResourceManager {
-	rm := &ResourceManager{}
+	rm := NewResourceManager()
 	rm.registerResource(v1.ResourceTier(&v1.TierMetadata{}, &v1.TierSpec{}))
 	rm.registerResource(v1.ResourcePolicy(&v1.PolicyMetadata{}, &v1.PolicySpec{}))
 	rm.registerResource(v1.ResourceProfile(&v1.ProfileMetadata{}, &v1.ProfileSpec{}))
