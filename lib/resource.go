@@ -1,12 +1,12 @@
 package libcalico
 
 import (
-	"github.com/coreos/etcd/client"
 	"io/ioutil"
 	"os"
-	"errors"
-	"github.com/ghodss/yaml"
+
 	"github.com/asaskevich/govalidator"
+	"github.com/coreos/etcd/client"
+	"github.com/ghodss/yaml"
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/api/unversioned"
 )
@@ -49,7 +49,6 @@ func LoadResource(etcd client.KeysAPI, r unversioned.Resource) (unversioned.Reso
 func DeleteResource(etcd client.KeysAPI, r unversioned.Resource, ignoreNotPresent bool) (int, error) {
 }
 
-
 // Create the Resource from the specified file f.
 // -  The file format may be JSON or YAML encoding of either a single resource or list of
 //    resources as defined by the API objects in /api.
@@ -74,7 +73,6 @@ func CreateResourceFromFile(f string) (*unversioned.Resource, error) {
 
 	return CreateResourceFromBytes(b)
 }
-
 
 // Create the Resource from the specified byte array encapsulating the resource.
 // -  The byte array may be JSON or YAML encoding of either a single resource or list of
@@ -104,7 +102,7 @@ func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
 
 		// The resource list spec and meta data will be parsed into generic interfaces, so
 		// need to re-parse based on the type metadata for each.
-		for _, ri := range(rl) {
+		for _, ri := range rl {
 			rib, err := yaml.Marshal(ri)
 			if err != nil {
 				return nil, err

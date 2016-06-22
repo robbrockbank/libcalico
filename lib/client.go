@@ -4,21 +4,19 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/coreos/etcd/client"
-	"github.com/kelseyhightower/envconfig"
-	"github.com/ghodss/yaml"
 	"io/ioutil"
-	"k8s.io/kubernetes/third_party/golang/go/doc/testdata"
+
+	"github.com/coreos/etcd/client"
+	"github.com/ghodss/yaml"
+	"github.com/kelseyhightower/envconfig"
 )
 
-
 type ClientConfig struct {
-	Authority string  `json:"etcdAuthority" envconfig:"ETCD_AUTHORITY" default:"127.0.0.1:2379"`
+	Authority string `json:"etcdAuthority" envconfig:"ETCD_AUTHORITY" default:"127.0.0.1:2379"`
 	Endpoints string `json:"etcdEndpoints" envconfig:"ETCD_ENDPOINTS"`
-	Username string `json:"etcdUsername" envconfig:"ETCD_USERNAME"`
-	Password string `json:"etcdPassword" envconfig:"ETCD_PASSWORD"`
+	Username  string `json:"etcdUsername" envconfig:"ETCD_USERNAME"`
+	Password  string `json:"etcdPassword" envconfig:"ETCD_PASSWORD"`
 }
-
 
 func (cc *ClientConfig) GetKeysAPI() (client.KeysAPI, error) {
 	etcdLocation := []string{}
@@ -47,7 +45,6 @@ func (cc *ClientConfig) GetKeysAPI() (client.KeysAPI, error) {
 	return client.NewKeysAPI(c), nil
 }
 
-
 // Load the client config from the specified file (if it exists), falling back
 // to environment variables for non-specified fields.
 func LoadClientConfig(f string) (*ClientConfig, err) {
@@ -68,7 +65,6 @@ func LoadClientConfig(f string) (*ClientConfig, err) {
 
 	return &c, err
 }
-
 
 // Get the etcd keys API.  The access details will be searched for in the following
 // order:

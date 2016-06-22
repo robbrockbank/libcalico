@@ -1,10 +1,10 @@
 package v1
 
 import (
-	"strconv"
-	"fmt"
-	"k8s.io/kubernetes/pkg/util/intstr"
 	"encoding/json"
+	"fmt"
+	"strconv"
+
 	"github.com/projectcalico/libcalico/lib/api/unversioned"
 )
 
@@ -24,7 +24,7 @@ type TierSpec struct {
 }
 
 func ResourceTier(m *TierMetadata, s *TierSpec) unversioned.Resource {
-	return unversioned.Resource{unversioned.TypeMetadata{"tier", "v1"}, m , s}
+	return unversioned.Resource{unversioned.TypeMetadata{"tier", "v1"}, m, s}
 }
 
 // ----  Policy  ----
@@ -36,7 +36,7 @@ type PolicyMetadata struct {
 }
 
 type PolicySpec struct {
-	Order         Order `json:"order" valid:"matches(default|\d*)"`
+	Order         Order  `json:"order" valid:"matches(default|\d*)"`
 	InboundRules  []Rule `json:"ingress"`
 	OutboundRules []Rule `json:"egress"`
 	Selector      string `json:"selector"`
@@ -61,7 +61,7 @@ type ProfileSpec struct {
 }
 
 func ResourceProfile(m *ProfileMetadata, s *ProfileSpec) unversioned.Resource {
-	return unversioned.Resource{unversioned.TypeMetadata{"profile", "v1"}, m , s}
+	return unversioned.Resource{unversioned.TypeMetadata{"profile", "v1"}, m, s}
 }
 
 // ----  Rule (subtype of Profile and Policy)  ----
@@ -111,9 +111,8 @@ type HostEndpointSpec struct {
 }
 
 func ResourceHostEndpoint(m *HostEndpointMetadata, s *HostEndpointSpec) unversioned.Resource {
-	return unversioned.Resource{unversioned.TypeMetadata{"host-endpoint", "v1"}, m , s}
+	return unversioned.Resource{unversioned.TypeMetadata{"host-endpoint", "v1"}, m, s}
 }
-
 
 // Order is a type that can hold an int or a value indicating "default".  When used in
 // JSON or YAML marshalling and unmarshalling, it produces or consumes the

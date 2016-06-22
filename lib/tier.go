@@ -1,16 +1,6 @@
 package libcalico
 
-import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"log"
-	"regexp"
-
-	"github.com/coreos/etcd/client"
-	"github.com/ghodss/yaml"
-	"golang.org/x/net/context"
-)
+import "regexp"
 
 var policyRE = regexp.MustCompile(`/calico/v1/policy/tier/[^/]*/policy/[^/]*`)
 

@@ -2,27 +2,23 @@ package api
 
 import (
 	"errors"
+
+	"github.com/mohae/utilitybelt/deepcopy"
 	"github.com/projectcalico/libcalico/lib/api/unversioned"
 	"github.com/projectcalico/libcalico/lib/api/v1"
-	"github.com/mohae/utilitybelt/deepcopy"
-	"github.com/ghodss/yaml"
 )
 
 type ResourceManager struct {
 	ResourceHelper map[unversioned.TypeMetadata]ResourceHelper
 }
 
-
-
 type ResourceHelper struct {
-	EmptyResource         unversioned.Resource
+	EmptyResource unversioned.Resource
 }
-
 
 func (rm *ResourceManager) registerResource(r unversioned.Resource) {
 	rm.ResourceHelper[r.TypeMetadata] = r
 }
-
 
 func ResourceManager() *ResourceManager {
 	rm := &ResourceManager{}
@@ -32,7 +28,6 @@ func ResourceManager() *ResourceManager {
 	rm.registerResource(v1.ResourceHostEndpoint(&v1.HostEndpointMetadata{}, &v1.HostEndpointSpec{}))
 	return rm
 }
-
 
 func (rm *ResourceManager) NewResource(tm unversioned.TypeMetadata) (*unversioned.Resource, error) {
 	rh, ok := rm.ResourceHelper[tm]
