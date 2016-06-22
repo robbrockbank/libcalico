@@ -51,6 +51,12 @@ func (cc *ClientConfig) GetKeysAPI() (client.KeysAPI, error) {
 func LoadClientConfig(f string) (*ClientConfig, error) {
 	var c ClientConfig
 
+	err := envconfig.Process("calico", &c)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("%v\n", c)
+
 	b, err := ioutil.ReadFile(f)
 	if err == nil {
 		fmt.Printf("Parsing config file")
@@ -58,12 +64,6 @@ func LoadClientConfig(f string) (*ClientConfig, error) {
 		if err != nil {
 			return nil, err
 		}
-	}
-	fmt.Printf("%v\n", c)
-
-	err = envconfig.Process("calico", &c)
-	if err != nil {
-		return nil, err
 	}
 	fmt.Printf("%v\n", c)
 
