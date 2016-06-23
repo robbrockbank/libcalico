@@ -6,6 +6,7 @@ import (
 
 	"fmt"
 
+	"gopkg.in/go-playground/validator.v8"
 	"github.com/coreos/etcd/client"
 	"github.com/ghodss/yaml"
 	"github.com/projectcalico/libcalico/lib/api"
