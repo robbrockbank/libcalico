@@ -3,11 +3,14 @@ package api
 import (
 	"errors"
 
-	. "github.com/projectcalico/libcalico/lib/api/unversioned"
-	"github.com/projectcalico/libcalico/lib/api/v1"
 	"fmt"
 	"reflect"
+
+	. "github.com/projectcalico/libcalico/lib/api/unversioned"
+	"github.com/projectcalico/libcalico/lib/api/v1"
 )
+
+//TODO Use init() to do static init of manager and to register each type
 
 type ResourceManager struct {
 	ResourceHelper map[TypeMetadata]ResourceHelper
@@ -18,9 +21,9 @@ func NewResourceManager() *ResourceManager {
 }
 
 type ResourceHelper struct {
-	Type     TypeMetadata
+	Type             TypeMetadata
 	ResourceType     interface{}
-	ResourceListType     interface{}
+	ResourceListType interface{}
 }
 
 func (rm *ResourceManager) registerHelper(r ResourceHelper) {
@@ -59,17 +62,19 @@ func (rm *ResourceManager) NewResource(tm TypeMetadata) (interface{}, error) {
 		return nil, errors.New(fmt.Sprintf("Unknown resource type (%s) and/or version (%s)", tm.Kind, tm.APIVersion))
 	}
 	fmt.Printf("Found resource helper: %v\n", rh)
-	new := reflect.New(rh.ResourceType)
-	return &new, nil
+	fmt.Printf("Type: %v\n", reflect.TypeOf(rh.ResourceType))
+	new := reflect.New(reflect.TypeOf(rh.ResourceType)).Interface()
+	return new, nil
 }
 
-func (rm *ResourceManager) NewResourceList(tm unversioned.TypeMetadata) (*unversioned.Resource, error) {
+func (rm *ResourceManager) NewResourceList(tm TypeMetadata) (interface{}, error) {
 	rh, ok := rm.ResourceHelper[tm]
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("Unknown resource type (%s) and/or version (%s)", tm.Kind, tm.APIVersion))
 	}
 	fmt.Printf("Found resource helper: %v\n", rh)
-	fmt.Printf("Returning empty resource: %v\n", new)
-	new := reflect.New(rh.ResourceListType)
-	return &new, nil
+	new := reflect.New(reflect.TypeOf(rh.ResourceListType)).Interface()
+	reflect.ValueOf(new).Elem().FieldByName("Kind").SetString(tm.Kind + "List")
+	reflect.ValueOf(new).Elem().FieldByName("APIVersion").SetString(tm.APIVersion)
+	return new, nil
 }

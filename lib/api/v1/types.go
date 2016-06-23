@@ -1,9 +1,7 @@
 package v1
 
 import (
-	"encoding/json"
-	"fmt"
-	"strconv"
+	. "net"
 
 	"github.com/projectcalico/libcalico/lib/api/unversioned"
 	"github.com/projectcalico/libcalico/lib/common"
@@ -20,7 +18,6 @@ type ObjectMetadata struct {
 
 // ---- Metadata common to all lists ----
 type ListMetadata struct {
-	
 }
 
 // ----  Tier  ----
@@ -29,19 +26,19 @@ type ListMetadata struct {
 type TierMetadata ObjectMetadata
 
 type TierSpec struct {
-	Order common.Order `json:"order" valid:"matches(default|\d*)"`
+	Order intorstr.Int32OrString `json:"order" valid:"matches(default|\d+)"`
 }
 
 type Tier struct {
 	unversioned.TypeMetadata
-	Metadata TierMetadata  `json:"metadata"`
-	Spec TierSpec  `json:"spec"`
+	Metadata TierMetadata `json:"metadata"`
+	Spec     TierSpec     `json:"spec"`
 }
 
 type TierList struct {
 	unversioned.TypeMetadata
 	Metadata ListMetadata `json:"metadata"`
-	Items []Tier  `json:"items"`
+	Items    []Tier       `json:"items"`
 }
 
 // ----  Policy  ----
@@ -53,22 +50,22 @@ type PolicyMetadata struct {
 }
 
 type PolicySpec struct {
-	Order         common.IntOrStr  `json:"order" valid:"matches(default|\d*)"`
-	IngressRules  []Rule `json:"ingress"`
-	EgressRules []Rule `json:"egress"`
-	Selector      string `json:"selector" valid:"selector"`
+	Order        intorstr.Int32OrString `json:"order"`
+	IngressRules []Rule                 `json:"ingress"`
+	EgressRules  []Rule                 `json:"egress"`
+	Selector     string                 `json:"selector"`
 }
 
 type Policy struct {
 	unversioned.TypeMetadata
-	Metadata PolicyMetadata  `json:"metadata"`
-	Spec PolicySpec  `json:"spec"`
+	Metadata PolicyMetadata `json:"metadata"`
+	Spec     PolicySpec     `json:"spec"`
 }
 
 type PolicyList struct {
 	unversioned.TypeMetadata
 	Metadata ListMetadata `json:"metadata"`
-	Items []Policy  `json:"items"`
+	Items    []Policy     `json:"items"`
 }
 
 // ----  Profile  ----
@@ -77,53 +74,52 @@ type PolicyList struct {
 type ProfileMetadata ObjectMetadata
 
 type ProfileSpec struct {
-	IngressRules  *[]Rule            `json:"ingress,omitempty"`
-	EgressRules   *[]Rule            `json:"egress,omitempty"`
-	Labels        *map[string]string `json:"labels,omitempty" valid:"matches([a-zA-Z0-9-_/]+)"`
-	Tags          *[]string          `json:"tags,omitempty"`
+	IngressRules *[]Rule            `json:"ingress,omitempty"`
+	EgressRules  *[]Rule            `json:"egress,omitempty"`
+	Labels       *map[string]string `json:"labels,omitempty"`
+	Tags         *[]string          `json:"tags,omitempty"`
 }
 
 type Profile struct {
 	unversioned.TypeMetadata
-	Metadata ProfileMetadata  `json:"metadata"`
-	Spec ProfileSpec          `json:"spec"`
+	Metadata ProfileMetadata `json:"metadata"`
+	Spec     ProfileSpec     `json:"spec"`
 }
 
 type ProfileList struct {
 	unversioned.TypeMetadata
-	Metadata ListMetadata  `json:"metadata"`
-	Items []Profile        `json:"items"`
+	Metadata ListMetadata `json:"metadata"`
+	Items    []Profile    `json:"items"`
 }
-
 
 // ----  Rule (subtype of Profile and Policy)  ----
 
 type Rule struct {
 	Action string `json:"action" valid:"matches(deny|allow|next-tier)"`
 
-	Protocol    *string `json:"protocol,omitempty" valid:"protocol"`
-	SrcTag      *string `json:"srcTag,omitempty" valid:"optional"`
-	SrcNet      *string `json:"srcNet,omitempty" valid:"cidr"`
-	SrcSelector *string `json:"srcSelector,omitempty" valid:"selector"`
-	SrcPorts    *[]int  `json:"srcPorts,omitempty" valid:"port"`
-	DstTag      *string `json:"dstTag,omitempty" valid:"optional"`
-	DstSelector *string `json:"dstSelector,omitempty" valid:"selector"`
-	DstNet      *string `json:"dstNet,omitempty" valid:"cidr"`
-	DstPorts    *[]int  `json:"dstPorts,omitempty" valid:"port"`
-	IcmpType    *int    `json:"icmpType,omitempty" valid:"icmp_type"`
-	IcmpCode    *int    `json:"icmpCode,omitempty" valid:"icmp_code"`
+	Protocol    *string `json:"protocol,omitempty"`
+	SrcTag      *string `json:"srcTag,omitempty"`
+	SrcNet      *IPNet  `json:"srcNet,omitempty"`
+	SrcSelector *string `json:"srcSelector,omitempty"`
+	SrcPorts    *[]int  `json:"srcPorts,omitempty"`
+	DstTag      *string `json:"dstTag,omitempty"`
+	DstSelector *string `json:"dstSelector,omitempty"`
+	DstNet      *IPNet  `json:"dstNet,omitempty"`
+	DstPorts    *[]int  `json:"dstPorts,omitempty"`
+	IcmpType    *int    `json:"icmpType,omitempty"`
+	IcmpCode    *int    `json:"icmpCode,omitempty"`
 
-	NotProtocol    *string `json:"!protocol,omitempty" valid:"protocol"`
-	NotSrcTag      *string `json:"!srcTag,omitempty" valid:"optional"`
-	NotSrcNet      *string `json:"!srcNet,omitempty" valid:"cidr"`
-	NotSrcSelector *string `json:"!srcSelector,omitempty" valid:"selector"`
-	NotSrcPorts    *[]int  `json:"!srcPorts,omitempty" valid:"port"`
-	NotDstTag      *string `json:"!dstTag,omitempty" valid:"optional"`
-	NotDstSelector *string `json:"!dstSelector,omitempty" valid:"selector"`
-	NotDstNet      *string `json:"!dstNet,omitempty" valid:"cidr"`
-	NotDstPorts    *[]int  `json:"!dstPorts,omitempty" valid:"port"`
-	NotIcmpType    *int    `json:"!icmpType,omitempty" valid:"icmp_type"`
-	NotIcmpCode    *int    `json:"!icmpCode,omitempty" valid:"icmp_code"`
+	NotProtocol    *string `json:"!protocol,omitempty"`
+	NotSrcTag      *string `json:"!srcTag,omitempty"`
+	NotSrcNet      *IPNet  `json:"!srcNet,omitempty"`
+	NotSrcSelector *string `json:"!srcSelector,omitempty"`
+	NotSrcPorts    *[]int  `json:"!srcPorts,omitempty"`
+	NotDstTag      *string `json:"!dstTag,omitempty"`
+	NotDstSelector *string `json:"!dstSelector,omitempty"`
+	NotDstNet      *IPNet  `json:"!dstNet,omitempty"`
+	NotDstPorts    *[]int  `json:"!dstPorts,omitempty"`
+	NotIcmpType    *int    `json:"!icmpType,omitempty"`
+	NotIcmpCode    *int    `json:"!icmpCode,omitempty"`
 }
 
 // ----  Host Endpoint  ----
@@ -135,22 +131,20 @@ type HostEndpointMetadata struct {
 }
 
 type HostEndpointSpec struct {
-	InterfaceName     *string            `json:"interface_name" valid:"interface"`
-	ExpectedIPv4Addrs *[]string          `json:"expectedIPv4Addrs" valid:"ipv4"`
-	ExpectedIPv6Addrs *[]string          `json:"expectedIPv6Addrs" valid:"ipv6"` // Perhaps contract into a single field in the Northbound API
-	Labels            *map[string]string `json:"labels" valid:"matches([a-zA-Z0-9-_/]*)"`
-	Profiles        *[]string          `json:"profiles" valid:"profile"` // Perhaps profiles or profile_names
+	InterfaceName *string            `json:"interface_name"`
+	ExpectedAddrs *[]IP              `json:"expectedIPv4Addrs"`
+	Labels        *map[string]string `json:"labels"`
+	Profiles      *[]string          `json:"profiles"` // Perhaps profiles or profile_names
 }
 
 type HostEndpoint struct {
 	unversioned.TypeMetadata
-	Metadata HostEndpointMetadata  `json:"metadata"`
-	Spec HostEndpointSpec  `json:"spec"`
+	Metadata HostEndpointMetadata `json:"metadata"`
+	Spec     HostEndpointSpec     `json:"spec"`
 }
 
 type HostEndpointList struct {
 	unversioned.TypeMetadata
-	Metadata ListMetadata  `json:"metadata"`
-	Items []HostEndpoint  `json:"items"`
+	Metadata ListMetadata   `json:"metadata"`
+	Items    []HostEndpoint `json:"items"`
 }
-
