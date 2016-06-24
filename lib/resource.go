@@ -5,13 +5,13 @@ import (
 	"os"
 
 	"fmt"
+	"reflect"
 
-	"gopkg.in/go-playground/validator.v8"
 	"github.com/coreos/etcd/client"
 	"github.com/ghodss/yaml"
 	"github.com/projectcalico/libcalico/lib/api"
 	. "github.com/projectcalico/libcalico/lib/api/unversioned"
-	//"github.com/asaskevich/govalidator"
+	"github.com/projectcalico/libcalico/lib/common"
 )
 
 // Save the resource in the datastore:
@@ -110,7 +110,7 @@ func CreateResourceFromBytes(b []byte) (interface{}, error) {
 // a concrete structure for that resource type.
 func unmarshalResource(tm TypeMetadata, b []byte) (interface{}, error) {
 	fmt.Printf("Processing type %s\n", tm.Kind)
-	unpacked, err := api.CreateResourceManager().NewResource(tm)
+	unpacked, err := api.NewResource(tm)
 	if err != nil {
 		return nil, err
 	}
@@ -119,16 +119,9 @@ func unmarshalResource(tm TypeMetadata, b []byte) (interface{}, error) {
 		return nil, err
 	}
 
-	// Validate the data in the structures.
-	//if _, err = govalidator.ValidateStruct(unpacked); err != nil {
-	//	return nil, err
-	//}
-
-	config := &validator.Config{TagName: "validate"}
-	validate := validator.New(config)
-	errs := validate.Struct(unpacked)
-	if errs != nil {
-		return errs
+	fmt.Printf("Type of unpacked data: %v\n", reflect.TypeOf(unpacked))
+	if err = common.Validate(unpacked); err != nil {
+		return nil, err
 	}
 
 	fmt.Printf("Unpacked: %v\n", unpacked)
@@ -143,7 +136,7 @@ func unmarshalListOfResources(tml []TypeMetadata, b []byte) (interface{}, error)
 	unpacked := []interface{}{}
 	for _, tm := range tml {
 		fmt.Printf("  - processing type %s\n", tm.Kind)
-		r, err := api.CreateResourceManager().NewResource(tm)
+		r, err := api.NewResource(tm)
 		if err != nil {
 			return nil, err
 		}
@@ -156,11 +149,11 @@ func unmarshalListOfResources(tml []TypeMetadata, b []byte) (interface{}, error)
 
 	// Validate the data in the structures.  The validator does not handle slices, so
 	// validate each resource separately.
-	//for _, r := range unpacked {
-	//	if _, err := govalidator.ValidateStruct(r); err != nil {
-	//		return nil, err
-	//	}
-	//}
+	for _, r := range unpacked {
+		if err := common.Validate(r); err != nil {
+			return nil, err
+		}
+	}
 
 	fmt.Printf("Unpacked: %v\n", unpacked)
 

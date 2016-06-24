@@ -1,10 +1,8 @@
 package v1
 
 import (
-	. "net"
-
 	"github.com/projectcalico/libcalico/lib/api/unversioned"
-	"github.com/projectcalico/libcalico/lib/common"
+	. "github.com/projectcalico/libcalico/lib/common"
 )
 
 /*
@@ -13,7 +11,7 @@ The v1 structure definitions used in the V1 interface.
 
 // ---- Metadata common to all resources ----
 type ObjectMetadata struct {
-	Name string `json:"name" valid:"name"`
+	Name string `json:"name" validate:"name"`
 }
 
 // ---- Metadata common to all lists ----
@@ -26,7 +24,7 @@ type ListMetadata struct {
 type TierMetadata ObjectMetadata
 
 type TierSpec struct {
-	Order intorstr.Int32OrString `json:"order" valid:"matches(default|\d+)"`
+	Order Order `json:"order" validate:"required"`
 }
 
 type Tier struct {
@@ -38,7 +36,7 @@ type Tier struct {
 type TierList struct {
 	unversioned.TypeMetadata
 	Metadata ListMetadata `json:"metadata"`
-	Items    []Tier       `json:"items"`
+	Items    []Tier       `json:"items" validate:"dive"`
 }
 
 // ----  Policy  ----
@@ -46,14 +44,14 @@ type TierList struct {
 
 type PolicyMetadata struct {
 	ObjectMetadata
-	Tier *string `json:"tier,omitempty" valid:"matches([a-zA-Z0-9-_]+)"`
+	Tier *string `json:"tier,omitempty" validate:"omitempty,name"`
 }
 
 type PolicySpec struct {
-	Order        intorstr.Int32OrString `json:"order"`
-	IngressRules []Rule                 `json:"ingress"`
-	EgressRules  []Rule                 `json:"egress"`
-	Selector     string                 `json:"selector"`
+	Order        Order `json:"order" validate:"required"`
+	IngressRules *[]Rule       `json:"ingress,omitempty" validate:"omitempty,dive"`
+	EgressRules  *[]Rule       `json:"egress,omitempty" validate:"omitempty,dive"`
+	Selector     string        `json:"selector" validate:"selector"`
 }
 
 type Policy struct {
@@ -65,7 +63,7 @@ type Policy struct {
 type PolicyList struct {
 	unversioned.TypeMetadata
 	Metadata ListMetadata `json:"metadata"`
-	Items    []Policy     `json:"items"`
+	Items    []Policy     `json:"items" validate:"dive"`
 }
 
 // ----  Profile  ----
@@ -74,10 +72,10 @@ type PolicyList struct {
 type ProfileMetadata ObjectMetadata
 
 type ProfileSpec struct {
-	IngressRules *[]Rule            `json:"ingress,omitempty"`
-	EgressRules  *[]Rule            `json:"egress,omitempty"`
-	Labels       *map[string]string `json:"labels,omitempty"`
-	Tags         *[]string          `json:"tags,omitempty"`
+	IngressRules *[]Rule            `json:"ingress,omitempty" validate:"omitempty,dive"`
+	EgressRules  *[]Rule            `json:"egress,omitempty" validate:"omitempty,dive"`
+	Labels       *map[string]string `json:"labels,omitempty" validate:"omitempty,labels"`
+	Tags         *[]string          `json:"tags,omitempty" validate:"omitempty,dive,tag"`
 }
 
 type Profile struct {
@@ -89,37 +87,37 @@ type Profile struct {
 type ProfileList struct {
 	unversioned.TypeMetadata
 	Metadata ListMetadata `json:"metadata"`
-	Items    []Profile    `json:"items"`
+	Items    []Profile    `json:"items" validate:"dive"`
 }
 
 // ----  Rule (subtype of Profile and Policy)  ----
 
 type Rule struct {
-	Action string `json:"action" valid:"matches(deny|allow|next-tier)"`
+	Action string `json:"action" validate:"action"`
 
-	Protocol    *string `json:"protocol,omitempty"`
-	SrcTag      *string `json:"srcTag,omitempty"`
-	SrcNet      *IPNet  `json:"srcNet,omitempty"`
-	SrcSelector *string `json:"srcSelector,omitempty"`
-	SrcPorts    *[]int  `json:"srcPorts,omitempty"`
-	DstTag      *string `json:"dstTag,omitempty"`
-	DstSelector *string `json:"dstSelector,omitempty"`
-	DstNet      *IPNet  `json:"dstNet,omitempty"`
-	DstPorts    *[]int  `json:"dstPorts,omitempty"`
-	IcmpType    *int    `json:"icmpType,omitempty"`
-	IcmpCode    *int    `json:"icmpCode,omitempty"`
+	Protocol    *Protocol `json:"protocol,omitempty" validate:"omitempty"`
+	SrcTag      *string        `json:"srcTag,omitempty" validate:"omitempty,tag"`
+	SrcNet      *IPNet         `json:"srcNet,omitempty" validate:"omitempty"`
+	SrcSelector *string        `json:"srcSelector,omitempty" validate:"omitempty,selector"`
+	SrcPorts    *[]int         `json:"srcPorts,omitempty" validate:"omitempty,dive,gte=0,lte=65535"`
+	DstTag      *string        `json:"dstTag,omitempty" validate:"omitempty,tag"`
+	DstSelector *string        `json:"dstSelector,omitempty" validate:"omitempty,selector"`
+	DstNet      *IPNet         `json:"dstNet,omitempty" validate:"omitempty"`
+	DstPorts    *[]int         `json:"dstPorts,omitempty" validate:"omitempty,dive,gte=0,lte=65535"`
+	ICMPType    *int           `json:"icmpType,omitempty" validate:"omitempty,gte=0,lte=255"`
+	ICMPCode    *int           `json:"icmpCode,omitempty" validate:"omitempty,gte=0,lte=255"`
 
-	NotProtocol    *string `json:"!protocol,omitempty"`
-	NotSrcTag      *string `json:"!srcTag,omitempty"`
-	NotSrcNet      *IPNet  `json:"!srcNet,omitempty"`
-	NotSrcSelector *string `json:"!srcSelector,omitempty"`
-	NotSrcPorts    *[]int  `json:"!srcPorts,omitempty"`
-	NotDstTag      *string `json:"!dstTag,omitempty"`
-	NotDstSelector *string `json:"!dstSelector,omitempty"`
-	NotDstNet      *IPNet  `json:"!dstNet,omitempty"`
-	NotDstPorts    *[]int  `json:"!dstPorts,omitempty"`
-	NotIcmpType    *int    `json:"!icmpType,omitempty"`
-	NotIcmpCode    *int    `json:"!icmpCode,omitempty"`
+	NotProtocol    *Protocol `json:"!protocol,omitempty" validate:"omitempty"`
+	NotSrcTag      *string        `json:"!srcTag,omitempty" validate:"omitempty,tag"`
+	NotSrcNet      *IPNet         `json:"!srcNet,omitempty" validate:"omitempty"`
+	NotSrcSelector *string        `json:"!srcSelector,omitempty" validate:"omitempty,selector"`
+	NotSrcPorts    *[]int         `json:"!srcPorts,omitempty" validate:"omitempty,dive,gte=0,lte=65535"`
+	NotDstTag      *string        `json:"!dstTag,omitempty" validate:"omitempty"`
+	NotDstSelector *string        `json:"!dstSelector,omitempty" validate:"omitempty,selector"`
+	NotDstNet      *IPNet         `json:"!dstNet,omitempty" validate:"omitempty"`
+	NotDstPorts    *[]int         `json:"!dstPorts,omitempty" validate:"omitempty,dive,gte=0,lte=65535"`
+	NotICMPType    *int           `json:"!icmpType,omitempty" validate:"omitempty,gte=0,lte=255"`
+	NotICMPCode    *int           `json:"!icmpCode,omitempty" validate:"omitempty,gte=0,lte=255"`
 }
 
 // ----  Host Endpoint  ----
@@ -131,10 +129,10 @@ type HostEndpointMetadata struct {
 }
 
 type HostEndpointSpec struct {
-	InterfaceName *string            `json:"interface_name"`
-	ExpectedAddrs *[]IP              `json:"expectedIPv4Addrs"`
-	Labels        *map[string]string `json:"labels"`
-	Profiles      *[]string          `json:"profiles"` // Perhaps profiles or profile_names
+	InterfaceName *string            `json:"interfaceName" validate:"omitempty,interface"`
+	ExpectedIPs   *[]IP              `json:"expectedIPs" validate:"omitempty,dive,ip"`
+	Labels        *map[string]string `json:"labels" validate:"omitempty,labels"`
+	Profiles      *[]string          `json:"profiles" validate:"omitempty,dive,name"`
 }
 
 type HostEndpoint struct {
@@ -146,5 +144,5 @@ type HostEndpoint struct {
 type HostEndpointList struct {
 	unversioned.TypeMetadata
 	Metadata ListMetadata   `json:"metadata"`
-	Items    []HostEndpoint `json:"items"`
+	Items    []HostEndpoint `json:"items" validate:"dive"`
 }
