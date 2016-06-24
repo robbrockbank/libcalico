@@ -4,12 +4,14 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/asaskevich/govalidator"
+	"fmt"
+	"reflect"
+
 	"github.com/coreos/etcd/client"
 	"github.com/ghodss/yaml"
 	"github.com/projectcalico/libcalico/lib/api"
-	"github.com/projectcalico/libcalico/lib/api/unversioned"
-	"fmt"
+	. "github.com/projectcalico/libcalico/lib/api/unversioned"
+	"github.com/projectcalico/libcalico/lib/common"
 )
 
 // Save the resource in the datastore:
@@ -20,7 +22,7 @@ import (
 // If a list of resources is specified, they are saved in the list order, and this function
 // returns after saving all resources, or after hitting an error.  The function returns the
 // number of resources successfully updated.
-func SaveResource(etcd client.KeysAPI, r *unversioned.Resource, canCreate, canReplace bool) (int, error) {
+func SaveResource(etcd client.KeysAPI, r interface{}, canCreate, canReplace bool) (int, error) {
 	return 0, nil
 }
 
@@ -34,7 +36,7 @@ func SaveResource(etcd client.KeysAPI, r *unversioned.Resource, canCreate, canRe
 // If a list of resources is specified, they are saved in the list order, and this function
 // returns after saving all resources, or after hitting an error.  The function returns the
 // number of resources successfully updated.
-func LoadResource(etcd client.KeysAPI, r *unversioned.Resource) (*unversioned.Resource, error) {
+func LoadResource(etcd client.KeysAPI, r interface{}) (interface{}, error) {
 	return nil, nil
 }
 
@@ -49,7 +51,7 @@ func LoadResource(etcd client.KeysAPI, r *unversioned.Resource) (*unversioned.Re
 // If a list of resources is specified, they are deleted in the list order, and this function
 // returns after saving all resources, or after hitting an error.  The function returns the
 // number of resources successfully deleted.
-func DeleteResource(etcd client.KeysAPI, r *unversioned.Resource, ignoreNotPresent bool) (int, error) {
+func DeleteResource(etcd client.KeysAPI, r interface{}, ignoreNotPresent bool) (int, error) {
 	return 0, nil
 }
 
@@ -60,7 +62,7 @@ func DeleteResource(etcd client.KeysAPI, r *unversioned.Resource, ignoreNotPrese
 //
 // The returned Resource will either be a single Resource or a List containing zero or more
 // Resources.  If the file does not contain any valid Resources this function returns an error.
-func CreateResourceFromFile(f string) (*unversioned.Resource, error) {
+func CreateResourceFromFile(f string) (interface{}, error) {
 
 	// Load the bytes from file or from stdin.
 	var b []byte
@@ -78,70 +80,82 @@ func CreateResourceFromFile(f string) (*unversioned.Resource, error) {
 	return CreateResourceFromBytes(b)
 }
 
-// Create the Resource from the specified byte array encapsulating the resource.
+// Create the resource from the specified byte array encapsulating the resource.
 // -  The byte array may be JSON or YAML encoding of either a single resource or list of
 //    resources as defined by the API objects in /api.
 //
-// The returned Resource will either be a single Resource or a List containing zero or more
-// Resources.  If the file does not contain any valid Resources this function returns an error.
-func CreateResourceFromBytes(b []byte) (*unversioned.Resource, error) {
+// The returned Resource will either be a single resource document or a List of documents.
+// If the file does not contain any valid Resources this function returns an error.
+func CreateResourceFromBytes(b []byte) (interface{}, error) {
 	// Start by unmarshalling the bytes into a TypeMetadata structure - this will ignore
 	// other fields.
-	tm := unversioned.TypeMetadata{}
-	err := yaml.Unmarshal(b, &tm)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("Parsed type metadata: %v\n", tm)
-
-	// Handle unversioned resources explicitly (currently just the list type).
-	var rp *unversioned.Resource
-	if tm.Kind == "list" {
-		fmt.Printf("Processing list type")
-		r := unversioned.ResourceList(&unversioned.ListMetadata{}, &unversioned.ListSpec{})
-		err = yaml.Unmarshal(b, &r)
-		if err != nil {
-			return nil, err
-		}
-		ls := r.Spec.(unversioned.ListSpec)
-		rl := []unversioned.Resource{}
-
-		// The resource list spec and meta data will be parsed into generic interfaces, so
-		// need to re-parse based on the type metadata for each.
-		for _, ri := range ls.List {
-			rib, err := yaml.Marshal(ri)
-			if err != nil {
-				return nil, err
-			}
-			ri, err := CreateResourceFromBytes(rib)
-			if err != nil {
-				return nil, err
-			}
-			rl = append(rl, *ri)
-		}
-
-		// Update the Resource List to be a list of concrete list types.  This allows
-		// the list to be validated.
-		ls.List = rl
-		rp = &r
+	var err error
+	tm := TypeMetadata{}
+	tml := []TypeMetadata{}
+	if err = yaml.Unmarshal(b, &tm); err == nil {
+		// We processed a metadata, so create a concrete resource struct to unpack
+		// into.
+		return unmarshalResource(tm, b)
+	} else if err = yaml.Unmarshal(b, &tml); err == nil {
+		// We processed a list of metadata's, create a list of concrete resource
+		// structs to unpack into.
+		return unmarshalListOfResources(tml, b)
 	} else {
-		// Now that we have a concrete type unmarshal into that resource type.
-		fmt.Printf("Processing type %s\n", tm.Kind)
-		r, err := api.CreateResourceManager().NewResource(tm)
-		err = yaml.Unmarshal(b, &r)
-		if err != nil {
-			return nil, err
-		}
-		rp = r
+		// Failed to parse a single resource or list of resources.
+		return nil, err
 	}
+}
 
-	fmt.Printf("Parsed: %v\n", *rp)
-
-	// Validate the data in the structures.
-	_, err = govalidator.ValidateStruct(r)
+// Unmarshal a bytearray containing a single resource of the specified type into
+// a concrete structure for that resource type.
+func unmarshalResource(tm TypeMetadata, b []byte) (interface{}, error) {
+	fmt.Printf("Processing type %s\n", tm.Kind)
+	unpacked, err := api.NewResource(tm)
 	if err != nil {
 		return nil, err
 	}
 
-	return &r, nil
+	if err = yaml.Unmarshal(b, unpacked); err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("Type of unpacked data: %v\n", reflect.TypeOf(unpacked))
+	if err = common.Validate(unpacked); err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("Unpacked: %v\n", unpacked)
+
+	return unpacked, nil
+}
+
+// Unmarshal a bytearray containing a list of resources of the specified type into
+// a list of concrete structures for that resource type.
+func unmarshalListOfResources(tml []TypeMetadata, b []byte) (interface{}, error) {
+	fmt.Printf("Processing list of resources\n")
+	unpacked := []interface{}{}
+	for _, tm := range tml {
+		fmt.Printf("  - processing type %s\n", tm.Kind)
+		r, err := api.NewResource(tm)
+		if err != nil {
+			return nil, err
+		}
+		unpacked = append(unpacked, r)
+	}
+
+	if err := yaml.Unmarshal(b, &unpacked); err != nil {
+		return nil, err
+	}
+
+	// Validate the data in the structures.  The validator does not handle slices, so
+	// validate each resource separately.
+	for _, r := range unpacked {
+		if err := common.Validate(r); err != nil {
+			return nil, err
+		}
+	}
+
+	fmt.Printf("Unpacked: %v\n", unpacked)
+
+	return unpacked, nil
 }

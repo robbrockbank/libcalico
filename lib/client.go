@@ -11,6 +11,9 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+// TODO rework.  Client should hide the fact that its etcd - so really need a new client
+// struct with methods attached to it.
+
 type ClientConfig struct {
 	Authority string `json:"etcdAuthority" envconfig:"ETCD_AUTHORITY" default:"127.0.0.1:2379"`
 	Endpoints string `json:"etcdEndpoints" envconfig:"ETCD_ENDPOINTS"`
