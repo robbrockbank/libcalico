@@ -1,4 +1,4 @@
-package v1
+package api
 
 import (
 	. "github.com/projectcalico/libcalico/lib/api/unversioned"
@@ -23,8 +23,16 @@ type Policy struct {
 	Spec     PolicySpec     `json:"spec"`
 }
 
+func NewPolicy() *Policy {
+	return &Policy{TypeMetadata: TypeMetadata{Kind: "policy", APIVersion: "v1"}}
+}
+
 type PolicyList struct {
 	TypeMetadata
 	Metadata ListMetadata `json:"metadata"`
 	Items    []Policy     `json:"items" validate:"dive"`
+}
+
+func NewPolicyList() *PolicyList {
+	return &PolicyList{TypeMetadata: TypeMetadata{Kind: "policyList", APIVersion: "v1"}}
 }

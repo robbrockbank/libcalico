@@ -15,9 +15,7 @@ var protocolRegex *regexp.Regexp
 
 func init() {
 	// Initialise static data.
-	config := &validator.Config{TagName: "validate"}
-
-	config = &validator.Config{TagName: "validate", FieldNameTag: "json"}
+	config := &validator.Config{TagName: "validate", FieldNameTag: "json"}
 	validate = validator.New(config)
 
 	var err error

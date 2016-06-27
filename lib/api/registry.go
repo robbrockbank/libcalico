@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	. "github.com/projectcalico/libcalico/lib/api/unversioned"
-	"github.com/projectcalico/libcalico/lib/api/v1"
 )
 
 var helpers map[TypeMetadata]ResourceHelper
@@ -20,31 +19,28 @@ func init() {
 	// Register all known resources.
 	// TODO Would be better for each version of the API to do this?
 	registerHelper(ResourceHelper{
-		TypeMetadata{Kind: "tier", APIVersion: "v1"},
-		v1.Tier{},
-		v1.TierList{},
+		NewTier(),
+		NewTierList(),
 	})
 	registerHelper(ResourceHelper{
-		TypeMetadata{Kind: "policy", APIVersion: "v1"},
-		v1.Policy{},
-		v1.PolicyList{},
+		NewPolicy(),
+		NewPolicyList(),
 	})
 	registerHelper(ResourceHelper{
-		TypeMetadata{Kind: "profile", APIVersion: "v1"},
-		v1.Profile{},
-		v1.ProfileList{},
+		NewProfile(),
+		NewProfileList(),
 	})
 	registerHelper(ResourceHelper{
-		TypeMetadata{Kind: "hostEndpoint", APIVersion: "v1"},
-		v1.HostEndpoint{},
-		v1.HostEndpointList{},
+		NewHostEndpoint(),
+		NewHostEndpointList(),
 	})
 }
 
 
 // Register a resource helper.
 func registerHelper(r ResourceHelper) {
-	helpers[r.Type] = r
+	tmd := reflect.ValueOf(r.ResourceType).Elem().FieldByName("TypeMetadata").Interface().(TypeMetadata)
+	helpers[tmd] = r
 }
 
 
@@ -53,7 +49,6 @@ func registerHelper(r ResourceHelper) {
 // -  The concrete resource struct for this version
 // -  The concrete resource list struct for this version
 type ResourceHelper struct {
-	Type             TypeMetadata
 	ResourceType     interface{}
 	ResourceListType interface{}
 }

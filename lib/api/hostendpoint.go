@@ -1,4 +1,4 @@
-types.gopackage v1
+package api
 
 import (
 	. "github.com/projectcalico/libcalico/lib/api/unversioned"
@@ -23,8 +23,16 @@ type HostEndpoint struct {
 	Spec     HostEndpointSpec     `json:"spec"`
 }
 
+func NewHostEndpoint() *HostEndpoint {
+	return &HostEndpoint{TypeMetadata: TypeMetadata{Kind: "hostEndpoint", APIVersion: "v1"}}
+}
+
 type HostEndpointList struct {
 	TypeMetadata
 	Metadata ListMetadata   `json:"metadata"`
 	Items    []HostEndpoint `json:"items" validate:"dive"`
+}
+
+func NewHostEndpointList() *HostEndpointList {
+	return &HostEndpointList{TypeMetadata: TypeMetadata{Kind: "hostEndpointList", APIVersion: "v1"}}
 }

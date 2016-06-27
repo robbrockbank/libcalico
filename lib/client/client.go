@@ -1,68 +1,47 @@
 package client
 
 import (
-	etcd "github.com/coreos/etcd/client"
-	"errors"
-	"strings"
 	"io/ioutil"
-	"k8s.io/kubernetes/pkg/kubelet/client"
+	"github.com/kelseyhightower/envconfig"
+	backend "github.com/projectcalico/libcalico/lib/backend/client"
+	. "github.com/projectcalico/libcalico/lib/api"
+	"github.com/ghodss/yaml"
 )
 
-
 type CalicoClient struct {
-	// Etcd connection information
-	EtcdAuthority string `json:"etcdAuthority" envconfig:"ETCD_AUTHORITY" default:"127.0.0.1:2379"`
-	EtcdEndpoints string `json:"etcdEndpoints" envconfig:"ETCD_ENDPOINTS"`
-	EtcdUsername  string `json:"etcdUsername" envconfig:"ETCD_USERNAME"`
-	EtcdPassword  string `json:"etcdPassword" envconfig:"ETCD_PASSWORD"`
-
-	// ---- Internal package data ----
-	connected bool
-	etcdClient  *etcd.Client
-	etcdKeysAPI *etcd.KeysAPI
+	backend *backend.Client
 }
 
-
-// Connect() the client to the underlying datastore specified in the config.
-func (cc *CalicoClient) Connect() (err error) {
-	if cc.connected {
-		panic("Client is already connected")
-	}
-
-	// Determine the location from the authority or the endpoints.  The endpoints
-	// takes precedence if both are specified.
-	etcdLocation := []string{}
-	if cc.EtcdAuthority != "" {
-		etcdLocation = []string{"http://" + cc.EtcdAuthority}
-	}
-	if cc.EtcdEndpoints != "" {
-		etcdLocation = strings.Split(cc.EtcdEndpoints, ",")
-	}
-
-	if len(etcdLocation) == 0 {
-		return errors.New("no etcd authority or endpoints specified")
-	}
-
-	// Create etcd client
-	cfg := etcd.Config{
-		Endpoints: etcdLocation,
-		Transport: etcd.DefaultTransport}
-	if cc.etcdClient, err = client.New(cfg); err != nil {
-		return err
-	}
-	cc.etcdKeysAPI = client.NewKeysAPI(cc.etcdClient)
-	cc.connected = true
-	return nil
+// Return a new connected CalicoClient.
+func New(config *CalicoClientConfig) (c *CalicoClient, err error) {
+	cc := CalicoClient{}
+	cc.backend, err = backend.NewClient(config)
+	return &cc, err
 }
 
+func (c *CalicoClient) Tiers(namespace string) TierInterface {
+	return newTiers(c)
+}
+
+func (c *CalicoClient) Policies(namespace string) PolicyInterface {
+	return newPolicies(c)
+}
+
+func (c *CalicoClient) Profiles(namespace string) ProfileInterface {
+	return newProfiles(c)
+}
+
+func (c *CalicoClient) HostEndpoints(namespace string) HostEndpointInterface {
+	return newHostEndpoints(c)
+}
 
 // Load the client config from the specified file (if specified) and from environment
-// variables.  The values from both locations are merged together, with file alues
+// variables.  The values from both locations are merged together, with file values
 // taking precedence).
 //
 // Returns a connected client.
-func New(f *string) (*CalicoClient, error) {
-	var c CalicoClient
+func LoadClientConfig(f *string) (*CalicoClientConfig, error) {
+	var c CalicoClientConfig
 
 	// Load client config from environment variables first.
 	if err := envconfig.Process("calico", &c); err != nil {
@@ -71,12 +50,14 @@ func New(f *string) (*CalicoClient, error) {
 
 	// Override / merge with values loaded from the specified file.
 	if f != nil {
-		if b, err := ioutil.ReadFile(f); err != nil {
+		if b, err := ioutil.ReadFile(*f); err != nil {
 			return nil, err
 		} else if err := yaml.Unmarshal(b, &c); err != nil {
 			return nil, err
 		}
 	}
 
-	return &c, c.Connect()
+	return &c, nil
 }
+
+

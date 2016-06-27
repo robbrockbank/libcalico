@@ -1,8 +1,7 @@
-package v1
+package api
 
 import (
 	. "github.com/projectcalico/libcalico/lib/api/unversioned"
-	. "github.com/projectcalico/libcalico/lib/common"
 )
 
 type ProfileMetadata ObjectMetadata
@@ -20,8 +19,16 @@ type Profile struct {
 	Spec     ProfileSpec     `json:"spec"`
 }
 
+func NewProfile() *Profile {
+	return &Profile{TypeMetadata: TypeMetadata{Kind: "profile", APIVersion: "v1"}}
+}
+
 type ProfileList struct {
 	TypeMetadata
 	Metadata ListMetadata `json:"metadata"`
 	Items    []Profile    `json:"items" validate:"dive"`
+}
+
+func NewProfileList() *Profile {
+	return &Profile{TypeMetadata: TypeMetadata{Kind: "profile", APIVersion: "v1"}}
 }
