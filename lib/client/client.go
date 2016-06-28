@@ -19,29 +19,27 @@ func New(config *CalicoClientConfig) (c *CalicoClient, err error) {
 	return &cc, err
 }
 
-func (c *CalicoClient) Tiers(namespace string) TierInterface {
+func (c *CalicoClient) Tiers() TierInterface {
 	return newTiers(c)
 }
 
-func (c *CalicoClient) Policies(namespace string) PolicyInterface {
+func (c *CalicoClient) Policies() PolicyInterface {
 	return newPolicies(c)
 }
 
-func (c *CalicoClient) Profiles(namespace string) ProfileInterface {
+func (c *CalicoClient) Profiles() ProfileInterface {
 	return newProfiles(c)
 }
 
-func (c *CalicoClient) HostEndpoints(namespace string) HostEndpointInterface {
+func (c *CalicoClient) HostEndpoints() HostEndpointInterface {
 	return newHostEndpoints(c)
 }
 
 // Load the client config from the specified file (if specified) and from environment
 // variables.  The values from both locations are merged together, with file values
 // taking precedence).
-//
-// Returns a connected client.
-func LoadClientConfig(f *string) (*CalicoClientConfig, error) {
-	var c CalicoClientConfig
+func LoadClientConfig(f *string) (*ClientConfig, error) {
+	var c ClientConfig
 
 	// Load client config from environment variables first.
 	if err := envconfig.Process("calico", &c); err != nil {

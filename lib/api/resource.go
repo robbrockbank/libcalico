@@ -1,17 +1,76 @@
-package libcalico
+package api
 
 import (
-	"io/ioutil"
-	"os"
+	"errors"
 
 	"fmt"
 	"reflect"
+	"strings"
+
+	. "github.com/projectcalico/libcalico/lib/api/unversioned"
+	"os"
+	"io/ioutil"
+
 
 	"github.com/ghodss/yaml"
-	"github.com/projectcalico/libcalico/lib/api"
-	. "github.com/projectcalico/libcalico/lib/api/unversioned"
 	"github.com/projectcalico/libcalico/lib/common"
 )
+
+var helpers map[TypeMetadata]resourceHelper
+
+// Register all of the available resource types.
+func init() {
+	helpers = make(map[TypeMetadata]resourceHelper)
+
+	registerHelper := func (t interface{}, tl interface{}) {
+		tmd := reflect.ValueOf(t).Elem().FieldByName("TypeMetadata").Interface().(TypeMetadata)
+		helpers[tmd] = resourceHelper{t, tl}
+	}
+
+	// Register all API resources supported by the generic resource interface.
+	registerHelper(NewTier(), NewTierList())
+	registerHelper(NewPolicy(), NewPolicyList())
+	registerHelper(NewProfile(), NewProfileList())
+	registerHelper(NewHostEndpoint(), NewHostEndpointList())
+}
+
+// ResourceHelper encapsulates details about a specific version of a specific resource:
+// -  The type of resource (Kind and Version)
+// -  The concrete resource struct for this version
+// -  The concrete resource list struct for this version
+type resourceHelper struct {
+	resourceType     interface{}
+	resourceListType interface{}
+}
+
+// Create a new concrete resource structure based on the type.  If the type is
+// a list, this creates a concrete Resource-List of the required type.
+func NewResource(tm TypeMetadata) (interface{}, error) {
+	itemType := tm
+
+	// If this is a list type, then the item type is the resource that the list
+	// contains rather than the list itself.
+	if strings.HasSuffix(tm.Kind, "List") {
+		itemType = TypeMetadata{
+			Kind: strings.TrimSuffix(tm.Kind, "List"),
+			APIVersion: tm.APIVersion,
+		}
+	}
+
+	rh, ok := helpers[itemType]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("Unknown resource type (%s) and/or version (%s)", itemType.Kind, itemType.APIVersion))
+	}
+	fmt.Printf("Found resource helper: %v\n", rh)
+	fmt.Printf("Type: %v\n", reflect.TypeOf(rh.resourceType))
+
+	// Create new resource and fill in the type metadata.
+	new := reflect.New(reflect.TypeOf(rh.resourceType)).Interface()
+	reflect.ValueOf(new).Elem().FieldByName("Kind").SetString(tm.Kind)
+	reflect.ValueOf(new).Elem().FieldByName("APIVersion").SetString(tm.APIVersion)
+
+	return new, nil
+}
 
 // Create the Resource from the specified file f.
 // -  The file format may be JSON or YAML encoding of either a single resource or list of
@@ -68,7 +127,7 @@ func CreateResourceFromBytes(b []byte) (interface{}, error) {
 // a concrete structure for that resource type.
 func unmarshalResource(tm TypeMetadata, b []byte) (interface{}, error) {
 	fmt.Printf("Processing type %s\n", tm.Kind)
-	unpacked, err := api.NewResource(tm)
+	unpacked, err := NewResource(tm)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +153,7 @@ func unmarshalListOfResources(tml []TypeMetadata, b []byte) (interface{}, error)
 	unpacked := []interface{}{}
 	for _, tm := range tml {
 		fmt.Printf("  - processing type %s\n", tm.Kind)
-		r, err := api.NewResource(tm)
+		r, err := NewResource(tm)
 		if err != nil {
 			return nil, err
 		}
@@ -117,3 +176,4 @@ func unmarshalListOfResources(tml []TypeMetadata, b []byte) (interface{}, error)
 
 	return unpacked, nil
 }
+

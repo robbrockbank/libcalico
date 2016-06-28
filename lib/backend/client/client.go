@@ -10,7 +10,7 @@ import (
 
 type Client struct {
 	// Calico client config
-	config *CalicoClientConfig
+	config *ClientConfig
 
 	// ---- Internal package data ----
 	connected bool
@@ -18,7 +18,7 @@ type Client struct {
 	etcdKeysAPI *etcd.KeysAPI
 }
 
-func NewClient(config *CalicoClientConfig) (*Client, error){
+func NewClient(config *ClientConfig) (*Client, error){
 	c := Client{config: config}
 	return &c, c.connect()
 }
@@ -43,7 +43,7 @@ func (c *Client) connect() error {
 		return errors.New("no etcd authority or endpoints specified")
 	}
 
-	// Create etcd client
+	// Create the etcd client
 	cfg := etcd.Config{
 		Endpoints: etcdLocation,
 		Transport: etcd.DefaultTransport}
@@ -58,19 +58,19 @@ func (c *Client) connect() error {
 	return nil
 }
 
-func (c *Client) Tiers(namespace string) TierInterface {
+func (c *Client) Tiers() TierInterface {
 	return newTiers(c)
 }
 
-func (c *Client) Policies(namespace string) PolicyInterface {
+func (c *Client) Policies() PolicyInterface {
 	return newPolicies(c)
 }
 
-func (c *Client) Profiles(namespace string) ProfileInterface {
+func (c *Client) Profiles() ProfileInterface {
 	return newProfiles(c)
 }
 
-func (c *Client) HostEndpoints(namespace string) HostEndpointInterface {
+func (c *Client) HostEndpoints() HostEndpointInterface {
 	return newHostEndpoints(c)
 }
 

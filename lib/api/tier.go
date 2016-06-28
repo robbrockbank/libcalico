@@ -27,6 +27,6 @@ type TierList struct {
 	Items    []Tier       `json:"items" validate:"dive"`
 }
 
-func NewTierList() *Tier {
-	return &Tier{TypeMetadata: TypeMetadata{Kind: "tierList", APIVersion: "v1"}}
+func NewTierList() *TierList {
+	return &TierList{TypeMetadata: TypeMetadata{Kind: "tierList", APIVersion: "v1"}}
 }

@@ -4,12 +4,14 @@ import (
 	. "github.com/projectcalico/libcalico/lib/api/unversioned"
 )
 
-type ProfileMetadata ObjectMetadata
+type ProfileMetadata struct {
+	ObjectMetadata
+	Labels       *map[string]string `json:"labels,omitempty" validate:"omitempty,labels"`
+}
 
 type ProfileSpec struct {
 	IngressRules *[]Rule            `json:"ingress,omitempty" validate:"omitempty,dive"`
 	EgressRules  *[]Rule            `json:"egress,omitempty" validate:"omitempty,dive"`
-	Labels       *map[string]string `json:"labels,omitempty" validate:"omitempty,labels"`
 	Tags         *[]string          `json:"tags,omitempty" validate:"omitempty,dive,tag"`
 }
 
@@ -29,6 +31,6 @@ type ProfileList struct {
 	Items    []Profile    `json:"items" validate:"dive"`
 }
 
-func NewProfileList() *Profile {
-	return &Profile{TypeMetadata: TypeMetadata{Kind: "profile", APIVersion: "v1"}}
+func NewProfileList() *ProfileList {
+	return &ProfileList{TypeMetadata: TypeMetadata{Kind: "profileList", APIVersion: "v1"}}
 }

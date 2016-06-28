@@ -8,8 +8,8 @@ import (
 type HostEndpointInterface interface {
 	List(hostname, name *string) ([]HostEndpoint, error)
 	Get(hostname, name string) (*HostEndpoint, error)
-	Create(hostname, name string, data *HostEndpoint) error
-	Update(hostname, name string, data *HostEndpoint) error
+	Create(h *HostEndpoint) error
+	Update(h *HostEndpoint) error
 	Delete(hostname, name string) error
 }
 
@@ -23,9 +23,9 @@ func newHostEndpoints(c *Client) *hostEndpoints {
 	return &hostEndpoints{c}
 }
 
-// List takes a Metadata, and returns the list of hot endpoints that match that Metadata
-// (wildcarding mising fields)
-func (h *hostEndpoints) List(hostname, name *string) ([]HostEndpoint, error) {
+// List takes a Metadata, and returns the list of host endpoints that match that Metadata
+// (wildcarding missing fields)
+func (h *hostEndpoints) List(hlo *HostEndpointListOptions) ([]HostEndpoint, error) {
 	return nil, nil
 }
 
@@ -35,12 +35,12 @@ func (h *hostEndpoints) Get(hostname, name string) (*HostEndpoint, error) {
 }
 
 // Create creates a new host endpoint.
-func (h *hostEndpoints) Create(hostname, name string, data *HostEndpoint) error {
+func (h *hostEndpoints) Create(hep *HostEndpoint) error {
 	return nil
 }
 
 // Update updates an existing host endpoint.
-func (h *hostEndpoints) Update(hostname, name string, data *HostEndpoint) error {
+func (h *hostEndpoints) Update(hep *HostEndpoint) error {
 	return nil
 
 }

@@ -8,12 +8,12 @@ import (
 type HostEndpointMetadata struct {
 	ObjectMetadata
 	Hostname string `json:"hostname" valid:"hostname"`
+	Labels        *map[string]string `json:"labels" validate:"omitempty,labels"`
 }
 
 type HostEndpointSpec struct {
 	InterfaceName *string            `json:"interfaceName" validate:"omitempty,interface"`
 	ExpectedIPs   *[]IP              `json:"expectedIPs" validate:"omitempty,dive,ip"`
-	Labels        *map[string]string `json:"labels" validate:"omitempty,labels"`
 	Profiles      *[]string          `json:"profiles" validate:"omitempty,dive,name"`
 }
 

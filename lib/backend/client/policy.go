@@ -25,29 +25,29 @@ func newPolicies(c *Client) *policies {
 
 // List takes a Metadata, and returns the list of hot endpoints that match that Metadata
 // (wildcarding mising fields)
-func (h *policies) List(hostname, name *string) ([]Policy, error) {
+func (p *policies) List(hostname, name *string) ([]Policy, error) {
 	return nil, nil
 }
 
 // Get returns information about a particular policy.
-func (h *policies) Get(hostname, name string) (*Policy, error) {
+func (p *policies) Get(hostname, name string) (*Policy, error) {
 	return nil, nil
 }
 
 // Create creates a new policy.
-func (h *policies) Create(hostname, name string, data *Policy) error {
+func (p *policies) Create(hostname, name string, data *Policy) error {
 	return nil
 
 }
 
 // Update updates an existing policy.
-func (h *policies) Update(hostname, name string, data *Policy) error {
+func (p *policies) Update(hostname, name string, data *Policy) error {
 	return nil
 
 }
 
 // Delete deletes an existing policy.
-func (h *policies) Delete(hostname, name string) error {
+func (p *policies) Delete(hostname, name string) error {
 	return nil
 
 }

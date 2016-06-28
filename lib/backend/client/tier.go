@@ -26,29 +26,29 @@ func newTiers(c *Client) *tiers {
 
 // List takes a Metadata, and returns the list of hot endpoints that match that Metadata
 // (wildcarding mising fields)
-func (h *tiers) List(hostname, name *string) ([]Tier, error) {
+func (t *tiers) List(hostname, name *string) ([]Tier, error) {
 	return nil, nil
 }
 
 // Get returns information about a particular tier.
-func (h *tiers) Get(hostname, name string) (*Tier, error) {
+func (t *tiers) Get(hostname, name string) (*Tier, error) {
 	return nil, nil
 }
 
 // Create creates a new tier.
-func (h *tiers) Create(hostname, name string, data *Tier) error {
+func (t *tiers) Create(hostname, name string, data *Tier) error {
 	return nil
 
 }
 
 // Update updates an existing tier.
-func (h *tiers) Update(hostname, name string, data *Tier) error {
+func (t *tiers) Update(hostname, name string, data *Tier) error {
 	return nil
 
 }
 
 // Delete deletes an existing tier.
-func (h *tiers) Delete(hostname, name string) error {
+func (t *tiers) Delete(hostname, name string) error {
 	return nil
 
 }

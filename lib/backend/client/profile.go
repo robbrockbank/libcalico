@@ -25,29 +25,29 @@ func newProfiles(c *Client) *profiles {
 
 // List takes a Metadata, and returns the list of hot endpoints that match that Metadata
 // (wildcarding mising fields)
-func (h *profiles) List(hostname, name *string) ([]Profile, error) {
+func (p *profiles) List(hostname, name *string) ([]Profile, error) {
 	return nil, nil
 }
 
 // Get returns information about a particular profile.
-func (h *profiles) Get(hostname, name string) (*Profile, error) {
+func (p *profiles) Get(hostname, name string) (*Profile, error) {
 	return nil, nil
 }
 
 // Create creates a new profile.
-func (h *profiles) Create(hostname, name string, data *Profile) error {
+func (p *profiles) Create(hostname, name string, data *Profile) error {
 	return nil
 
 }
 
 // Update updates an existing profile.
-func (h *profiles) Update(hostname, name string, data *Profile) error {
+func (p *profiles) Update(hostname, name string, data *Profile) error {
 	return nil
 
 }
 
 // Delete deletes an existing profile.
-func (h *profiles) Delete(hostname, name string) error {
+func (p *profiles) Delete(hostname, name string) error {
 	return nil
 
 }
