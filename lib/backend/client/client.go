@@ -1,24 +1,24 @@
 package client
 
 import (
-	etcd "github.com/coreos/etcd/client"
 	"errors"
 	"strings"
+
+	etcd "github.com/coreos/etcd/client"
 	. "github.com/projectcalico/libcalico/lib/api"
 )
-
 
 type Client struct {
 	// Calico client config
 	config *ClientConfig
 
 	// ---- Internal package data ----
-	connected bool
+	connected   bool
 	etcdClient  *etcd.Client
 	etcdKeysAPI *etcd.KeysAPI
 }
 
-func NewClient(config *ClientConfig) (*Client, error){
+func NewClient(config *ClientConfig) (*Client, error) {
 	c := Client{config: config}
 	return &c, c.connect()
 }
@@ -73,5 +73,3 @@ func (c *Client) Profiles() ProfileInterface {
 func (c *Client) HostEndpoints() HostEndpointInterface {
 	return newHostEndpoints(c)
 }
-
-

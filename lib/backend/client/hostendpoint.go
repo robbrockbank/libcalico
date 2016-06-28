@@ -15,7 +15,7 @@ type HostEndpointInterface interface {
 
 // services implements ServicesNamespacer interface
 type hostEndpoints struct {
-	r  *Client
+	r *Client
 }
 
 // newServices returns a services

@@ -15,4 +15,3 @@ type ObjectMetadata struct {
 // ---- Metadata common to all lists ----
 type ListMetadata struct {
 }
-

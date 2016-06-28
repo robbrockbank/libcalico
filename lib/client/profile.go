@@ -1,9 +1,9 @@
 package client
 
 import (
+	"github.com/coreos/etcd/mvcc/backend"
 	. "github.com/projectcalico/libcalico/lib/api"
 	backend "github.com/projectcalico/libcalico/lib/backend/objects"
-	"github.com/coreos/etcd/mvcc/backend"
 )
 
 // ProfileInterface has methods to work with Profile resources.
@@ -17,11 +17,11 @@ type ProfileInterface interface {
 
 // services implements ServicesNamespacer interface
 type profiles struct {
-	c  *CalicoClient
+	c *Client
 }
 
 // newServices returns a services
-func newProfiles(c *CalicoClient) *profiles {
+func newProfiles(c *Client) *profiles {
 	return &profiles{c}
 }
 
@@ -78,7 +78,7 @@ func profileAPIToBackend(ap *Profile) (*backend.ProfileRules, *backend.ProfileTa
 	bpr := backend.ProfileRules{
 		Name: ap.Metadata.Name,
 
-		InboundRules: rulesAPIToBackend(ap.Spec.IngressRules),
+		InboundRules:  rulesAPIToBackend(ap.Spec.IngressRules),
 		OutboundRules: rulesAPIToBackend(ap.Spec.EgressRules),
 	}
 	bpt := backend.ProfileTags{
@@ -89,7 +89,7 @@ func profileAPIToBackend(ap *Profile) (*backend.ProfileRules, *backend.ProfileTa
 	bpl := backend.ProfileLabels{
 		Name: ap.Metadata.Name,
 
-		Labels: ap.Spec.Labels,
+		Labels: ap.Metadata.Labels,
 	}
 
 	return &bpr, &bpt, &bpl
@@ -100,11 +100,11 @@ func profileAPIToBackend(ap *Profile) (*backend.ProfileRules, *backend.ProfileTa
 func profileBackendToAPI(bpr *backend.ProfileRules, bpt *backend.ProfileTags, bpl *backend.ProfileLabels) *Profile {
 	ap := NewProfile()
 	ap.Metadata.Name = bpr.Name
+	ap.Metadata.Labels = bpl.Labels
 
 	ap.Spec.IngressRules = rulesBackendToAPI(bpr.InboundRules)
 	ap.Spec.EgressRules = rulesBackendToAPI(bpr.OutboundRules)
 	ap.Spec.Tags = bpt.Tags
-	ap.Spec.Labels = bpl.Labels
 
 	return &ap
 }

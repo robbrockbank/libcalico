@@ -2,36 +2,37 @@ package client
 
 import (
 	"io/ioutil"
-	"github.com/kelseyhightower/envconfig"
-	backend "github.com/projectcalico/libcalico/lib/backend/client"
-	. "github.com/projectcalico/libcalico/lib/api"
+
 	"github.com/ghodss/yaml"
+	"github.com/kelseyhightower/envconfig"
+	. "github.com/projectcalico/libcalico/lib/api"
+	backend "github.com/projectcalico/libcalico/lib/backend/client"
 )
 
-type CalicoClient struct {
+type Client struct {
 	backend *backend.Client
 }
 
-// Return a new connected CalicoClient.
-func New(config *CalicoClientConfig) (c *CalicoClient, err error) {
-	cc := CalicoClient{}
+// Return a new connected Client.
+func New(config *ClientConfig) (c *Client, err error) {
+	cc := Client{}
 	cc.backend, err = backend.NewClient(config)
 	return &cc, err
 }
 
-func (c *CalicoClient) Tiers() TierInterface {
+func (c *Client) Tiers() TierInterface {
 	return newTiers(c)
 }
 
-func (c *CalicoClient) Policies() PolicyInterface {
+func (c *Client) Policies() PolicyInterface {
 	return newPolicies(c)
 }
 
-func (c *CalicoClient) Profiles() ProfileInterface {
+func (c *Client) Profiles() ProfileInterface {
 	return newProfiles(c)
 }
 
-func (c *CalicoClient) HostEndpoints() HostEndpointInterface {
+func (c *Client) HostEndpoints() HostEndpointInterface {
 	return newHostEndpoints(c)
 }
 
@@ -57,5 +58,3 @@ func LoadClientConfig(f *string) (*ClientConfig, error) {
 
 	return &c, nil
 }
-
-

@@ -10,10 +10,9 @@ import (
 type NumOrStringType int
 
 const (
-	NumOrStringNum     NumOrStringType = iota // The structure holds a number.
-	NumOrStringString              // The structure holds a string.
+	NumOrStringNum    NumOrStringType = iota // The structure holds a number.
+	NumOrStringString                        // The structure holds a string.
 )
-
 
 // Int32OrString is a type that can hold an int32 or a string.  When used in
 // JSON or YAML marshalling and unmarshalling, it produces or consumes the
@@ -63,7 +62,6 @@ func (i Int32OrString) MarshalJSON() ([]byte, error) {
 		return []byte{}, fmt.Errorf("impossible Int32OrString.Type")
 	}
 }
-
 
 // Float32OrString is a type that can hold an float32 or a string.  When used in
 // JSON or YAML marshalling and unmarshalling, it produces or consumes the

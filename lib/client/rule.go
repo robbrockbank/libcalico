@@ -8,57 +8,57 @@ import (
 // Convert an API Rule structure to a Backend Rule structure
 func ruleAPIToBackend(ar Rule) *backend.Rule {
 	return &backend.Rule{
-		Action: ar.Action,
+		Action:   ar.Action,
 		ICMPCode: ar.ICMPCode,
 		ICMPType: ar.ICMPType,
-		
-		SrcTag: ar.Source.Tag,
-		SrcNet: ar.Source.Net,
+
+		SrcTag:      ar.Source.Tag,
+		SrcNet:      ar.Source.Net,
 		SrcSelector: ar.Source.Selector,
-		SrcPorts: ar.Source.Ports,
-		DstTag: ar.Destination.Tag,
-		DstNet: ar.Destination.Net,
+		SrcPorts:    ar.Source.Ports,
+		DstTag:      ar.Destination.Tag,
+		DstNet:      ar.Destination.Net,
 		DstSelector: ar.Destination.Selector,
-		DstPorts: ar.Destination.Ports,
-		
-		NotSrcTag: ar.Source.NotTag,
-		NotSrcNet: ar.Source.NotNet,
+		DstPorts:    ar.Destination.Ports,
+
+		NotSrcTag:      ar.Source.NotTag,
+		NotSrcNet:      ar.Source.NotNet,
 		NotSrcSelector: ar.Source.NotSelector,
-		NotSrcPorts: ar.Source.NotPorts,
-		NotDstTag: ar.Destination.NotTag,
-		NotDstNet: ar.Destination.NotNet,
+		NotSrcPorts:    ar.Source.NotPorts,
+		NotDstTag:      ar.Destination.NotTag,
+		NotDstNet:      ar.Destination.NotNet,
 		NotDstSelector: ar.Destination.NotSelector,
-		NotDstPorts: ar.Destination.NotPorts,
+		NotDstPorts:    ar.Destination.NotPorts,
 	}
 }
 
 // Convert a Backend Rule structure to an API Rule structure
 func ruleBackendToAPI(br backend.Rule) *Rule {
 	return &Rule{
-		Action: br.Action,
+		Action:   br.Action,
 		ICMPCode: br.ICMPCode,
 		ICMPType: br.ICMPType,
-		
+
 		Source: EntityRule{
-			Tag: br.SrcTag,
-			Net: br.SrcNet,
-			Selector: br.SrcSelector,
-			Ports: br.SrcPorts,
-			NotTag: br.NotSrcTag,
-			NotNet: br.NotSrcNet,
+			Tag:         br.SrcTag,
+			Net:         br.SrcNet,
+			Selector:    br.SrcSelector,
+			Ports:       br.SrcPorts,
+			NotTag:      br.NotSrcTag,
+			NotNet:      br.NotSrcNet,
 			NotSelector: br.NotSrcSelector,
-			NotPorts: br.NotSrcPorts,
+			NotPorts:    br.NotSrcPorts,
 		},
-		
+
 		Destination: EntityRule{
-			Tag: br.DstTag,
-			Net: br.DstNet,
-			Selector: br.DstSelector,
-			Ports: br.DstPorts,
-			NotTag: br.NotDstTag,
-			NotNet: br.NotDstNet,
+			Tag:         br.DstTag,
+			Net:         br.DstNet,
+			Selector:    br.DstSelector,
+			Ports:       br.DstPorts,
+			NotTag:      br.NotDstTag,
+			NotNet:      br.NotDstNet,
 			NotSelector: br.NotDstSelector,
-			NotPorts: br.NotDstPorts,
+			NotPorts:    br.NotDstPorts,
 		},
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"net"
 )
 
-
 // Sub class net.IP so that we can add JSON marshalling and unmarshalling.
 type IP struct {
 	net.IP

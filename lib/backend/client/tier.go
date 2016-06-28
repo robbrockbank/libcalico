@@ -4,7 +4,6 @@ import (
 	. "github.com/projectcalico/libcalico/lib/backend/objects"
 )
 
-
 // TierInterface has methods to work with Service resources.
 type TierInterface interface {
 	List(hostname, name *string) ([]Tier, error)
@@ -16,7 +15,7 @@ type TierInterface interface {
 
 // services implements ServicesNamespacer interface
 type tiers struct {
-	r  *Client
+	r *Client
 }
 
 // newServices returns a services

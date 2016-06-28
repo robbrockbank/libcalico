@@ -2,9 +2,11 @@ package client
 
 import (
 	"net"
+
+	"github.com/coreos/etcd/mvcc/backend"
 	. "github.com/projectcalico/libcalico/lib/api"
-	. "github.com/projectcalico/libcalico/lib/common"
 	backend "github.com/projectcalico/libcalico/lib/backend/objects"
+	. "github.com/projectcalico/libcalico/lib/common"
 )
 
 // HostEndpointInterface has methods to work with HostEndpoint resources.
@@ -18,11 +20,11 @@ type HostEndpointInterface interface {
 
 // services implements ServicesNamespacer interface
 type hostEndpoints struct {
-	c  *CalicoClient
+	c *Client
 }
 
 // newServices returns a services
-func newHostEndpoints(c *CalicoClient) *hostEndpoints {
+func newHostEndpoints(c *Client) *hostEndpoints {
 	return &hostEndpoints{c}
 }
 
@@ -30,7 +32,7 @@ func newHostEndpoints(c *CalicoClient) *hostEndpoints {
 // (wildcarding missing fields)
 func (h *hostEndpoints) List(metadata *HostEndpointMetadata) (*HostEndpointList, error) {
 	bhlo := backend.HostEndpointListOptions{
-		Hostname: metadata.Hostname,
+		Hostname:   metadata.Hostname,
 		EndpointID: metadata.Name,
 	}
 	if bhs, err := h.c.backend.HostEndpoints().List(bhlo); err != nil {
@@ -78,7 +80,7 @@ func (h *hostEndpoints) Delete(metadata *HostEndpointMetadata) error {
 func hostEndpointAPIToBackend(ah *HostEndpoint) *backend.HostEndpoint {
 	var ipv4Addrs []IP
 	var ipv6Addrs []IP
-	if (ah.Spec.ExpectedIPs != nil) {
+	if ah.Spec.ExpectedIPs != nil {
 		for _, ip := range ah.Spec.ExpectedIPs {
 			if len(ip) == net.IPv4len {
 				ipv4Addrs = append(ipv4Addrs, ip)
@@ -89,11 +91,11 @@ func hostEndpointAPIToBackend(ah *HostEndpoint) *backend.HostEndpoint {
 	}
 
 	bh := backend.HostEndpoint{
-		Hostname: ah.Metadata.Hostname,
+		Hostname:   ah.Metadata.Hostname,
 		EndpointID: ah.Metadata.Name,
-		Labels: ah.Metadata.Labels,
+		Labels:     ah.Metadata.Labels,
 
-		Name: ah.Spec.InterfaceName,
+		Name:       ah.Spec.InterfaceName,
 		ProfileIDs: ah.Spec.Profiles,
 	}
 	if len(ipv4Addrs) > 0 {

@@ -1,9 +1,9 @@
 package client
 
 import (
+	"github.com/coreos/etcd/mvcc/backend"
 	. "github.com/projectcalico/libcalico/lib/api"
 	backend "github.com/projectcalico/libcalico/lib/backend/objects"
-	"github.com/coreos/etcd/mvcc/backend"
 )
 
 // PolicyInterface has methods to work with Policy resources.
@@ -17,11 +17,11 @@ type PolicyInterface interface {
 
 // services implements ServicesNamespacer interface
 type policies struct {
-	c  *CalicoClient
+	c *Client
 }
 
 // newServices returns a services
-func newPolicies(c *CalicoClient) *policies {
+func newPolicies(c *Client) *policies {
 	return &policies{c}
 }
 
@@ -77,10 +77,10 @@ func policyAPIToBackend(ap *Policy) *backend.Policy {
 	bp := backend.Policy{
 		Name: ap.Metadata.Name,
 
-		Order: ap.Spec.Order,
-		InboundRules: rulesAPIToBackend(ap.Spec.IngressRules),
+		Order:         ap.Spec.Order,
+		InboundRules:  rulesAPIToBackend(ap.Spec.IngressRules),
 		OutboundRules: rulesAPIToBackend(ap.Spec.EgressRules),
-		Selector: ap.Spec.Selector,
+		Selector:      ap.Spec.Selector,
 	}
 
 	return &bp

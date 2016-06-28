@@ -3,12 +3,12 @@ package objects
 type ProfileRules struct {
 	Name string `json:"-" validate:"required,name"`
 
-	InboundRules  *[]Rule            `json:"inbound_rules,omitempty" validate:"omitempty,dive"`
-	OutboundRules *[]Rule            `json:"outbound_rules,omitempty" validate:"omitempty,dive"`
+	InboundRules  *[]Rule `json:"inbound_rules,omitempty" validate:"omitempty,dive"`
+	OutboundRules *[]Rule `json:"outbound_rules,omitempty" validate:"omitempty,dive"`
 }
 
 type ProfileLabels struct {
-	Name   string
+	Name string
 
 	Labels *map[string]string
 }
@@ -20,5 +20,5 @@ type ProfileTags struct {
 }
 
 type ProfileListOptions struct {
-	Name     *string
+	Name *string
 }

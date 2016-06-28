@@ -6,13 +6,13 @@ import (
 
 type ProfileMetadata struct {
 	ObjectMetadata
-	Labels       *map[string]string `json:"labels,omitempty" validate:"omitempty,labels"`
+	Labels *map[string]string `json:"labels,omitempty" validate:"omitempty,labels"`
 }
 
 type ProfileSpec struct {
-	IngressRules *[]Rule            `json:"ingress,omitempty" validate:"omitempty,dive"`
-	EgressRules  *[]Rule            `json:"egress,omitempty" validate:"omitempty,dive"`
-	Tags         *[]string          `json:"tags,omitempty" validate:"omitempty,dive,tag"`
+	IngressRules *[]Rule   `json:"ingress,omitempty" validate:"omitempty,dive"`
+	EgressRules  *[]Rule   `json:"egress,omitempty" validate:"omitempty,dive"`
+	Tags         *[]string `json:"tags,omitempty" validate:"omitempty,dive,tag"`
 }
 
 type Profile struct {

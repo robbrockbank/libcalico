@@ -15,7 +15,7 @@ type PolicyInterface interface {
 
 // services implements ServicesNamespacer interface
 type policies struct {
-	r  *Client
+	r *Client
 }
 
 // newServices returns a services

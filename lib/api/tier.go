@@ -8,7 +8,7 @@ import (
 type TierMetadata ObjectMetadata
 
 type TierSpec struct {
-	Order Order `json:"order" validate:"required"`
+	Order *float32 `json:"order"`
 }
 
 type Tier struct {

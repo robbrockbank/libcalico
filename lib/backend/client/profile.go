@@ -15,7 +15,7 @@ type ProfileInterface interface {
 
 // services implements ServicesNamespacer interface
 type profiles struct {
-	r  *Client
+	r *Client
 }
 
 // newServices returns a services

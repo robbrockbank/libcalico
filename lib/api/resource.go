@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"strings"
 
-	. "github.com/projectcalico/libcalico/lib/api/unversioned"
-	"os"
 	"io/ioutil"
+	"os"
 
+	. "github.com/projectcalico/libcalico/lib/api/unversioned"
 
 	"github.com/ghodss/yaml"
 	"github.com/projectcalico/libcalico/lib/common"
@@ -22,7 +22,7 @@ var helpers map[TypeMetadata]resourceHelper
 func init() {
 	helpers = make(map[TypeMetadata]resourceHelper)
 
-	registerHelper := func (t interface{}, tl interface{}) {
+	registerHelper := func(t interface{}, tl interface{}) {
 		tmd := reflect.ValueOf(t).Elem().FieldByName("TypeMetadata").Interface().(TypeMetadata)
 		helpers[tmd] = resourceHelper{t, tl}
 	}
@@ -52,7 +52,7 @@ func NewResource(tm TypeMetadata) (interface{}, error) {
 	// contains rather than the list itself.
 	if strings.HasSuffix(tm.Kind, "List") {
 		itemType = TypeMetadata{
-			Kind: strings.TrimSuffix(tm.Kind, "List"),
+			Kind:       strings.TrimSuffix(tm.Kind, "List"),
 			APIVersion: tm.APIVersion,
 		}
 	}
@@ -176,4 +176,3 @@ func unmarshalListOfResources(tml []TypeMetadata, b []byte) (interface{}, error)
 
 	return unpacked, nil
 }
-

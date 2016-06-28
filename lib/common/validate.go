@@ -4,8 +4,9 @@ import (
 	"reflect"
 	"regexp"
 
-	"gopkg.in/go-playground/validator.v8"
 	"fmt"
+
+	"gopkg.in/go-playground/validator.v8"
 )
 
 var validate *validator.Validate
@@ -18,10 +19,9 @@ func init() {
 	config := &validator.Config{TagName: "validate", FieldNameTag: "json"}
 	validate = validator.New(config)
 
-	var err error
-	if nameRegex, err = regexp.Compile("[a-zA-Z0-9_-]+"); err != nil { panic(err) }
-	if actionRegex, err = regexp.Compile("next-tier|allow|deny"); err != nil { panic(err) }
-	if protocolRegex, err = regexp.Compile("tcp|udp|icmp|icmpv6|sctp|udplite"); err != nil { panic(err) }
+	nameRegex = regexp.MustCompile("[a-zA-Z0-9_-]+")
+	actionRegex = regexp.MustCompile("next-tier|allow|deny")
+	protocolRegex = regexp.MustCompile("tcp|udp|icmp|icmpv6|sctp|udplite")
 }
 
 func RegisterFieldValidator(key string, fn validator.Func) {
@@ -47,7 +47,6 @@ func init() {
 	RegisterFieldValidator("labels", validateLabels)
 	RegisterFieldValidator("interface", validateInterface)
 
-	RegisterStructValidator(validateOrder, Order{})
 	RegisterStructValidator(validateProtocol, Protocol{})
 }
 
@@ -90,15 +89,6 @@ func validateInterface(v *validator.Validate, topStruct reflect.Value, currentSt
 	b := []byte(field.String())
 	fmt.Printf("Validate interface: %s\n", b)
 	return nameRegex.Match(b)
-}
-
-func validateOrder(v *validator.Validate, structLevel *validator.StructLevel) {
-	fmt.Printf("Validate order")
-	o := structLevel.CurrentStruct.Interface().(Order)
-	fmt.Printf("Validate protocol: %v %s %v\n", o.Type, o.StrVal, o.NumVal)
-	if o.Type == NumOrStringString && o.StrVal != "default" {
-		structLevel.ReportError(reflect.ValueOf(o.StrVal), "Order", "order", "orderStr")
-	}
 }
 
 func validateProtocol(v *validator.Validate, structLevel *validator.StructLevel) {
