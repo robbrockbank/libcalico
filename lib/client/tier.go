@@ -1,26 +1,25 @@
 package client
 
 import (
-	"github.com/coreos/etcd/mvcc/backend"
 	. "github.com/projectcalico/libcalico/lib/api"
 	backend "github.com/projectcalico/libcalico/lib/backend/objects"
 )
 
 // TierInterface has methods to work with Tier resources.
 type TierInterface interface {
-	List(metadata TierMetadata) (*TierList, error)
-	Get(metadata TierMetadata) (*Tier, error)
+	List(metadata *TierMetadata) (*TierList, error)
+	Get(metadata *TierMetadata) (*Tier, error)
 	Create(hep *Tier) (*Tier, error)
 	Update(hep *Tier) (*Tier, error)
-	Delete(metadata TierMetadata) error
+	Delete(metadata *TierMetadata) error
 }
 
-// services implements ServicesNamespacer interface
+// tiers implements TierInterface
 type tiers struct {
 	c *Client
 }
 
-// newServices returns a services
+// newTiers returns a tiers
 func newTiers(c *Client) *tiers {
 	return &tiers{c}
 }

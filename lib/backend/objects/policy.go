@@ -1,9 +1,5 @@
 package objects
 
-import (
-	. "github.com/projectcalico/libcalico/lib/common"
-)
-
 type Policy struct {
 	Name string `json:"-" validate:"required,name"`
 

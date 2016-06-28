@@ -1,26 +1,25 @@
 package client
 
 import (
-	"github.com/coreos/etcd/mvcc/backend"
 	. "github.com/projectcalico/libcalico/lib/api"
 	backend "github.com/projectcalico/libcalico/lib/backend/objects"
 )
 
 // PolicyInterface has methods to work with Policy resources.
 type PolicyInterface interface {
-	List(metadata PolicyMetadata) (*PolicyList, error)
-	Get(metadata PolicyMetadata) (*Policy, error)
+	List(metadata *PolicyMetadata) (*PolicyList, error)
+	Get(metadata *PolicyMetadata) (*Policy, error)
 	Create(hep *Policy) (*Policy, error)
 	Update(hep *Policy) (*Policy, error)
-	Delete(metadata PolicyMetadata) error
+	Delete(metadata *PolicyMetadata) error
 }
 
-// services implements ServicesNamespacer interface
+// policies implements PolicyInterface
 type policies struct {
 	c *Client
 }
 
-// newServices returns a services
+// newPolicies returns a policies
 func newPolicies(c *Client) *policies {
 	return &policies{c}
 }

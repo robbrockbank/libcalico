@@ -3,7 +3,6 @@ package client
 import (
 	"net"
 
-	"github.com/coreos/etcd/mvcc/backend"
 	. "github.com/projectcalico/libcalico/lib/api"
 	backend "github.com/projectcalico/libcalico/lib/backend/objects"
 	. "github.com/projectcalico/libcalico/lib/common"
@@ -11,19 +10,19 @@ import (
 
 // HostEndpointInterface has methods to work with HostEndpoint resources.
 type HostEndpointInterface interface {
-	List(metadata HostEndpointMetadata) (*HostEndpointList, error)
-	Get(metadata HostEndpointMetadata) (*HostEndpoint, error)
+	List(metadata *HostEndpointMetadata) (*HostEndpointList, error)
+	Get(metadata *HostEndpointMetadata) (*HostEndpoint, error)
 	Create(hep *HostEndpoint) (*HostEndpoint, error)
 	Update(hep *HostEndpoint) (*HostEndpoint, error)
-	Delete(metadata HostEndpointMetadata) error
+	Delete(metadata *HostEndpointMetadata) error
 }
 
-// services implements ServicesNamespacer interface
+// hostEndpoints implements HostEndpointInterface
 type hostEndpoints struct {
 	c *Client
 }
 
-// newServices returns a services
+// newHostEndpoints returns a hostEndpoints
 func newHostEndpoints(c *Client) *hostEndpoints {
 	return &hostEndpoints{c}
 }

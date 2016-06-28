@@ -1,26 +1,25 @@
 package client
 
 import (
-	"github.com/coreos/etcd/mvcc/backend"
 	. "github.com/projectcalico/libcalico/lib/api"
 	backend "github.com/projectcalico/libcalico/lib/backend/objects"
 )
 
 // ProfileInterface has methods to work with Profile resources.
 type ProfileInterface interface {
-	List(metadata ProfileMetadata) (*ProfileList, error)
-	Get(metadata ProfileMetadata) (*Profile, error)
+	List(metadata *ProfileMetadata) (*ProfileList, error)
+	Get(metadata *ProfileMetadata) (*Profile, error)
 	Create(hep *Profile) (*Profile, error)
 	Update(hep *Profile) (*Profile, error)
-	Delete(metadata ProfileMetadata) error
+	Delete(metadata *ProfileMetadata) error
 }
 
-// services implements ServicesNamespacer interface
+// profiles implements ProfileInterface
 type profiles struct {
 	c *Client
 }
 
-// newServices returns a services
+// newProfiles returns a profiles
 func newProfiles(c *Client) *profiles {
 	return &profiles{c}
 }
@@ -74,37 +73,30 @@ func (p *profiles) Delete(metadata *ProfileMetadata) error {
 
 // Convert a API Profile structure to the Backend Profile structures.
 // For profiles there is a one-to-many mapping.
-func profileAPIToBackend(ap *Profile) (*backend.ProfileRules, *backend.ProfileTags, *backend.ProfileLabels) {
-	bpr := backend.ProfileRules{
+func profileAPIToBackend(ap *Profile) *backend.Profile {
+	bp := backend.Profile{
 		Name: ap.Metadata.Name,
-
-		InboundRules:  rulesAPIToBackend(ap.Spec.IngressRules),
-		OutboundRules: rulesAPIToBackend(ap.Spec.EgressRules),
-	}
-	bpt := backend.ProfileTags{
-		Name: ap.Metadata.Name,
-
-		Tags: ap.Spec.Tags,
-	}
-	bpl := backend.ProfileLabels{
-		Name: ap.Metadata.Name,
-
+		Rules: backend.ProfileRules{
+			InboundRules:  rulesAPIToBackend(ap.Spec.IngressRules),
+			OutboundRules: rulesAPIToBackend(ap.Spec.EgressRules),
+		},
+		Tags:   ap.Spec.Tags,
 		Labels: ap.Metadata.Labels,
 	}
 
-	return &bpr, &bpt, &bpl
+	return &bp
 }
 
 // Convert the Backend Profile structures to an API Profile structure
 // For profiles there is a many-to-one mapping.
-func profileBackendToAPI(bpr *backend.ProfileRules, bpt *backend.ProfileTags, bpl *backend.ProfileLabels) *Profile {
+func profileBackendToAPI(bp *backend.Profile) *Profile {
 	ap := NewProfile()
-	ap.Metadata.Name = bpr.Name
-	ap.Metadata.Labels = bpl.Labels
+	ap.Metadata.Name = bp.Name
+	ap.Metadata.Labels = bp.Labels
 
-	ap.Spec.IngressRules = rulesBackendToAPI(bpr.InboundRules)
-	ap.Spec.EgressRules = rulesBackendToAPI(bpr.OutboundRules)
-	ap.Spec.Tags = bpt.Tags
+	ap.Spec.IngressRules = rulesBackendToAPI(bp.Rules.InboundRules)
+	ap.Spec.EgressRules = rulesBackendToAPI(bp.Rules.OutboundRules)
+	ap.Spec.Tags = bp.Tags
 
 	return &ap
 }

@@ -4,21 +4,21 @@ import (
 	. "github.com/projectcalico/libcalico/lib/backend/objects"
 )
 
-// HostEndpointInterface has methods to work with Service resources.
+// HostEndpointInterface has methods to work with HostEndoint objects.
 type HostEndpointInterface interface {
-	List(hostname, name *string) ([]HostEndpoint, error)
+	List(hlo *HostEndpointListOptions) ([]HostEndpoint, error)
 	Get(hostname, name string) (*HostEndpoint, error)
 	Create(h *HostEndpoint) error
 	Update(h *HostEndpoint) error
 	Delete(hostname, name string) error
 }
 
-// services implements ServicesNamespacer interface
+// hostEndpoints implements HostEndpointInterface
 type hostEndpoints struct {
 	r *Client
 }
 
-// newServices returns a services
+// newHostEndpoints returns a hostEndpoints
 func newHostEndpoints(c *Client) *hostEndpoints {
 	return &hostEndpoints{c}
 }

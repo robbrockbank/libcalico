@@ -4,50 +4,50 @@ import (
 	. "github.com/projectcalico/libcalico/lib/backend/objects"
 )
 
-// TierInterface has methods to work with Service resources.
+// TierInterface has methods to work with Tier objects.
 type TierInterface interface {
-	List(hostname, name *string) ([]Tier, error)
-	Get(hostname, name string) (*Tier, error)
-	Create(hostname, name string, data *Tier) error
-	Update(hostname, name string, data *Tier) error
-	Delete(hostname, name string) error
+	List(btlo *TierListOptions) ([]Tier, error)
+	Get(name string) (*Tier, error)
+	Create(bp *Tier) error
+	Update(bp *Tier) error
+	Delete(name string) error
 }
 
-// services implements ServicesNamespacer interface
+// tiers implements TierInterface
 type tiers struct {
 	r *Client
 }
 
-// newServices returns a services
+// newTiers returns a tiers
 func newTiers(c *Client) *tiers {
 	return &tiers{c}
 }
 
-// List takes a Metadata, and returns the list of hot endpoints that match that Metadata
-// (wildcarding mising fields)
-func (t *tiers) List(hostname, name *string) ([]Tier, error) {
+// List takes a Metadata, and returns the list of tiers that match that Metadata
+// (wildcarding missing fields)
+func (t *tiers) List(btlo *TierListOptions) ([]Tier, error) {
 	return nil, nil
 }
 
 // Get returns information about a particular tier.
-func (t *tiers) Get(hostname, name string) (*Tier, error) {
+func (t *tiers) Get(name string) (*Tier, error) {
 	return nil, nil
 }
 
 // Create creates a new tier.
-func (t *tiers) Create(hostname, name string, data *Tier) error {
+func (t *tiers) Create(bp *Tier) error {
 	return nil
 
 }
 
 // Update updates an existing tier.
-func (t *tiers) Update(hostname, name string, data *Tier) error {
+func (t *tiers) Update(bp *Tier) error {
 	return nil
 
 }
 
 // Delete deletes an existing tier.
-func (t *tiers) Delete(hostname, name string) error {
+func (t *tiers) Delete(name string) error {
 	return nil
 
 }
