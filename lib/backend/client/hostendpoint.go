@@ -7,10 +7,10 @@ import (
 // HostEndpointInterface has methods to work with HostEndoint objects.
 type HostEndpointInterface interface {
 	List(hlo *HostEndpointListOptions) ([]HostEndpoint, error)
-	Get(hostname, name string) (*HostEndpoint, error)
+	Get(k *HostEndpointKey) (*HostEndpoint, error)
 	Create(h *HostEndpoint) error
 	Update(h *HostEndpoint) error
-	Delete(hostname, name string) error
+	Delete(k *HostEndpointKey) error
 }
 
 // hostEndpoints implements HostEndpointInterface
@@ -26,11 +26,12 @@ func newHostEndpoints(c *Client) *hostEndpoints {
 // List takes a Metadata, and returns the list of host endpoints that match that Metadata
 // (wildcarding missing fields)
 func (h *hostEndpoints) List(hlo *HostEndpointListOptions) ([]HostEndpoint, error) {
+
 	return nil, nil
 }
 
 // Get returns information about a particular host endpoint.
-func (h *hostEndpoints) Get(hostname, name string) (*HostEndpoint, error) {
+func (h *hostEndpoints) Get(k *HostEndpointKey) (*HostEndpoint, error) {
 	return nil, nil
 }
 
@@ -46,7 +47,6 @@ func (h *hostEndpoints) Update(hep *HostEndpoint) error {
 }
 
 // Delete deletes an existing host endpoint.
-func (h *hostEndpoints) Delete(hostname, name string) error {
+func (h *hostEndpoints) Delete(k *HostEndpointKey) error {
 	return nil
-
 }

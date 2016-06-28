@@ -5,8 +5,12 @@ type ProfileRules struct {
 	OutboundRules *[]Rule `json:"outbound_rules,omitempty" validate:"omitempty,dive"`
 }
 
+type ProfileKey struct {
+	Name string `json:"-" validate:"required,name"`
+}
+
 type Profile struct {
-	Name   string
+	Key    ProfileKey
 	Rules  ProfileRules
 	Tags   *[]string
 	Labels *map[string]string

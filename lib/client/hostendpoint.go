@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"net"
 
 	. "github.com/projectcalico/libcalico/lib/api"
@@ -45,7 +46,9 @@ func (h *hostEndpoints) List(metadata *HostEndpointMetadata) (*HostEndpointList,
 
 // Get returns information about a particular host endpoint.
 func (h *hostEndpoints) Get(metadata *HostEndpointMetadata) (*HostEndpoint, error) {
-	if bh, err := h.c.backend.HostEndpoints().Get(metadata.Hostname, metadata.Name); err != nil {
+	if bk, err := getBackendKeyFromMetadata(metadata); err!= nil {
+		return nil, err
+	} else if bh, err := h.c.backend.HostEndpoints().Get(bk); err != nil {
 		return nil, err
 	} else {
 		return hostEndpointBackendToAPI(bh), nil
@@ -72,7 +75,22 @@ func (h *hostEndpoints) Update(ah *HostEndpoint) (*HostEndpoint, error) {
 
 // Delete deletes an existing host endpoint.
 func (h *hostEndpoints) Delete(metadata *HostEndpointMetadata) error {
-	return h.c.backend.HostEndpoints().Delete(metadata.Hostname, metadata.Name)
+	if bk, err := getBackendKeyFromMetadata(metadata); err!= nil {
+		return nil, err
+	} else {
+		return h.c.backend.HostEndpoints().Delete(bk)
+	}
+}
+
+func getHostEndpointBackendKeyFromMetadata(m *HostEndpointMetadata) (*backend.HostEndpointKey, error) {
+	if m == nil || m.Name == nil || m.Hostname == nil {
+		return nil, errors.New("insufficient identifiers supplied")
+	}
+	k := backend.HostEndpointKey{
+		Hostname: *(m.Hostname),
+		EndpointID: *(m.Name),
+	}
+	return &k, nil
 }
 
 // Convert an API HostEndpoint structure to a Backend Tier structure
@@ -90,8 +108,10 @@ func hostEndpointAPIToBackend(ah *HostEndpoint) *backend.HostEndpoint {
 	}
 
 	bh := backend.HostEndpoint{
-		Hostname:   ah.Metadata.Hostname,
-		EndpointID: ah.Metadata.Name,
+		HostEndpointKey: backend.HostEndpointKey{
+			Hostname:   ah.Metadata.Hostname,
+			EndpointID: ah.Metadata.Name,
+		},
 		Labels:     ah.Metadata.Labels,
 
 		Name:       ah.Spec.InterfaceName,
@@ -118,8 +138,8 @@ func hostEndpointBackendToAPI(bh *backend.HostEndpoint) *HostEndpoint {
 		ips = append(ips, bh.ExpectedIPv6Addrs...)
 	}
 
-	ah.Metadata.Hostname = bh.Hostname
-	ah.Metadata.Name = bh.EndpointID
+	ah.Metadata.Hostname = bh.HostEndpointKey.Hostname
+	ah.Metadata.Name = bh.HostEndpointKey.EndpointID
 	ah.Metadata.Labels = bh.Labels
 
 	ah.Spec.InterfaceName = bh.Name

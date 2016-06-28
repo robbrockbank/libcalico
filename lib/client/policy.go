@@ -1,8 +1,10 @@
 package client
 
 import (
+	"errors"
 	. "github.com/projectcalico/libcalico/lib/api"
 	backend "github.com/projectcalico/libcalico/lib/backend/objects"
+	"github.com/coreos/etcd/mvcc/backend"
 )
 
 // PolicyInterface has methods to work with Policy resources.
@@ -68,12 +70,27 @@ func (p *policies) Update(ap *Policy) (*Policy, error) {
 
 // Delete deletes an existing policy.
 func (p *policies) Delete(metadata *PolicyMetadata) error {
-	return p.c.backend.Policies().Delete(metadata.Name)
+	if bk, err := getBackendKeyFromMetadata(metadata); err!= nil {
+		return nil, err
+	} else {
+		return p.c.backend.Policies().Delete(bk)
+	}
+}
+
+func getBackendKeyFromMetadata(m *PolicyMetadata) (*backend.PolicyKey, error) {
+	if m == nil || m.Name == nil {
+		return nil, errors.New("insufficient identifiers supplied")
+	}
+	k := backend.PolicyKey{
+		Name: *(m.Name),
+	}
+	return &k, nil
 }
 
 // Convert an API Policy structure to a Backend Tier structure
 func policyAPIToBackend(ap *Policy) *backend.Policy {
 	bp := backend.Policy{
+		PolicyKey: backend.Policy
 		Name: ap.Metadata.Name,
 
 		Order:         ap.Spec.Order,

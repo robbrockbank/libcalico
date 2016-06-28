@@ -7,10 +7,10 @@ import (
 // PolicyInterface has methods to work with Policy objects.
 type PolicyInterface interface {
 	List(bplo *PolicyListOptions) ([]Policy, error)
-	Get(name string) (*Policy, error)
+	Get(k *PolicyKey) (*Policy, error)
 	Create(bp *Policy) error
 	Update(bp *Policy) error
-	Delete(name string) error
+	Delete(k *PolicyKey) error
 }
 
 // policies implements PolicyInterface
@@ -30,7 +30,7 @@ func (p *policies) List(bplo *PolicyListOptions) ([]Policy, error) {
 }
 
 // Get returns information about a particular policy.
-func (p *policies) Get(name string) (*Policy, error) {
+func (p *policies) Get(k *PolicyKey) (*Policy, error) {
 	return nil, nil
 }
 
@@ -47,7 +47,7 @@ func (p *policies) Update(bp *Policy) error {
 }
 
 // Delete deletes an existing policy.
-func (p *policies) Delete(name string) error {
+func (p *policies) Delete(k *PolicyKey) error {
 	return nil
 
 }

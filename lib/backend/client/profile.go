@@ -7,10 +7,10 @@ import (
 // ProfileInterface has methods to work with Profile objects.
 type ProfileInterface interface {
 	List(bplo *ProfileListOptions) ([]Profile, error)
-	Get(name string) (*Profile, error)
+	Get(k *ProfileKey) (*Profile, error)
 	Create(bp *Profile) error
 	Update(bp *Profile) error
-	Delete(name string) error
+	Delete(k *ProfileKey) error
 }
 
 // profiles implements ProfileInterface
@@ -30,7 +30,7 @@ func (p *profiles) List(bplo *ProfileListOptions) ([]Profile, error) {
 }
 
 // Get returns information about a particular profile.
-func (p *profiles) Get(name string) (*Profile, error) {
+func (p *profiles) Get(k *ProfileKey) (*Profile, error) {
 	return nil, nil
 }
 
@@ -47,7 +47,7 @@ func (p *profiles) Update(bp *Profile) error {
 }
 
 // Delete deletes an existing profile.
-func (p *profiles) Delete(name string) error {
+func (p *profiles) Delete(k *ProfileKey) error {
 	return nil
 
 }

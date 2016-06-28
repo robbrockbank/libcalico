@@ -7,10 +7,10 @@ import (
 // TierInterface has methods to work with Tier objects.
 type TierInterface interface {
 	List(btlo *TierListOptions) ([]Tier, error)
-	Get(name string) (*Tier, error)
+	Get(k *TierKey) (*Tier, error)
 	Create(bp *Tier) error
 	Update(bp *Tier) error
-	Delete(name string) error
+	Delete(k *TierKey) error
 }
 
 // tiers implements TierInterface
@@ -30,7 +30,7 @@ func (t *tiers) List(btlo *TierListOptions) ([]Tier, error) {
 }
 
 // Get returns information about a particular tier.
-func (t *tiers) Get(name string) (*Tier, error) {
+func (t *tiers) Get(k *TierKey) (*Tier, error) {
 	return nil, nil
 }
 
@@ -47,7 +47,7 @@ func (t *tiers) Update(bp *Tier) error {
 }
 
 // Delete deletes an existing tier.
-func (t *tiers) Delete(name string) error {
+func (t *tiers) Delete(k *TierKey) error {
 	return nil
 
 }
