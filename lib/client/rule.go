@@ -69,8 +69,8 @@ func rulesAPIToBackend(ars *[]Rule) *[]backend.Rule {
 		return nil
 	}
 
-	brs := make([]backend.Rule, len(ars))
-	for idx, ar := range ars {
+	brs := make([]backend.Rule, len(*ars))
+	for idx, ar := range *ars {
 		brs[idx] = *ruleAPIToBackend(ar)
 	}
 	return &brs
@@ -82,8 +82,8 @@ func rulesBackendToAPI(brs *[]backend.Rule) *[]Rule {
 		return nil
 	}
 
-	ars := make([]Rule, len(brs))
-	for idx, br := range brs {
+	ars := make([]Rule, len(*brs))
+	for idx, br := range *brs {
 		ars[idx] = *ruleBackendToAPI(br)
 	}
 	return &ars

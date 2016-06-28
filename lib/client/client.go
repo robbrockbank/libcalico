@@ -20,6 +20,7 @@ func New(config *ClientConfig) (c *Client, err error) {
 	return &cc, err
 }
 
+/*
 func (c *Client) Tiers() TierInterface {
 	return newTiers(c)
 }
@@ -31,6 +32,7 @@ func (c *Client) Policies() PolicyInterface {
 func (c *Client) Profiles() ProfileInterface {
 	return newProfiles(c)
 }
+*/
 
 func (c *Client) HostEndpoints() HostEndpointInterface {
 	return newHostEndpoints(c)

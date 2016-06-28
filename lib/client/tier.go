@@ -1,8 +1,9 @@
 package client
 
 import (
+	//"errors"
 	. "github.com/projectcalico/libcalico/lib/api"
-	backend "github.com/projectcalico/libcalico/lib/backend/objects"
+	//backend "github.com/projectcalico/libcalico/lib/backend/objects"
 )
 
 // TierInterface has methods to work with Tier resources.
@@ -14,6 +15,7 @@ type TierInterface interface {
 	Delete(metadata *TierMetadata) error
 }
 
+/*
 // tiers implements TierInterface
 type tiers struct {
 	c *Client
@@ -71,6 +73,16 @@ func (t *tiers) Delete(metadata *TierMetadata) error {
 	return t.c.backend.Tiers().Delete(metadata.Name)
 }
 
+func getTierBackendKeyFromMetadata(m *TierMetadata) (*backend.TierKey, error) {
+	if m == nil || m.Name == nil {
+		return nil, errors.New("insufficient identifiers supplied")
+	}
+	k := backend.TierKey{
+		Name: *(m.Name),
+	}
+	return &k, nil
+}
+
 // Convert an API Tier structure to a Backend Tier structure
 func tierAPIToBackend(at *Tier) *backend.Tier {
 	bt := backend.Tier{
@@ -91,3 +103,4 @@ func tierBackendToAPI(bt *backend.Tier) *Tier {
 
 	return &at
 }
+*/

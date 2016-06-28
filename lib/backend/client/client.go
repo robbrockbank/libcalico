@@ -57,7 +57,7 @@ func (c *Client) connect() error {
 	c.connected = true
 	return nil
 }
-
+/*
 func (c *Client) Tiers() TierInterface {
 	return newTiers(c)
 }
@@ -69,7 +69,7 @@ func (c *Client) Policies() PolicyInterface {
 func (c *Client) Profiles() ProfileInterface {
 	return newProfiles(c)
 }
-
+*/
 func (c *Client) HostEndpoints() HostEndpointInterface {
 	return newHostEndpoints(c)
 }

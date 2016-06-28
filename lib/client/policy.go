@@ -1,10 +1,9 @@
 package client
 
 import (
-	"errors"
+	//"errors"
 	. "github.com/projectcalico/libcalico/lib/api"
-	backend "github.com/projectcalico/libcalico/lib/backend/objects"
-	"github.com/coreos/etcd/mvcc/backend"
+	//backend "github.com/projectcalico/libcalico/lib/backend/objects"
 )
 
 // PolicyInterface has methods to work with Policy resources.
@@ -16,6 +15,7 @@ type PolicyInterface interface {
 	Delete(metadata *PolicyMetadata) error
 }
 
+/*
 // policies implements PolicyInterface
 type policies struct {
 	c *Client
@@ -70,14 +70,14 @@ func (p *policies) Update(ap *Policy) (*Policy, error) {
 
 // Delete deletes an existing policy.
 func (p *policies) Delete(metadata *PolicyMetadata) error {
-	if bk, err := getBackendKeyFromMetadata(metadata); err!= nil {
+	if bk, err := getPolicyBackendKeyFromMetadata(metadata); err!= nil {
 		return nil, err
 	} else {
 		return p.c.backend.Policies().Delete(bk)
 	}
 }
 
-func getBackendKeyFromMetadata(m *PolicyMetadata) (*backend.PolicyKey, error) {
+func getPolicyBackendKeyFromMetadata(m *PolicyMetadata) (*backend.PolicyKey, error) {
 	if m == nil || m.Name == nil {
 		return nil, errors.New("insufficient identifiers supplied")
 	}
@@ -88,10 +88,14 @@ func getBackendKeyFromMetadata(m *PolicyMetadata) (*backend.PolicyKey, error) {
 }
 
 // Convert an API Policy structure to a Backend Tier structure
-func policyAPIToBackend(ap *Policy) *backend.Policy {
+func policyAPIToBackend(ap *Policy) (*backend.Policy, error) {
+	k, err := getPolicyBackendKeyFromMetadata(ap.Metadata)
+	if err != nil {
+		return nil, err
+	}
+
 	bp := backend.Policy{
-		PolicyKey: backend.Policy
-		Name: ap.Metadata.Name,
+		PolicyKey: k,
 
 		Order:         ap.Spec.Order,
 		InboundRules:  rulesAPIToBackend(ap.Spec.IngressRules),
@@ -99,11 +103,11 @@ func policyAPIToBackend(ap *Policy) *backend.Policy {
 		Selector:      ap.Spec.Selector,
 	}
 
-	return &bp
+	return &bp, nil
 }
 
 // Convert a Backend Policy structure to an API Tier structure
-func policyBackendToAPI(bp *backend.Policy) *Policy {
+func policyBackendToAPI(bp *backend.Policy) (*Policy, error) {
 	ap := NewPolicy()
 	ap.Metadata.Name = bp.Name
 
@@ -112,5 +116,6 @@ func policyBackendToAPI(bp *backend.Policy) *Policy {
 	ap.Spec.EgressRules = rulesBackendToAPI(bp.OutboundRules)
 	ap.Spec.Selector = bp.Selector
 
-	return &ap
+	return &ap, nil
 }
+*/

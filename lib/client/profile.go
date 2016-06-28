@@ -1,10 +1,12 @@
 package client
 
 import (
-	. "github.com/projectcalico/libcalico/lib/api"
-	backend "github.com/projectcalico/libcalico/lib/backend/objects"
+	//"errors"
+	//. "github.com/projectcalico/libcalico/lib/api"
+	//backend "github.com/projectcalico/libcalico/lib/backend/objects"
 )
 
+/*
 // ProfileInterface has methods to work with Profile resources.
 type ProfileInterface interface {
 	List(metadata *ProfileMetadata) (*ProfileList, error)
@@ -71,6 +73,16 @@ func (p *profiles) Delete(metadata *ProfileMetadata) error {
 	return p.c.backend.Profiles().Delete(metadata.Name)
 }
 
+func getProfileBackendKeyFromMetadata(m *ProfileMetadata) (*backend.ProfileKey, error) {
+	if m == nil || m.Name == nil {
+		return nil, errors.New("insufficient identifiers supplied")
+	}
+	k := backend.ProfileKey{
+		Name: *(m.Name),
+	}
+	return &k, nil
+}
+
 // Convert a API Profile structure to the Backend Profile structures.
 // For profiles there is a one-to-many mapping.
 func profileAPIToBackend(ap *Profile) *backend.Profile {
@@ -100,3 +112,4 @@ func profileBackendToAPI(bp *backend.Profile) *Profile {
 
 	return &ap
 }
+*/
