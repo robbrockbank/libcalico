@@ -1,4 +1,4 @@
-package objects
+package backend
 
 type TierKey struct {
 	Name string `json:"-" validate:"required,name"`

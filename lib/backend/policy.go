@@ -1,4 +1,4 @@
-package objects
+package backend
 
 type PolicyKey struct {
 	Name string `json:"-" validate:"required,name"`

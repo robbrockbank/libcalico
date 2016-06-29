@@ -1,16 +1,29 @@
-package client
+package backend
 
 import (
 	"errors"
 	"strings"
 
 	etcd "github.com/coreos/etcd/client"
-	. "github.com/projectcalico/libcalico/lib/api"
+	"github.com/projectcalico/libcalico/lib/api"
 )
+
+type KeyInterface interface {
+	asEtcdKey() (string, error)
+}
+
+type ListInterface interface {
+	asEtcdKeyRegex() (string, error)
+}
+
+type KeyValue struct {
+	Key KeyInterface
+	Value []byte
+}
 
 type Client struct {
 	// Calico client config
-	config *ClientConfig
+	config *api.ClientConfig
 
 	// ---- Internal package data ----
 	connected   bool
@@ -18,7 +31,7 @@ type Client struct {
 	etcdKeysAPI *etcd.KeysAPI
 }
 
-func NewClient(config *ClientConfig) (*Client, error) {
+func NewClient(config *api.ClientConfig) (*Client, error) {
 	c := Client{config: config}
 	return &c, c.connect()
 }
@@ -57,19 +70,23 @@ func (c *Client) connect() error {
 	c.connected = true
 	return nil
 }
-/*
-func (c *Client) Tiers() TierInterface {
-	return newTiers(c)
+
+func (c *Client) Create(d KeyValue) error {
+	return nil
 }
 
-func (c *Client) Policies() PolicyInterface {
-	return newPolicies(c)
+func (c *Client) Update(d KeyValue) error {
+	return nil
 }
 
-func (c *Client) Profiles() ProfileInterface {
-	return newProfiles(c)
+func (c *Client) Get(k KeyInterface) (KeyValue, error) {
+	return KeyValue{}, nil
 }
-*/
-func (c *Client) HostEndpoints() HostEndpointInterface {
-	return newHostEndpoints(c)
+
+func (c *Client) List(l ListInterface) ([]KeyValue, error) {
+	return []KeyValue{}, nil
+}
+
+func (c *Client) Delete(k KeyInterface) error {
+	return nil
 }

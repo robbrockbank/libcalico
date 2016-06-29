@@ -1,4 +1,4 @@
-package objects
+package backend
 
 type ProfileRules struct {
 	InboundRules  *[]Rule `json:"inbound_rules,omitempty" validate:"omitempty,dive"`

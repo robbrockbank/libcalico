@@ -4,115 +4,107 @@ import (
 	"errors"
 	"net"
 
-	. "github.com/projectcalico/libcalico/lib/api"
-	backend "github.com/projectcalico/libcalico/lib/backend/objects"
+	"github.com/projectcalico/libcalico/lib/api"
 	. "github.com/projectcalico/libcalico/lib/common"
+	"github.com/projectcalico/libcalico/lib/backend"
 )
 
-// HostEndpointInterface has methods to work with HostEndpoint resources.
+// api.HostEndpointInterface has methods to work with api.HostEndpoint resources.
 type HostEndpointInterface interface {
-	List(metadata *HostEndpointMetadata) (*HostEndpointList, error)
-	Get(metadata *HostEndpointMetadata) (*HostEndpoint, error)
-	Create(hep *HostEndpoint) (*HostEndpoint, error)
-	Update(hep *HostEndpoint) (*HostEndpoint, error)
-	Delete(metadata *HostEndpointMetadata) error
+	List(api.HostEndpointMetadata) (*api.HostEndpointList, error)
+	Get(api.HostEndpointMetadata) (*api.HostEndpoint, error)
+	Create(api.HostEndpoint) (*api.HostEndpoint, error)
+	Update(api.HostEndpoint) (*api.HostEndpoint, error)
+	Delete(api.HostEndpointMetadata) error
 }
 
-// hostEndpoints implements HostEndpointInterface
+// hostEndpoints implements api.HostEndpointInterface
 type hostEndpoints struct {
 	c *Client
 }
 
-// newHostEndpoints returns a hostEndpoints
+// newapi.HostEndpoints returns a hostEndpoints
 func newHostEndpoints(c *Client) *hostEndpoints {
 	return &hostEndpoints{c}
 }
 
 // List takes a Metadata, and returns the list of host endpoints that match that Metadata
 // (wildcarding missing fields)
-func (h *hostEndpoints) List(metadata *HostEndpointMetadata) (*HostEndpointList, error) {
-	if bhlo, err := h.toListOptions(metadata); err != nil {
-		return nil, err
-	} else if bhs, err := h.c.backend.HostEndpoints().List(bhlo); err != nil {
+func (h *hostEndpoints) List(metadata api.HostEndpointMetadata) (*api.HostEndpointList, error) {
+	if l, err := h.c.list(backend.HostEndpoint{}, metadata, h); err != nil {
 		return nil, err
 	} else {
-		ahl := NewHostEndpointList()
-		for _, bh := range bhs {
-			if ah, err := h.backendToAPI(&bh); err != nil {
-				ahl.Items = append(ahl.Items, *ah)
-			}
+		hl := api.NewHostEndpointList()
+		hl.Items = make([]api.HostEndpoint, len(l))
+		for _, h := range l {
+			hl.Items = append(hl.Items, h.(api.HostEndpoint))
 		}
-		return ahl, nil
+		return hl, nil
 	}
 }
 
 // Get returns information about a particular host endpoint.
-func (h *hostEndpoints) Get(metadata *HostEndpointMetadata) (*HostEndpoint, error) {
-	if bk, err := h.toBackendKey(metadata); err!= nil {
-		return nil, err
-	} else if bh, err := h.c.backend.HostEndpoints().Get(bk); err != nil {
+func (h *hostEndpoints) Get(metadata api.HostEndpointMetadata) (*api.HostEndpoint, error) {
+	if a, err := h.c.get(backend.HostEndpoint{}, metadata, h); err != nil {
 		return nil, err
 	} else {
-		return h.backendToAPI(bh)
+		h := a.(api.HostEndpoint)
+		return &h, nil
 	}
 }
 
 // Create creates a new host endpoint.
-func (h *hostEndpoints) Create(ah *HostEndpoint) (*HostEndpoint, error) {
-	if bh, err := h.apiToBackend(ah); err != nil {
-		return nil, err
-	} else if err = h.c.backend.HostEndpoints().Create(bh); err != nil {
+func (h *hostEndpoints) Create(a api.HostEndpoint) (*api.HostEndpoint, error) {
+	if err := h.c.create(a, h); err != nil {
 		return nil, err
 	} else {
-		return h.backendToAPI(bh)
+		return &a, nil
 	}
 }
 
-// Update updates an existing host endpoint.
-func (h *hostEndpoints) Update(ah *HostEndpoint) (*HostEndpoint, error) {
-	if bh, err := h.apiToBackend(ah); err != nil {
-		return nil, err
-	} else if err = h.c.backend.HostEndpoints().Update(bh); err != nil {
+// Create creates a new host endpoint.
+func (h *hostEndpoints) Update(a api.HostEndpoint) (*api.HostEndpoint, error) {
+	if err := h.c.update(a, h); err != nil {
 		return nil, err
 	} else {
-		return h.backendToAPI(bh)
+		return &a, nil
 	}
 }
 
 // Delete deletes an existing host endpoint.
-func (h *hostEndpoints) Delete(metadata *HostEndpointMetadata) error {
-	if bk, err := h.toBackendKey(metadata); err!= nil {
-		return err
-	} else {
-		return h.c.backend.HostEndpoints().Delete(bk)
-	}
+func (h *hostEndpoints) Delete(metadata api.HostEndpointMetadata) error {
+	return h.c.delete(metadata, h)
 }
 
-func (h *hostEndpoints) toListOptions(m *HostEndpointMetadata) (*backend.HostEndpointListOptions, error) {
-	bhlo := backend.HostEndpointListOptions{
-		Hostname:   m.Hostname,
-		EndpointID: m.Name,
+func (h *hostEndpoints) convertMetadataToListInterface(m interface{}) (backend.ListInterface, error) {
+	hm := m.(api.HostEndpointMetadata)
+	l := backend.HostEndpointListOptions{
+		Hostname:   hm.Hostname,
+		EndpointID: hm.Name,
 	}
-	return &bhlo, nil
+	return l, nil
 }
 
-func (h *hostEndpoints) toBackendKey(m *HostEndpointMetadata) (*backend.HostEndpointKey, error) {
-	if m == nil || m.Name == nil || m.Hostname == nil {
+func (h *hostEndpoints) convertMetadataToKeyInterface(m interface{}) (backend.KeyInterface, error) {
+	hm := m.(api.HostEndpointMetadata)
+	if hm.Name == nil || hm.Hostname == nil {
 		return nil, errors.New("insufficient identifiers supplied")
 	}
 	k := backend.HostEndpointKey{
-		Hostname: *(m.Hostname),
-		EndpointID: *(m.Name),
+		Hostname: *(hm.Hostname),
+		EndpointID: *(hm.Name),
 	}
-	return &k, nil
+	return k, nil
 }
 
-// Convert an API HostEndpoint structure to a Backend Tier structure
-func (h *hostEndpoints) apiToBackend(ah *HostEndpoint) (*backend.HostEndpoint, error) {
-	k, err := h.toBackendKey(&ah.Metadata)
+// Convert an API api.HostEndpoint structure to a Backend Tier structure
+func (h *hostEndpoints) convertAPIToBackend(a interface{}) (interface{}, error) {
+	ah := a.(api.HostEndpoint)
+	k, err := h.convertMetadataToKeyInterface(ah.Metadata)
 	if err != nil {
 		return nil, err
 	}
+	hk := k.(backend.HostEndpointKey)
 
 	var ipv4Addrs []IP
 	var ipv6Addrs []IP
@@ -127,7 +119,7 @@ func (h *hostEndpoints) apiToBackend(ah *HostEndpoint) (*backend.HostEndpoint, e
 	}
 
 	bh := backend.HostEndpoint{
-		HostEndpointKey: *k,
+		HostEndpointKey: hk,
 		Labels:     ah.Metadata.Labels,
 
 		Name:       ah.Spec.InterfaceName,
@@ -140,12 +132,13 @@ func (h *hostEndpoints) apiToBackend(ah *HostEndpoint) (*backend.HostEndpoint, e
 		bh.ExpectedIPv6Addrs = &ipv4Addrs
 	}
 
-	return &bh, nil
+	return bh, nil
 }
 
-// Convert a Backend HostEndpoint structure to an API Tier structure
-func (h *hostEndpoints) backendToAPI(bh *backend.HostEndpoint) (*HostEndpoint, error) {
-	ah := NewHostEndpoint()
+// Convert a Backend api.HostEndpoint structure to an API api.HostEndpoint structure
+func (h *hostEndpoints) convertBackendToAPI(b interface{}) (interface{}, error) {
+	ah := api.NewHostEndpoint()
+	bh := b.(backend.HostEndpoint)
 	var ips []IP
 	if bh.ExpectedIPv4Addrs != nil {
 		ips = append(ips, *bh.ExpectedIPv4Addrs...)

@@ -17,6 +17,7 @@ import (
 )
 
 var helpers map[TypeMetadata]resourceHelper
+var helpersByType map[reflect.Type]resourceHelper
 
 // Register all of the available resource types.
 func init() {
@@ -24,7 +25,9 @@ func init() {
 
 	registerHelper := func(t interface{}, tl interface{}) {
 		tmd := reflect.ValueOf(t).Elem().FieldByName("TypeMetadata").Interface().(TypeMetadata)
-		helpers[tmd] = resourceHelper{t, tl}
+		rh := resourceHelper{tmd, t, tl}
+		helpers[tmd] = rh
+		helpersByType[reflect.TypeOf(t)] = rh
 	}
 
 	// Register all API resources supported by the generic resource interface.
@@ -39,6 +42,7 @@ func init() {
 // -  The concrete resource struct for this version
 // -  The concrete resource list struct for this version
 type resourceHelper struct {
+	typeMetadata     TypeMetadata
 	resourceType     interface{}
 	resourceListType interface{}
 }
@@ -68,6 +72,42 @@ func NewResource(tm TypeMetadata) (interface{}, error) {
 	new := reflect.New(reflect.TypeOf(rh.resourceType)).Interface()
 	reflect.ValueOf(new).Elem().FieldByName("Kind").SetString(tm.Kind)
 	reflect.ValueOf(new).Elem().FieldByName("APIVersion").SetString(tm.APIVersion)
+
+	return new, nil
+}
+
+// Create a new concrete Resource from the type of resource class.  This correctly
+// fills in the type Metadata.
+func NewResourceFromType(t reflect.Type) (interface{}, error) {
+	rh, ok := helpersByType[t]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("Unknown resource type %v", t))
+	}
+	fmt.Printf("Found resource helper: %v\n", rh)
+	fmt.Printf("Type: %v\n", reflect.TypeOf(rh.resourceType))
+
+	// Create new resource and fill in the type metadata.
+	new := reflect.New(reflect.TypeOf(rh.resourceListType)).Interface()
+	reflect.ValueOf(new).Elem().FieldByName("Kind").SetString(rh.typeMetadata.Kind)
+	reflect.ValueOf(new).Elem().FieldByName("APIVersion").SetString(rh.typeMetadata.APIVersion)
+
+	return new, nil
+}
+
+// Create a new concrete Resource List from the type of resource class.  This correctly
+// fills in the type Metadata.
+func NewResourceListFromType(t reflect.Type) (interface{}, error) {
+	rh, ok := helpersByType[t]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("Unknown resource type %v", t))
+	}
+	fmt.Printf("Found resource helper: %v\n", rh)
+	fmt.Printf("Type: %v\n", reflect.TypeOf(rh.resourceType))
+
+	// Create new resource and fill in the type metadata.
+	new := reflect.New(reflect.TypeOf(rh.resourceType)).Interface()
+	reflect.ValueOf(new).Elem().FieldByName("Kind").SetString(rh.typeMetadata.Kind + "List")
+	reflect.ValueOf(new).Elem().FieldByName("APIVersion").SetString(rh.typeMetadata.APIVersion)
 
 	return new, nil
 }

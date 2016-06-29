@@ -2,7 +2,7 @@ package client
 
 import (
 	. "github.com/projectcalico/libcalico/lib/api"
-	backend "github.com/projectcalico/libcalico/lib/backend/objects"
+	"github.com/projectcalico/libcalico/lib/backend"
 )
 
 // Convert an API Rule structure to a Backend Rule structure

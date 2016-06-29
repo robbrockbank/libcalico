@@ -1,4 +1,4 @@
-package objects
+package backend
 
 import . "github.com/projectcalico/libcalico/lib/common"
 
