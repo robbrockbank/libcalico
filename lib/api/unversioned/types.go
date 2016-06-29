@@ -9,7 +9,7 @@ type TypeMetadata struct {
 
 // ---- Metadata common to all resources ----
 type ObjectMetadata struct {
-	Name *string `json:"name" validate:"name"`
+	Name string `json:"name,omitempty" validate:"omitempty,name"`
 }
 
 // ---- Metadata common to all lists ----

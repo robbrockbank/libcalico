@@ -73,35 +73,35 @@ func LoadClientConfig(f *string) (*api.ClientConfig, error) {
 // Untyped interface for creating an API object.  This is called from the
 // typed interface.  This assumes a 1:1 mapping between the API resource and
 // the backend object.
-func (c *Client) create(apiObject interface{}, helper conversionHelper) error {
+func (c *Client) create(apiObject interface{}, helper conversionHelper) (interface{}, error) {
 	// All API objects have a Metadata, so extract it.
 	metadata := reflect.ValueOf(apiObject).Elem().FieldByName("Metadata")
 	if k, err := helper.convertMetadataToKeyInterface(metadata); err != nil {
-		return err
+		return nil, err
 	} else if b, err := helper.convertAPIToBackend(apiObject); err != nil {
-		return err
+		return nil, err
 	} else if v, err := json.Marshal(b); err != nil {
-		return err
+		return nil, err
 	} else {
 		obj := backend.KeyValue{Key: k, Value: v}
-		return c.backend.Create(obj)
+		return apiObject, c.backend.Create(obj)
 	}
 }
 
 // Untyped interface for updating an API object.  This is called from the
 // typed interface.
-func (c *Client) update(apiObject interface{}, helper conversionHelper) error {
+func (c *Client) update(apiObject interface{}, helper conversionHelper) (interface{}, error) {
 	// All API objects have a Metadata, so extract it.
 	metadata := reflect.ValueOf(apiObject).Elem().FieldByName("Metadata")
 	if k, err := helper.convertMetadataToKeyInterface(metadata); err != nil {
-		return err
+		return nil, err
 	} else if b, err := helper.convertAPIToBackend(apiObject); err != nil {
-		return err
+		return nil, err
 	} else if v, err := json.Marshal(b); err != nil {
-		return err
+		return nil, err
 	} else {
 		obj := backend.KeyValue{Key: k, Value: v}
-		return c.backend.Update(obj)
+		return apiObject, c.backend.Update(obj)
 	}
 }
 

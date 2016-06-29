@@ -1,7 +1,6 @@
 package client
 
 import (
-	"errors"
 	"net"
 
 	"github.com/projectcalico/libcalico/lib/api"
@@ -13,8 +12,8 @@ import (
 type HostEndpointInterface interface {
 	List(api.HostEndpointMetadata) (*api.HostEndpointList, error)
 	Get(api.HostEndpointMetadata) (*api.HostEndpoint, error)
-	Create(api.HostEndpoint) (*api.HostEndpoint, error)
-	Update(api.HostEndpoint) (*api.HostEndpoint, error)
+	Create(*api.HostEndpoint) (*api.HostEndpoint, error)
+	Update(*api.HostEndpoint) (*api.HostEndpoint, error)
 	Delete(api.HostEndpointMetadata) error
 }
 
@@ -54,20 +53,22 @@ func (h *hostEndpoints) Get(metadata api.HostEndpointMetadata) (*api.HostEndpoin
 }
 
 // Create creates a new host endpoint.
-func (h *hostEndpoints) Create(a api.HostEndpoint) (*api.HostEndpoint, error) {
-	if err := h.c.create(a, h); err != nil {
+func (h *hostEndpoints) Create(a *api.HostEndpoint) (*api.HostEndpoint, error) {
+	if na, err := h.c.create(*a, h); err != nil {
 		return nil, err
 	} else {
-		return &a, nil
+		nh := na.(api.HostEndpoint)
+		return &nh, nil
 	}
 }
 
 // Create creates a new host endpoint.
-func (h *hostEndpoints) Update(a api.HostEndpoint) (*api.HostEndpoint, error) {
-	if err := h.c.update(a, h); err != nil {
+func (h *hostEndpoints) Update(a *api.HostEndpoint) (*api.HostEndpoint, error) {
+	if na, err := h.c.update(*a, h); err != nil {
 		return nil, err
 	} else {
-		return &a, nil
+		nh := na.(api.HostEndpoint)
+		return &nh, nil
 	}
 }
 
@@ -87,12 +88,9 @@ func (h *hostEndpoints) convertMetadataToListInterface(m interface{}) (backend.L
 
 func (h *hostEndpoints) convertMetadataToKeyInterface(m interface{}) (backend.KeyInterface, error) {
 	hm := m.(api.HostEndpointMetadata)
-	if hm.Name == nil || hm.Hostname == nil {
-		return nil, errors.New("insufficient identifiers supplied")
-	}
 	k := backend.HostEndpointKey{
-		Hostname: *(hm.Hostname),
-		EndpointID: *(hm.Name),
+		Hostname: hm.Hostname,
+		EndpointID: hm.Name,
 	}
 	return k, nil
 }
@@ -108,13 +106,11 @@ func (h *hostEndpoints) convertAPIToBackend(a interface{}) (interface{}, error) 
 
 	var ipv4Addrs []IP
 	var ipv6Addrs []IP
-	if ah.Spec.ExpectedIPs != nil {
-		for _, ip := range *ah.Spec.ExpectedIPs {
-			if len(ip.IP) == net.IPv4len {
-				ipv4Addrs = append(ipv4Addrs, ip)
-			} else {
-				ipv6Addrs = append(ipv6Addrs, ip)
-			}
+	for _, ip := range ah.Spec.ExpectedIPs {
+		if len(ip.IP) == net.IPv4len {
+			ipv4Addrs = append(ipv4Addrs, ip)
+		} else {
+			ipv6Addrs = append(ipv6Addrs, ip)
 		}
 	}
 
@@ -124,12 +120,8 @@ func (h *hostEndpoints) convertAPIToBackend(a interface{}) (interface{}, error) 
 
 		Name:       ah.Spec.InterfaceName,
 		ProfileIDs: ah.Spec.Profiles,
-	}
-	if len(ipv4Addrs) > 0 {
-		bh.ExpectedIPv4Addrs = &ipv4Addrs
-	}
-	if len(ipv6Addrs) > 0 {
-		bh.ExpectedIPv6Addrs = &ipv4Addrs
+		ExpectedIPv4Addrs: ipv4Addrs,
+		ExpectedIPv6Addrs: ipv6Addrs,
 	}
 
 	return bh, nil
@@ -137,25 +129,18 @@ func (h *hostEndpoints) convertAPIToBackend(a interface{}) (interface{}, error) 
 
 // Convert a Backend api.HostEndpoint structure to an API api.HostEndpoint structure
 func (h *hostEndpoints) convertBackendToAPI(b interface{}) (interface{}, error) {
-	ah := api.NewHostEndpoint()
 	bh := b.(backend.HostEndpoint)
-	var ips []IP
-	if bh.ExpectedIPv4Addrs != nil {
-		ips = append(ips, *bh.ExpectedIPv4Addrs...)
-	}
-	if bh.ExpectedIPv6Addrs != nil {
-		ips = append(ips, *bh.ExpectedIPv6Addrs...)
-	}
+	ah := api.NewHostEndpoint()
 
-	ah.Metadata.Hostname = &bh.HostEndpointKey.Hostname
-	ah.Metadata.Name = &bh.HostEndpointKey.EndpointID
+	ah.Metadata.Hostname = bh.HostEndpointKey.Hostname
+	ah.Metadata.Name = bh.HostEndpointKey.EndpointID
 	ah.Metadata.Labels = bh.Labels
 
+	ips := bh.ExpectedIPv4Addrs
+	ips = append(ips, bh.ExpectedIPv6Addrs...)
 	ah.Spec.InterfaceName = bh.Name
 	ah.Spec.Profiles = bh.ProfileIDs
-	if len(ips) > 0 {
-		ah.Spec.ExpectedIPs = &ips
-	}
+	ah.Spec.ExpectedIPs = ips
 
 	return ah, nil
 }
