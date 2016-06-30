@@ -1,7 +1,11 @@
 package api
 
 import (
+	"reflect"
+
 	. "github.com/projectcalico/libcalico/lib/api/unversioned"
+	. "github.com/projectcalico/libcalico/lib/common"
+	"gopkg.in/go-playground/validator.v8"
 )
 
 type PolicyMetadata struct {
@@ -34,4 +38,17 @@ type PolicyList struct {
 
 func NewPolicyList() *PolicyList {
 	return &PolicyList{TypeMetadata: TypeMetadata{Kind: "policyList", APIVersion: "v1"}}
+}
+
+// Register v1 structure validators to validate cross-field dependencies in any of the
+// required structures.
+func init() {
+	RegisterStructValidator(validatePolicy, Policy{})
+}
+
+func validatePolicy(v *validator.Validate, structLevel *validator.StructLevel) {
+	policy := structLevel.CurrentStruct.Interface().(Policy)
+	if policy.Metadata.Tier == DefaultTierName {
+		structLevel.ReportError(reflect.ValueOf(policy.Metadata.Tier), "Tier", "Tier", "tierNameReserved")
+	}
 }

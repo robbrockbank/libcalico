@@ -11,11 +11,11 @@ type PolicyKey struct {
 }
 
 func (key PolicyKey) asEtcdKey() (string, error) {
-	if key.Name == "" {
+	if key.Name == "" || key.Tier == "" {
 		return "", errors.New("insufficient identifiers")
 	}
 	e := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s",
-		key.Name, tierOrDefault(key.Tier))
+		key.Tier, key.Name)
 	return e, nil
 }
 
@@ -26,8 +26,8 @@ type PolicyListOptions struct {
 
 func (options PolicyListOptions) asEtcdKeyRegex() (string, error) {
 	e := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s",
-		idOrWildcard(options.Name),
-		tierOrDefault(options.Tier))
+		idOrWildcard(options.Tier),
+		idOrWildcard(options.Name))
 	return e, nil
 }
 
