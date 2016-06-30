@@ -6,7 +6,7 @@ const (
 )
 
 // Return the tier name, or the default if blank.
-func tierOrDefault(tier string) string {
+func TierOrDefault(tier string) string {
 	if tier == blank {
 		return DefaultTierName
 	} else {
@@ -15,7 +15,7 @@ func tierOrDefault(tier string) string {
 }
 
 // Return the tier name, or blank if the default.
-func tierOrBlank(tier string) string {
+func TierOrBlank(tier string) string {
 	if tier == DefaultTierName {
 		return blank
 	} else {

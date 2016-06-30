@@ -3,6 +3,7 @@ package client
 import (
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/backend"
+	"github.com/projectcalico/libcalico/lib/common"
 )
 
 // PolicyInterface has methods to work with Policy resources.
@@ -89,7 +90,7 @@ func (h *policies) convertMetadataToKeyInterface(m interface{}) (backend.KeyInte
 	pm := m.(api.PolicyMetadata)
 	k := backend.PolicyKey{
 		Name: pm.Name,
-		Tier: pm.Tier,
+		Tier: common.TierOrDefault(pm.Tier),
 	}
 	return k, nil
 }
@@ -121,6 +122,7 @@ func (h *policies) convertBackendToAPI(b interface{}) (interface{}, error) {
 	ap := api.NewPolicy()
 
 	ap.Metadata.Name = bp.Name
+	ap.Metadata.Tier = common.TierOrBlank(bp.Tier)
 
 	ap.Spec.Order = bp.Order
 	ap.Spec.IngressRules = rulesBackendToAPI(bp.InboundRules)
