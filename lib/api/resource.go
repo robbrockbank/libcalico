@@ -25,10 +25,12 @@ func init() {
 	helpers = make(map[TypeMetadata]resourceHelper)
 	helpersByType = make(map[reflect.Type]resourceHelper)
 
-	registerHelper := func(t interface{}, tl interface{}) {
-		tmd := reflect.ValueOf(t).Elem().FieldByName("TypeMetadata").Interface().(TypeMetadata)
+	registerHelper := func(t Resource, tl Resource) {
+		// [smc] how about using an interface here rather than reflection?
+		tmd := t.GetTypeMetadata()
 		rh := resourceHelper{
 			tmd,
+			// [smc] I'm not up to speed on reflection, but can't you just use t here?
 			reflect.ValueOf(t).Elem().Interface(),
 			reflect.ValueOf(tl).Elem().Interface(),
 		}
