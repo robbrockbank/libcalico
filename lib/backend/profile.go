@@ -5,7 +5,6 @@ import (
 	"fmt"
 )
 
-
 // The profile structure is defined to allow the client to define a conversion interface
 // to map between the API and backend profiles.  However, in the actual underlying
 // implementation the profile is written as three separate entries - rules, tags and labels.
@@ -34,6 +33,10 @@ func (key ProfileKey) asEtcdKey() (string, error) {
 	}
 	e := fmt.Sprintf("/calico/v1/policy/profile/%s", key.Name)
 	return e, nil
+}
+
+func (key ProfileKey) asEtcdDeleteKey() (string, error) {
+	return key.asEtcdKey()
 }
 
 // ProfileRulesKey implements the KeyInterface for the profile rules

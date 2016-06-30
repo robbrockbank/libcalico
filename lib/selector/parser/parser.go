@@ -17,6 +17,7 @@ package parser
 import (
 	"errors"
 	"fmt"
+
 	"github.com/golang/glog"
 	. "github.com/projectcalico/libcalico/lib/selector/tokenizer"
 )

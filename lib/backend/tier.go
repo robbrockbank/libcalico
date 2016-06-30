@@ -1,8 +1,8 @@
 package backend
 
 import (
-	"errors"
 	"fmt"
+	"github.com/projectcalico/libcalico/lib/common"
 )
 
 type TierKey struct {
@@ -10,8 +10,13 @@ type TierKey struct {
 }
 
 func (key TierKey) asEtcdKey() (string, error) {
+	k, err := key.asEtcdDeleteKey()
+	return k + "/metadata", err
+}
+
+func (key TierKey) asEtcdDeleteKey() (string, error) {
 	if key.Name == "" {
-		return "", errors.New("insufficient identifiers")
+		return "", common.ErrorInsufficientIdentifiers{}
 	}
 	e := fmt.Sprintf("/calico/v1/policy/tier/%s", key.Name)
 	return e, nil

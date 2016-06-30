@@ -18,6 +18,7 @@ import (
 	. "github.com/projectcalico/libcalico/lib/selector/parser"
 
 	"fmt"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -65,11 +66,11 @@ var selectorTests = []selectorTest{
 	{`a == "a"`, []map[string]string{{"a": "a"}}, []map[string]string{}},
 	{`a != "b"`, []map[string]string{{"a": "a"}}, []map[string]string{}},
 	{`a != "a"`, []map[string]string{{}}, []map[string]string{}},
-	{`a in {"a"}`, []map[string]string{{"a": "a"}},  []map[string]string{}},
-	{`!a in {"a"}`, []map[string]string{{"a": "b"}},  []map[string]string{}},
-	{`a in {"a", "b"}`, []map[string]string{{"a": "a"}},  []map[string]string{}},
-	{`a in {"a", "b"}`, []map[string]string{{"a": "b"}},  []map[string]string{}},
-	{`a not in {"d", "e"}`, []map[string]string{{"a": "a"}},  []map[string]string{}},
+	{`a in {"a"}`, []map[string]string{{"a": "a"}}, []map[string]string{}},
+	{`!a in {"a"}`, []map[string]string{{"a": "b"}}, []map[string]string{}},
+	{`a in {"a", "b"}`, []map[string]string{{"a": "a"}}, []map[string]string{}},
+	{`a in {"a", "b"}`, []map[string]string{{"a": "b"}}, []map[string]string{}},
+	{`a not in {"d", "e"}`, []map[string]string{{"a": "a"}}, []map[string]string{}},
 	{`has(a)`, []map[string]string{{"a": "b"}}, []map[string]string{}},
 	{`!has(a)`, []map[string]string{{"b": "b"}}, []map[string]string{}},
 	{``, []map[string]string{{}}, []map[string]string{}},

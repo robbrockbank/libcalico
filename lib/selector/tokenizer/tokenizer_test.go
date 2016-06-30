@@ -18,6 +18,7 @@ import (
 	. "github.com/projectcalico/libcalico/lib/selector/tokenizer"
 
 	"fmt"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

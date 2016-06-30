@@ -1,9 +1,10 @@
 package client
 
 import (
+	"fmt"
+
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/backend"
-	"fmt"
 )
 
 // ProfileInterface has methods to work with Profile resources.

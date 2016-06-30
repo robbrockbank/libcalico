@@ -21,6 +21,10 @@ func (key HostEndpointKey) asEtcdKey() (string, error) {
 	return e, nil
 }
 
+func (key HostEndpointKey) asEtcdDeleteKey() (string, error) {
+	return key.asEtcdKey()
+}
+
 type HostEndpointListOptions struct {
 	Hostname   string
 	EndpointID string

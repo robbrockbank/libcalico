@@ -6,10 +6,10 @@ import (
 	"reflect"
 
 	"github.com/ghodss/yaml"
+	"github.com/golang/glog"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/backend"
-	"github.com/golang/glog"
 )
 
 type Client struct {
@@ -173,7 +173,6 @@ func (c *Client) unmarshal(v backend.KeyValue, backendObjectp interface{}) (inte
 	return new, json.Unmarshal(v.Value, new)
 }
 
-// Part of
 func (c *Client) backendCreate(k backend.KeyInterface, obj interface{}) error {
 	if obj == nil {
 		glog.V(2).Info("Skipping empty data")

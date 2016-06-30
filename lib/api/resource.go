@@ -26,7 +26,6 @@ func init() {
 	helpersByType = make(map[reflect.Type]resourceHelper)
 
 	registerHelper := func(t Resource, tl Resource) {
-		// [smc] how about using an interface here rather than reflection?
 		tmd := t.GetTypeMetadata()
 		rh := resourceHelper{
 			tmd,

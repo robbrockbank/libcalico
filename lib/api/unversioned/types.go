@@ -1,5 +1,6 @@
 package unversioned
 
+// All resources (and resource lists) implement the Resource interface.
 type Resource interface {
 	GetTypeMetadata() TypeMetadata
 }

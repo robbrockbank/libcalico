@@ -19,6 +19,10 @@ func (key PolicyKey) asEtcdKey() (string, error) {
 	return e, nil
 }
 
+func (key PolicyKey) asEtcdDeleteKey() (string, error) {
+	return key.asEtcdKey()
+}
+
 type PolicyListOptions struct {
 	Name string
 	Tier string

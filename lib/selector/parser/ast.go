@@ -94,7 +94,6 @@ func (node LabelEqValueNode) collectFragments(fragments []string) []string {
 	return append(fragments, node.LabelName, " == ", quote, node.Value, quote)
 }
 
-
 type LabelInSetNode struct {
 	LabelName string
 	Value     map[string]bool
@@ -118,7 +117,7 @@ func (node LabelInSetNode) collectFragments(fragments []string) []string {
 		} else {
 			quote = `"`
 		}
-		if ! first {
+		if !first {
 			fragments = append(fragments, ", ")
 		} else {
 			first = false
@@ -152,7 +151,7 @@ func (node LabelNotInSetNode) collectFragments(fragments []string) []string {
 		} else {
 			quote = `"`
 		}
-		if ! first {
+		if !first {
 			fragments = append(fragments, ", ")
 		} else {
 			first = false
