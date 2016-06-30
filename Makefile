@@ -30,6 +30,8 @@ ut:
 	docker run --rm -v `pwd`/calico_containers:/code calico/test \
                 nosetests tests/unit  -c nose.cfg
 
+go-ut:
+	ginkgo -r
 
 ut-circle: 
 	# Test this locally using CIRCLE_TEST_REPORTS=/tmp COVERALLS_REPO_TOKEN=bad make ut-circle
