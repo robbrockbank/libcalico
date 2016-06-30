@@ -1,8 +1,8 @@
 package backend
 
 type ProfileRules struct {
-	InboundRules  *[]Rule `json:"inbound_rules,omitempty" validate:"omitempty,dive"`
-	OutboundRules *[]Rule `json:"outbound_rules,omitempty" validate:"omitempty,dive"`
+	InboundRules  []Rule `json:"inbound_rules,omitempty" validate:"omitempty,dive"`
+	OutboundRules []Rule `json:"outbound_rules,omitempty" validate:"omitempty,dive"`
 }
 
 type ProfileKey struct {
@@ -12,8 +12,8 @@ type ProfileKey struct {
 type Profile struct {
 	Key    ProfileKey
 	Rules  ProfileRules
-	Tags   *[]string
-	Labels *map[string]string
+	Tags   []string
+	Labels map[string]string
 }
 
 type ProfileListOptions struct {

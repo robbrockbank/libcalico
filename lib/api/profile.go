@@ -6,19 +6,19 @@ import (
 
 type ProfileMetadata struct {
 	ObjectMetadata
-	Labels *map[string]string `json:"labels,omitempty" validate:"omitempty,labels"`
+	Labels map[string]string `json:"labels,omitempty" validate:"omitempty,labels"`
 }
 
 type ProfileSpec struct {
-	IngressRules *[]Rule   `json:"ingress,omitempty" validate:"omitempty,dive"`
-	EgressRules  *[]Rule   `json:"egress,omitempty" validate:"omitempty,dive"`
-	Tags         *[]string `json:"tags,omitempty" validate:"omitempty,dive,tag"`
+	IngressRules []Rule   `json:"ingress,omitempty" validate:"omitempty,dive"`
+	EgressRules  []Rule   `json:"egress,omitempty" validate:"omitempty,dive"`
+	Tags         []string `json:"tags,omitempty" validate:"omitempty,dive,tag"`
 }
 
 type Profile struct {
 	TypeMetadata
-	Metadata ProfileMetadata `json:"metadata"`
-	Spec     ProfileSpec     `json:"spec"`
+	Metadata ProfileMetadata `json:"metadata,omitempty"`
+	Spec     ProfileSpec     `json:"spec,omitempty"`
 }
 
 func NewProfile() *Profile {
@@ -27,8 +27,8 @@ func NewProfile() *Profile {
 
 type ProfileList struct {
 	TypeMetadata
-	Metadata ListMetadata `json:"metadata"`
-	Items    []Profile    `json:"items" validate:"dive"`
+	Metadata ListMetadata `json:"metadata,omitempty"`
+	Items    []Profile    `json:"items" validate:"dive,omitempty"`
 }
 
 func NewProfileList() *ProfileList {

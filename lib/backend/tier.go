@@ -6,7 +6,7 @@ type TierKey struct {
 
 type Tier struct {
 	TierKey `json:"-"`
-	Order *float32 `json:"order"`
+	Order *float32 `json:"order,omitempty"`
 }
 
 type TierListOptions struct {

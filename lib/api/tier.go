@@ -7,13 +7,13 @@ import (
 type TierMetadata ObjectMetadata
 
 type TierSpec struct {
-	Order *float32 `json:"order"`
+	Order *float32 `json:"order,omitempty"`
 }
 
 type Tier struct {
 	TypeMetadata
-	Metadata TierMetadata `json:"metadata"`
-	Spec     TierSpec     `json:"spec"`
+	Metadata TierMetadata `json:"metadata,omitempty"`
+	Spec     TierSpec     `json:"spec,omitempty"`
 }
 
 func NewTier() *Tier {
@@ -22,8 +22,8 @@ func NewTier() *Tier {
 
 type TierList struct {
 	TypeMetadata
-	Metadata ListMetadata `json:"metadata"`
-	Items    []Tier       `json:"items" validate:"dive"`
+	Metadata ListMetadata `json:"metadata,omitempty"`
+	Items    []Tier       `json:"items,omitempty" validate:"dive"`
 }
 
 func NewTierList() *TierList {
