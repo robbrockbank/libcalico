@@ -1,14 +1,15 @@
 package backend
 
 import (
-	. "github.com/projectcalico/libcalico/lib/common"
-	"fmt"
 	"errors"
+	"fmt"
+
+	. "github.com/projectcalico/libcalico/lib/common"
 )
 
 type HostEndpointKey struct {
-	Hostname       string `json:"-" validate:"required,hostname"`
-	EndpointID     string `json:"-" validate:"required,hostname"`
+	Hostname   string `json:"-" validate:"required,hostname"`
+	EndpointID string `json:"-" validate:"required,hostname"`
 }
 
 func (key HostEndpointKey) asEtcdKey() (string, error) {
@@ -16,7 +17,7 @@ func (key HostEndpointKey) asEtcdKey() (string, error) {
 		return "", errors.New("insufficient identifiers")
 	}
 	e := fmt.Sprintf("/calico/v1/host/%s/endpoint/%s",
-		           key.Hostname, key.EndpointID)
+		key.Hostname, key.EndpointID)
 	return e, nil
 }
 
@@ -27,13 +28,13 @@ type HostEndpointListOptions struct {
 
 func (options HostEndpointListOptions) asEtcdKeyRegex() (string, error) {
 	e := fmt.Sprintf("/calico/v1/host/%s/endpoint/%s",
-			 idOrWildcard(options.Hostname),
-			 idOrWildcard(options.EndpointID))
+		idOrWildcard(options.Hostname),
+		idOrWildcard(options.EndpointID))
 	return e, nil
 }
 
 type HostEndpoint struct {
-	HostEndpointKey `json:"-"`
+	HostEndpointKey   `json:"-"`
 	Name              string            `json:"name,omitempty" validate:"omitempty,interface"`
 	ExpectedIPv4Addrs []IP              `json:"expected_ipv4_addrs,omitempty" validate:"omitempty,dive,ipv4"`
 	ExpectedIPv6Addrs []IP              `json:"expected_ipv6_addrs,omitempty" validate:"omitempty,dive,ipv6"`

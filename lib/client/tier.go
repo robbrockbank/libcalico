@@ -1,21 +1,19 @@
 package client
 
 import (
-	//"errors"
-	. "github.com/projectcalico/libcalico/lib/api"
-	//backend "github.com/projectcalico/libcalico/lib/backend/objects"
+	"github.com/projectcalico/libcalico/lib/api"
+	"github.com/projectcalico/libcalico/lib/backend"
 )
 
 // TierInterface has methods to work with Tier resources.
 type TierInterface interface {
-	List(metadata *TierMetadata) (*TierList, error)
-	Get(metadata *TierMetadata) (*Tier, error)
-	Create(hep *Tier) (*Tier, error)
-	Update(hep *Tier) (*Tier, error)
-	Delete(metadata *TierMetadata) error
+	List(api.TierMetadata) (*api.TierList, error)
+	Get(api.TierMetadata) (*api.Tier, error)
+	Create(*api.Tier) (*api.Tier, error)
+	Update(*api.Tier) (*api.Tier, error)
+	Delete(api.TierMetadata) error
 }
 
-/*
 // tiers implements TierInterface
 type tiers struct {
 	c *Client
@@ -28,79 +26,98 @@ func newTiers(c *Client) *tiers {
 
 // List takes a Metadata, and returns the list of tiers that match that Metadata
 // (wildcarding missing fields)
-func (t *tiers) List(metadata *TierMetadata) (*TierList, error) {
-	btlo := backend.TierListOptions{
-		Name: metadata.Name,
-	}
-	if bts, err := t.c.backend.Tiers().List(btlo); err != nil {
+func (h *tiers) List(metadata api.TierMetadata) (*api.TierList, error) {
+	if l, err := h.c.list(backend.Tier{}, metadata, h); err != nil {
 		return nil, err
 	} else {
-		atl := NewTierList()
-		atl.Items = bts
-		return &atl, nil
+		hl := api.NewTierList()
+		hl.Items = make([]api.Tier, len(l))
+		for _, h := range l {
+			hl.Items = append(hl.Items, h.(api.Tier))
+		}
+		return hl, nil
 	}
 }
 
 // Get returns information about a particular tier.
-func (t *tiers) Get(metadata *TierMetadata) (*Tier, error) {
-	if bt, err := t.c.backend.Tiers().Get(metadata.Name); err != nil {
+func (h *tiers) Get(metadata api.TierMetadata) (*api.Tier, error) {
+	if a, err := h.c.get(backend.Tier{}, metadata, h); err != nil {
 		return nil, err
 	} else {
-		return tierBackendToAPI(bt), nil
+		h := a.(api.Tier)
+		return &h, nil
 	}
 }
 
 // Create creates a new tier.
-func (t *tiers) Create(ap *Tier) (*Tier, error) {
-	if bt, err := t.c.Tiers().Create(tierAPIToBackend(ap)); err != nil {
+func (h *tiers) Create(a *api.Tier) (*api.Tier, error) {
+	if na, err := h.c.create(*a, h); err != nil {
 		return nil, err
 	} else {
-		return tierBackendToAPI(bt), nil
+		nh := na.(api.Tier)
+		return &nh, nil
 	}
 }
 
-// Update updates an existing tier.
-func (t *tiers) Update(at *Tier) (*Tier, error) {
-	if bt, err := t.c.Tiers().Update(tierAPIToBackend(at)); err != nil {
+// Create creates a new tier.
+func (h *tiers) Update(a *api.Tier) (*api.Tier, error) {
+	if na, err := h.c.update(*a, h); err != nil {
 		return nil, err
 	} else {
-		return tierBackendToAPI(bt), nil
+		nh := na.(api.Tier)
+		return &nh, nil
 	}
 }
 
 // Delete deletes an existing tier.
-func (t *tiers) Delete(metadata *TierMetadata) error {
-	return t.c.backend.Tiers().Delete(metadata.Name)
+func (h *tiers) Delete(metadata api.TierMetadata) error {
+	return h.c.delete(metadata, h)
 }
 
-func getTierBackendKeyFromMetadata(m *TierMetadata) (*backend.TierKey, error) {
-	if m == nil || m.Name == nil {
-		return nil, errors.New("insufficient identifiers supplied")
+// Convert a TierMetadata to a TierListInterface
+func (h *tiers) convertMetadataToListInterface(m interface{}) (backend.ListInterface, error) {
+	hm := m.(api.TierMetadata)
+	l := backend.TierListOptions{
+		Name: hm.Name,
 	}
+	return l, nil
+}
+
+// Convert a TierMetadata to a TierKeyInterface
+func (h *tiers) convertMetadataToKeyInterface(m interface{}) (backend.KeyInterface, error) {
+	hm := m.(api.TierMetadata)
 	k := backend.TierKey{
-		Name: *(m.Name),
+		Name: hm.Name,
 	}
-	return &k, nil
+	return k, nil
 }
 
 // Convert an API Tier structure to a Backend Tier structure
-func tierAPIToBackend(at *Tier) *backend.Tier {
+func (h *tiers) convertAPIToBackend(a interface{}) (interface{}, error) {
+	at := a.(api.Tier)
+	k, err := h.convertMetadataToKeyInterface(at.Metadata)
+	if err != nil {
+		return nil, err
+	}
+	tk := k.(backend.TierKey)
+
 	bt := backend.Tier{
-		Name: at.Metadata.Name,
+		TierKey: tk,
 
 		Order: at.Spec.Order,
 	}
 
-	return &bt
+	return bt, nil
 }
 
 // Convert a Backend Tier structure to an API Tier structure
-func tierBackendToAPI(bt *backend.Tier) *Tier {
-	at := NewTier()
+func (h *tiers) convertBackendToAPI(b interface{}) (interface{}, error) {
+	bt := b.(backend.Tier)
+	at := api.NewTier()
+
 	at.Metadata.Name = bt.Name
 
 	at.Spec.Order = bt.Order
 
-	return &at
+	return at, nil
 }
-*/

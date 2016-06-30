@@ -1,8 +1,8 @@
 package client
 
 import (
-	"io/ioutil"
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/ghodss/yaml"
@@ -29,7 +29,6 @@ func New(config *api.ClientConfig) (c *Client, err error) {
 	return &cc, err
 }
 
-/*
 func (c *Client) Tiers() TierInterface {
 	return newTiers(c)
 }
@@ -41,7 +40,6 @@ func (c *Client) Policies() PolicyInterface {
 func (c *Client) Profiles() ProfileInterface {
 	return newProfiles(c)
 }
-*/
 
 func (c *Client) HostEndpoints() HostEndpointInterface {
 	return newHostEndpoints(c)
@@ -114,7 +112,7 @@ func (c *Client) get(backendObject interface{}, metadata interface{}, helper con
 		return nil, err
 	} else if b, err := c.unmarshal(backendObject, kv); err != nil {
 		return nil, err
-        } else if a, err := helper.convertBackendToAPI(b); err != nil {
+	} else if a, err := helper.convertBackendToAPI(b); err != nil {
 		return nil, err
 	} else {
 		return a, nil
@@ -156,7 +154,7 @@ func (c *Client) list(backendObject interface{}, metadata interface{}, helper co
 	}
 }
 
-func (c *Client) unmarshal(backendObject interface{}, v backend.KeyValue) (interface {}, error) {
+func (c *Client) unmarshal(backendObject interface{}, v backend.KeyValue) (interface{}, error) {
 	new := reflect.New(reflect.TypeOf(backendObject)).Interface()
 	if err := json.Unmarshal(v.Value, new); err != nil {
 		return nil, err

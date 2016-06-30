@@ -4,9 +4,10 @@ import (
 	"errors"
 	"strings"
 
+	"fmt"
+
 	etcd "github.com/coreos/etcd/client"
 	"github.com/projectcalico/libcalico/lib/api"
-	"fmt"
 )
 
 // Interface used to calculate a datastore key.
@@ -21,7 +22,7 @@ type ListInterface interface {
 
 // Encapsulated datastore key interface with value.
 type KeyValue struct {
-	Key KeyInterface
+	Key   KeyInterface
 	Value []byte
 }
 

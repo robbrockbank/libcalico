@@ -1,13 +1,13 @@
 package client
 
 import (
-	. "github.com/projectcalico/libcalico/lib/api"
+	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/backend"
 )
 
 // Convert an API Rule structure to a Backend Rule structure
-func ruleAPIToBackend(ar Rule) *backend.Rule {
-	return &backend.Rule{
+func ruleAPIToBackend(ar api.Rule) backend.Rule {
+	return backend.Rule{
 		Action:   ar.Action,
 		ICMPCode: ar.ICMPCode,
 		ICMPType: ar.ICMPType,
@@ -33,13 +33,13 @@ func ruleAPIToBackend(ar Rule) *backend.Rule {
 }
 
 // Convert a Backend Rule structure to an API Rule structure
-func ruleBackendToAPI(br backend.Rule) *Rule {
-	return &Rule{
+func ruleBackendToAPI(br backend.Rule) api.Rule {
+	return api.Rule{
 		Action:   br.Action,
 		ICMPCode: br.ICMPCode,
 		ICMPType: br.ICMPType,
 
-		Source: EntityRule{
+		Source: api.EntityRule{
 			Tag:         br.SrcTag,
 			Net:         br.SrcNet,
 			Selector:    br.SrcSelector,
@@ -50,7 +50,7 @@ func ruleBackendToAPI(br backend.Rule) *Rule {
 			NotPorts:    br.NotSrcPorts,
 		},
 
-		Destination: EntityRule{
+		Destination: api.EntityRule{
 			Tag:         br.DstTag,
 			Net:         br.DstNet,
 			Selector:    br.DstSelector,
@@ -64,27 +64,27 @@ func ruleBackendToAPI(br backend.Rule) *Rule {
 }
 
 // Convert an API Rule structure slice to a Backend Rule structure slice
-func rulesAPIToBackend(ars *[]Rule) *[]backend.Rule {
+func rulesAPIToBackend(ars []api.Rule) []backend.Rule {
 	if ars == nil {
 		return nil
 	}
 
-	brs := make([]backend.Rule, len(*ars))
-	for idx, ar := range *ars {
-		brs[idx] = *ruleAPIToBackend(ar)
+	brs := make([]backend.Rule, len(ars))
+	for idx, ar := range ars {
+		brs[idx] = ruleAPIToBackend(ar)
 	}
-	return &brs
+	return brs
 }
 
 // Convert a Backend Rule structure slice to an API Rule structure slice
-func rulesBackendToAPI(brs *[]backend.Rule) *[]Rule {
+func rulesBackendToAPI(brs []backend.Rule) []api.Rule {
 	if brs == nil {
 		return nil
 	}
 
-	ars := make([]Rule, len(*brs))
-	for idx, br := range *brs {
-		ars[idx] = *ruleBackendToAPI(br)
+	ars := make([]api.Rule, len(brs))
+	for idx, br := range brs {
+		ars[idx] = ruleBackendToAPI(br)
 	}
-	return &ars
+	return ars
 }

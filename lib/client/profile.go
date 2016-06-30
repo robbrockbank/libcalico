@@ -1,19 +1,17 @@
 package client
 
 import (
-	//"errors"
-	//. "github.com/projectcalico/libcalico/lib/api"
-	//backend "github.com/projectcalico/libcalico/lib/backend/objects"
+	"github.com/projectcalico/libcalico/lib/api"
+	"github.com/projectcalico/libcalico/lib/backend"
 )
 
-/*
 // ProfileInterface has methods to work with Profile resources.
 type ProfileInterface interface {
-	List(metadata *ProfileMetadata) (*ProfileList, error)
-	Get(metadata *ProfileMetadata) (*Profile, error)
-	Create(hep *Profile) (*Profile, error)
-	Update(hep *Profile) (*Profile, error)
-	Delete(metadata *ProfileMetadata) error
+	List(api.ProfileMetadata) (*api.ProfileList, error)
+	Get(api.ProfileMetadata) (*api.Profile, error)
+	Create(*api.Profile) (*api.Profile, error)
+	Update(*api.Profile) (*api.Profile, error)
+	Delete(api.ProfileMetadata) error
 }
 
 // profiles implements ProfileInterface
@@ -28,66 +26,83 @@ func newProfiles(c *Client) *profiles {
 
 // List takes a Metadata, and returns the list of profiles that match that Metadata
 // (wildcarding missing fields)
-func (p *profiles) List(metadata *ProfileMetadata) (*ProfileList, error) {
-	bplo := backend.ProfileListOptions{
-		Name: metadata.Name,
-	}
-	if bps, err := p.c.backend.Profiles().List(bplo); err != nil {
+func (h *profiles) List(metadata api.ProfileMetadata) (*api.ProfileList, error) {
+	if l, err := h.c.list(backend.Profile{}, metadata, h); err != nil {
 		return nil, err
 	} else {
-		apl := NewProfileList()
-		apl.Items = bps
-		return &apl, nil
+		hl := api.NewProfileList()
+		hl.Items = make([]api.Profile, len(l))
+		for _, h := range l {
+			hl.Items = append(hl.Items, h.(api.Profile))
+		}
+		return hl, nil
 	}
 }
 
 // Get returns information about a particular profile.
-func (p *profiles) Get(metadata *ProfileMetadata) (*Profile, error) {
-	if bp, err := p.c.backend.Profiles().Get(metadata.Name); err != nil {
+func (h *profiles) Get(metadata api.ProfileMetadata) (*api.Profile, error) {
+	if a, err := h.c.get(backend.Profile{}, metadata, h); err != nil {
 		return nil, err
 	} else {
-		return profileBackendToAPI(bp), nil
+		h := a.(api.Profile)
+		return &h, nil
 	}
 }
 
 // Create creates a new profile.
-func (p *profiles) Create(ap *Profile) (*Profile, error) {
-	if bp, err := p.c.Profiles().Create(profileAPIToBackend(ap)); err != nil {
+func (h *profiles) Create(a *api.Profile) (*api.Profile, error) {
+	if na, err := h.c.create(*a, h); err != nil {
 		return nil, err
 	} else {
-		return profileBackendToAPI(bp), nil
+		nh := na.(api.Profile)
+		return &nh, nil
 	}
 }
 
-// Update updates an existing profile.
-func (p *profiles) Update(ap *Profile) (*Profile, error) {
-	if bp, err := p.c.Profiles().Update(profileAPIToBackend(ap)); err != nil {
+// Create creates a new profile.
+func (h *profiles) Update(a *api.Profile) (*api.Profile, error) {
+	if na, err := h.c.update(*a, h); err != nil {
 		return nil, err
 	} else {
-		return profileBackendToAPI(bp), nil
+		nh := na.(api.Profile)
+		return &nh, nil
 	}
 }
 
 // Delete deletes an existing profile.
-func (p *profiles) Delete(metadata *ProfileMetadata) error {
-	return p.c.backend.Profiles().Delete(metadata.Name)
+func (h *profiles) Delete(metadata api.ProfileMetadata) error {
+	return h.c.delete(metadata, h)
 }
 
-func getProfileBackendKeyFromMetadata(m *ProfileMetadata) (*backend.ProfileKey, error) {
-	if m == nil || m.Name == nil {
-		return nil, errors.New("insufficient identifiers supplied")
+// Convert a ProfileMetadata to a ProfileListInterface
+func (h *profiles) convertMetadataToListInterface(m interface{}) (backend.ListInterface, error) {
+	hm := m.(api.ProfileMetadata)
+	l := backend.ProfileListOptions{
+		Name: hm.Name,
 	}
+	return l, nil
+}
+
+// Convert a ProfileMetadata to a ProfileKeyInterface
+func (h *profiles) convertMetadataToKeyInterface(m interface{}) (backend.KeyInterface, error) {
+	hm := m.(api.ProfileMetadata)
 	k := backend.ProfileKey{
-		Name: *(m.Name),
+		Name: hm.Name,
 	}
-	return &k, nil
+	return k, nil
 }
 
-// Convert a API Profile structure to the Backend Profile structures.
-// For profiles there is a one-to-many mapping.
-func profileAPIToBackend(ap *Profile) *backend.Profile {
+// Convert an API Profile structure to a Backend Profile structure
+func (h *profiles) convertAPIToBackend(a interface{}) (interface{}, error) {
+	ap := a.(api.Profile)
+	k, err := h.convertMetadataToKeyInterface(ap.Metadata)
+	if err != nil {
+		return nil, err
+	}
+	pk := k.(backend.ProfileKey)
+
 	bp := backend.Profile{
-		Name: ap.Metadata.Name,
+		ProfileKey: pk,
 		Rules: backend.ProfileRules{
 			InboundRules:  rulesAPIToBackend(ap.Spec.IngressRules),
 			OutboundRules: rulesAPIToBackend(ap.Spec.EgressRules),
@@ -96,13 +111,14 @@ func profileAPIToBackend(ap *Profile) *backend.Profile {
 		Labels: ap.Metadata.Labels,
 	}
 
-	return &bp
+	return bp, nil
 }
 
-// Convert the Backend Profile structures to an API Profile structure
-// For profiles there is a many-to-one mapping.
-func profileBackendToAPI(bp *backend.Profile) *Profile {
-	ap := NewProfile()
+// Convert a Backend Profile structure to an API Profile structure
+func (h *profiles) convertBackendToAPI(b interface{}) (interface{}, error) {
+	bp := b.(backend.Profile)
+	ap := api.NewProfile()
+
 	ap.Metadata.Name = bp.Name
 	ap.Metadata.Labels = bp.Labels
 
@@ -110,6 +126,5 @@ func profileBackendToAPI(bp *backend.Profile) *Profile {
 	ap.Spec.EgressRules = rulesBackendToAPI(bp.Rules.OutboundRules)
 	ap.Spec.Tags = bp.Tags
 
-	return &ap
+	return ap, nil
 }
-*/

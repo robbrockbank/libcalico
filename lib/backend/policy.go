@@ -1,17 +1,40 @@
 package backend
 
+import (
+	"errors"
+	"fmt"
+)
+
 type PolicyKey struct {
 	Name string `json:"-" validate:"required,name"`
+	Tier string `json:"-" validate:"required,name"`
 }
 
-type Policy struct {
-	PolicyKey  `json:"-"`
-	Order         *float32 `json:"order,omitempty"`
-	InboundRules  []Rule  `json:"inbound_rules,omitempty" validate:"omitempty,dive"`
-	OutboundRules []Rule  `json:"outbound_rules,omitempty" validate:"omitempty,dive"`
-	Selector      string   `json:"selector" validate:"selector"`
+func (key PolicyKey) asEtcdKey() (string, error) {
+	if key.Name == "" {
+		return "", errors.New("insufficient identifiers")
+	}
+	e := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s",
+		key.Name, tierOrDefault(key.Tier))
+	return e, nil
 }
 
 type PolicyListOptions struct {
 	Name string
+	Tier string
+}
+
+func (options PolicyListOptions) asEtcdKeyRegex() (string, error) {
+	e := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s",
+		idOrWildcard(options.Name),
+		tierOrDefault(options.Tier))
+	return e, nil
+}
+
+type Policy struct {
+	PolicyKey     `json:"-"`
+	Order         *float32 `json:"order,omitempty"`
+	InboundRules  []Rule   `json:"inbound_rules,omitempty" validate:"omitempty,dive"`
+	OutboundRules []Rule   `json:"outbound_rules,omitempty" validate:"omitempty,dive"`
+	Selector      string   `json:"selector" validate:"selector"`
 }

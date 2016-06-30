@@ -4,11 +4,11 @@ import (
 	"net"
 
 	"github.com/projectcalico/libcalico/lib/api"
-	. "github.com/projectcalico/libcalico/lib/common"
 	"github.com/projectcalico/libcalico/lib/backend"
+	. "github.com/projectcalico/libcalico/lib/common"
 )
 
-// api.HostEndpointInterface has methods to work with api.HostEndpoint resources.
+// HostEndpointInterface has methods to work with HostEndpoint resources.
 type HostEndpointInterface interface {
 	List(api.HostEndpointMetadata) (*api.HostEndpointList, error)
 	Get(api.HostEndpointMetadata) (*api.HostEndpoint, error)
@@ -17,12 +17,12 @@ type HostEndpointInterface interface {
 	Delete(api.HostEndpointMetadata) error
 }
 
-// hostEndpoints implements api.HostEndpointInterface
+// hostEndpoints implements HostEndpointInterface
 type hostEndpoints struct {
 	c *Client
 }
 
-// newapi.HostEndpoints returns a hostEndpoints
+// newHostEndpoints returns a hostEndpoints
 func newHostEndpoints(c *Client) *hostEndpoints {
 	return &hostEndpoints{c}
 }
@@ -77,6 +77,7 @@ func (h *hostEndpoints) Delete(metadata api.HostEndpointMetadata) error {
 	return h.c.delete(metadata, h)
 }
 
+// Convert a HostEndpointMetadata to a HostEndpointListInterface
 func (h *hostEndpoints) convertMetadataToListInterface(m interface{}) (backend.ListInterface, error) {
 	hm := m.(api.HostEndpointMetadata)
 	l := backend.HostEndpointListOptions{
@@ -86,16 +87,17 @@ func (h *hostEndpoints) convertMetadataToListInterface(m interface{}) (backend.L
 	return l, nil
 }
 
+// Convert a HostEndpointMetadata to a HostEndpointKeyInterface
 func (h *hostEndpoints) convertMetadataToKeyInterface(m interface{}) (backend.KeyInterface, error) {
 	hm := m.(api.HostEndpointMetadata)
 	k := backend.HostEndpointKey{
-		Hostname: hm.Hostname,
+		Hostname:   hm.Hostname,
 		EndpointID: hm.Name,
 	}
 	return k, nil
 }
 
-// Convert an API api.HostEndpoint structure to a Backend Tier structure
+// Convert an API HostEndpoint structure to a Backend HostEndpoint structure
 func (h *hostEndpoints) convertAPIToBackend(a interface{}) (interface{}, error) {
 	ah := a.(api.HostEndpoint)
 	k, err := h.convertMetadataToKeyInterface(ah.Metadata)
@@ -116,10 +118,10 @@ func (h *hostEndpoints) convertAPIToBackend(a interface{}) (interface{}, error) 
 
 	bh := backend.HostEndpoint{
 		HostEndpointKey: hk,
-		Labels:     ah.Metadata.Labels,
+		Labels:          ah.Metadata.Labels,
 
-		Name:       ah.Spec.InterfaceName,
-		ProfileIDs: ah.Spec.Profiles,
+		Name:              ah.Spec.InterfaceName,
+		ProfileIDs:        ah.Spec.Profiles,
 		ExpectedIPv4Addrs: ipv4Addrs,
 		ExpectedIPv6Addrs: ipv6Addrs,
 	}
@@ -127,7 +129,7 @@ func (h *hostEndpoints) convertAPIToBackend(a interface{}) (interface{}, error) 
 	return bh, nil
 }
 
-// Convert a Backend api.HostEndpoint structure to an API api.HostEndpoint structure
+// Convert a Backend HostEndpoint structure to an API HostEndpoint structure
 func (h *hostEndpoints) convertBackendToAPI(b interface{}) (interface{}, error) {
 	bh := b.(backend.HostEndpoint)
 	ah := api.NewHostEndpoint()
