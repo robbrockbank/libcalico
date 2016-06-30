@@ -8,7 +8,7 @@ import (
 type HostEndpointMetadata struct {
 	ObjectMetadata
 	Hostname string             `json:"hostname,omitempty" valid:"omitempty,hostname"`
-	Labels   map[string]string  `json:"labels,omitempty" validate:"omitempty,labels"`
+	Labels   map[string]string  `json:"labels,omitempty" validate:"omitempty"`
 }
 
 type HostEndpointSpec struct {
@@ -29,8 +29,8 @@ func NewHostEndpoint() *HostEndpoint {
 
 type HostEndpointList struct {
 	TypeMetadata
-	Metadata ListMetadata   `json:"metadata"`
-	Items    []HostEndpoint `json:"items" validate:"dive"`
+	Metadata ListMetadata   `json:"metadata,omitempty"`
+	Items    []HostEndpoint `json:"items,omitempty" validate:"dive"`
 }
 
 func NewHostEndpointList() *HostEndpointList {

@@ -18,11 +18,10 @@ type IPNet struct {
 // MarshalJSON interface for an IP
 func (i *IP) MarshalJSON() ([]byte, error) {
 	s, err := i.MarshalText()
-
 	if err != nil {
 		return nil, err
 	}
-	return json.Marshal([]byte(s))
+	return json.Marshal(string(s))
 }
 
 // UnmarshalJSON interface for an IP

@@ -75,7 +75,7 @@ func LoadClientConfig(f *string) (*api.ClientConfig, error) {
 // the backend object.
 func (c *Client) create(apiObject interface{}, helper conversionHelper) (interface{}, error) {
 	// All API objects have a Metadata, so extract it.
-	metadata := reflect.ValueOf(apiObject).Elem().FieldByName("Metadata")
+	metadata := reflect.ValueOf(apiObject).FieldByName("Metadata").Interface()
 	if k, err := helper.convertMetadataToKeyInterface(metadata); err != nil {
 		return nil, err
 	} else if b, err := helper.convertAPIToBackend(apiObject); err != nil {
@@ -92,7 +92,7 @@ func (c *Client) create(apiObject interface{}, helper conversionHelper) (interfa
 // typed interface.
 func (c *Client) update(apiObject interface{}, helper conversionHelper) (interface{}, error) {
 	// All API objects have a Metadata, so extract it.
-	metadata := reflect.ValueOf(apiObject).Elem().FieldByName("Metadata")
+	metadata := reflect.ValueOf(apiObject).FieldByName("Metadata").Interface()
 	if k, err := helper.convertMetadataToKeyInterface(metadata); err != nil {
 		return nil, err
 	} else if b, err := helper.convertAPIToBackend(apiObject); err != nil {

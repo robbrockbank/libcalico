@@ -22,10 +22,15 @@ var helpersByType map[reflect.Type]resourceHelper
 // Register all of the available resource types.
 func init() {
 	helpers = make(map[TypeMetadata]resourceHelper)
+	helpersByType = make(map[reflect.Type]resourceHelper)
 
 	registerHelper := func(t interface{}, tl interface{}) {
 		tmd := reflect.ValueOf(t).Elem().FieldByName("TypeMetadata").Interface().(TypeMetadata)
-		rh := resourceHelper{tmd, t, tl}
+		rh := resourceHelper{
+			tmd,
+			reflect.ValueOf(t).Elem().Interface(),
+			reflect.ValueOf(tl).Elem().Interface(),
+		}
 		helpers[tmd] = rh
 		helpersByType[reflect.TypeOf(t)] = rh
 	}
@@ -50,6 +55,7 @@ type resourceHelper struct {
 // Create a new concrete resource structure based on the type.  If the type is
 // a list, this creates a concrete Resource-List of the required type.
 func NewResource(tm TypeMetadata) (interface{}, error) {
+	isList := false
 	itemType := tm
 
 	// If this is a list type, then the item type is the resource that the list
@@ -59,6 +65,7 @@ func NewResource(tm TypeMetadata) (interface{}, error) {
 			Kind:       strings.TrimSuffix(tm.Kind, "List"),
 			APIVersion: tm.APIVersion,
 		}
+		isList = true
 	}
 
 	rh, ok := helpers[itemType]
@@ -69,11 +76,17 @@ func NewResource(tm TypeMetadata) (interface{}, error) {
 	fmt.Printf("Type: %v\n", reflect.TypeOf(rh.resourceType))
 
 	// Create new resource and fill in the type metadata.
-	new := reflect.New(reflect.TypeOf(rh.resourceType)).Interface()
-	reflect.ValueOf(new).Elem().FieldByName("Kind").SetString(tm.Kind)
-	reflect.ValueOf(new).Elem().FieldByName("APIVersion").SetString(tm.APIVersion)
+	var new reflect.Value
+	if isList {
+		new = reflect.New(reflect.TypeOf(rh.resourceListType))
+	} else {
+		new = reflect.New(reflect.TypeOf(rh.resourceType))
+	}
+	elem := new.Elem()
+	elem.FieldByName("Kind").SetString(tm.Kind)
+	elem.FieldByName("APIVersion").SetString(tm.APIVersion)
 
-	return new, nil
+	return new.Interface(), nil
 }
 
 // Create a new concrete Resource from the type of resource class.  This correctly
@@ -87,11 +100,11 @@ func NewResourceFromType(t reflect.Type) (interface{}, error) {
 	fmt.Printf("Type: %v\n", reflect.TypeOf(rh.resourceType))
 
 	// Create new resource and fill in the type metadata.
-	new := reflect.New(reflect.TypeOf(rh.resourceListType)).Interface()
-	reflect.ValueOf(new).Elem().FieldByName("Kind").SetString(rh.typeMetadata.Kind)
-	reflect.ValueOf(new).Elem().FieldByName("APIVersion").SetString(rh.typeMetadata.APIVersion)
+	new := reflect.New(reflect.TypeOf(rh.resourceListType)).Elem()
+	new.FieldByName("Kind").SetString(rh.typeMetadata.Kind)
+	new.FieldByName("APIVersion").SetString(rh.typeMetadata.APIVersion)
 
-	return new, nil
+	return new.Interface(), nil
 }
 
 // Create a new concrete Resource List from the type of resource class.  This correctly
@@ -105,11 +118,11 @@ func NewResourceListFromType(t reflect.Type) (interface{}, error) {
 	fmt.Printf("Type: %v\n", reflect.TypeOf(rh.resourceType))
 
 	// Create new resource and fill in the type metadata.
-	new := reflect.New(reflect.TypeOf(rh.resourceType)).Interface()
-	reflect.ValueOf(new).Elem().FieldByName("Kind").SetString(rh.typeMetadata.Kind + "List")
-	reflect.ValueOf(new).Elem().FieldByName("APIVersion").SetString(rh.typeMetadata.APIVersion)
+	new := reflect.New(reflect.TypeOf(rh.resourceListType)).Elem()
+	new.FieldByName("Kind").SetString(rh.typeMetadata.Kind)
+	new.FieldByName("APIVersion").SetString(rh.typeMetadata.APIVersion)
 
-	return new, nil
+	return new.Interface(), nil
 }
 
 // Create the Resource from the specified file f.
