@@ -9,17 +9,28 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/backend"
+	"github.com/golang/glog"
 )
 
 type Client struct {
 	backend *backend.Client
 }
 
+// Interface used to convert between backand and API representations of our
+// objects.
 type conversionHelper interface {
 	convertAPIToBackend(interface{}) (interface{}, error)
 	convertBackendToAPI(interface{}) (interface{}, error)
 	convertMetadataToKeyInterface(interface{}) (backend.KeyInterface, error)
 	convertMetadataToListInterface(interface{}) (backend.ListInterface, error)
+}
+
+// Interface used to read and write a single backend object to the backend client.
+// List operations are handled differently.
+type backendObjectReaderWriter interface {
+	backendCreate(key backend.KeyInterface, obj interface{}) error
+	backendUpdate(key backend.KeyInterface, obj interface{}) error
+	backendGet(key backend.KeyInterface, objp interface{}) (interface{}, error)
 }
 
 // Return a new connected Client.
@@ -71,48 +82,50 @@ func LoadClientConfig(f *string) (*api.ClientConfig, error) {
 // Untyped interface for creating an API object.  This is called from the
 // typed interface.  This assumes a 1:1 mapping between the API resource and
 // the backend object.
-func (c *Client) create(apiObject interface{}, helper conversionHelper) (interface{}, error) {
+func (c *Client) create(apiObject interface{}, helper conversionHelper, rw backendObjectReaderWriter) error {
+	if rw == nil {
+		rw = c
+	}
 	// All API objects have a Metadata, so extract it.
 	metadata := reflect.ValueOf(apiObject).FieldByName("Metadata").Interface()
 	if k, err := helper.convertMetadataToKeyInterface(metadata); err != nil {
-		return nil, err
+		return err
 	} else if b, err := helper.convertAPIToBackend(apiObject); err != nil {
-		return nil, err
-	} else if v, err := json.Marshal(b); err != nil {
-		return nil, err
+		return err
 	} else {
-		obj := backend.KeyValue{Key: k, Value: v}
-		return apiObject, c.backend.Create(obj)
+		return rw.backendCreate(k, b)
 	}
 }
 
 // Untyped interface for updating an API object.  This is called from the
 // typed interface.
-func (c *Client) update(apiObject interface{}, helper conversionHelper) (interface{}, error) {
+func (c *Client) update(apiObject interface{}, helper conversionHelper, rw backendObjectReaderWriter) error {
+	if rw == nil {
+		rw = c
+	}
 	// All API objects have a Metadata, so extract it.
 	metadata := reflect.ValueOf(apiObject).FieldByName("Metadata").Interface()
 	if k, err := helper.convertMetadataToKeyInterface(metadata); err != nil {
-		return nil, err
+		return err
 	} else if b, err := helper.convertAPIToBackend(apiObject); err != nil {
-		return nil, err
-	} else if v, err := json.Marshal(b); err != nil {
-		return nil, err
+		return err
 	} else {
-		obj := backend.KeyValue{Key: k, Value: v}
-		return apiObject, c.backend.Update(obj)
+		err = rw.backendUpdate(k, b)
+		return err
 	}
 }
 
 // Untyped get interface for getting a single API object.  This is called from the typed
-// interface.
-func (c *Client) get(backendObject interface{}, metadata interface{}, helper conversionHelper) (interface{}, error) {
+// interface.  The result is
+func (c *Client) get(backendObject interface{}, metadata interface{}, helper conversionHelper, rw backendObjectReaderWriter) (interface{}, error) {
+	if rw == nil {
+		rw = c
+	}
 	if k, err := helper.convertMetadataToKeyInterface(metadata); err != nil {
 		return nil, err
-	} else if kv, err := c.backend.Get(k); err != nil {
+	} else if pb, err := rw.backendGet(k, backendObject); err != nil {
 		return nil, err
-	} else if b, err := c.unmarshal(backendObject, kv); err != nil {
-		return nil, err
-	} else if a, err := helper.convertBackendToAPI(b); err != nil {
+	} else if a, err := helper.convertBackendToAPI(pb); err != nil {
 		return nil, err
 	} else {
 		return a, nil
@@ -141,7 +154,7 @@ func (c *Client) list(backendObject interface{}, metadata interface{}, helper co
 	} else {
 		as := make([]interface{}, len(kvs))
 		for _, kv := range kvs {
-			if b, err := c.unmarshal(backendObject, kv); err != nil {
+			if b, err := c.unmarshal(kv, backendObject); err != nil {
 				return nil, err
 			} else if a, err := helper.convertBackendToAPI(b); err != nil {
 				return nil, err
@@ -154,11 +167,41 @@ func (c *Client) list(backendObject interface{}, metadata interface{}, helper co
 	}
 }
 
-func (c *Client) unmarshal(backendObject interface{}, v backend.KeyValue) (interface{}, error) {
-	new := reflect.New(reflect.TypeOf(backendObject)).Interface()
-	if err := json.Unmarshal(v.Value, new); err != nil {
+// Unmarshall the backend object into the supplied type.
+func (c *Client) unmarshal(v backend.KeyValue, backendObjectp interface{}) (interface{}, error) {
+	new := reflect.New(reflect.TypeOf(backendObjectp)).Interface()
+	return new, json.Unmarshal(v.Value, new)
+}
+
+// Part of
+func (c *Client) backendCreate(k backend.KeyInterface, obj interface{}) error {
+	if obj == nil {
+		glog.V(2).Info("Skipping empty data")
+		return nil
+	}
+	if v, err := json.Marshal(obj); err != nil {
+		return err
+	} else {
+		return c.backend.Create(backend.KeyValue{Key: k, Value: v})
+	}
+}
+
+func (c *Client) backendUpdate(k backend.KeyInterface, obj interface{}) error {
+	if obj == nil {
+		glog.V(2).Info("Skipping empty data")
+		return nil
+	}
+	if v, err := json.Marshal(obj); err != nil {
+		return err
+	} else {
+		return c.backend.Update(backend.KeyValue{Key: k, Value: v})
+	}
+}
+
+func (c *Client) backendGet(k backend.KeyInterface, objp interface{}) (interface{}, error) {
+	if kv, err := c.backend.Get(k); err != nil {
 		return nil, err
 	} else {
-		return new, nil
+		return c.unmarshal(kv, objp)
 	}
 }

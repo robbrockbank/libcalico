@@ -82,7 +82,7 @@ func validateLabels(v *validator.Validate, topStruct reflect.Value, currentStruc
 	l := field.Interface().(map[string]string)
 	glog.V(2).Infof("Validate labels: %s\n", l)
 	for k, v := range l {
-		if nameRegex.Match([]byte(k)) || nameRegex.Match([]byte(v)) {
+		if !nameRegex.Match([]byte(k)) || !nameRegex.Match([]byte(v)) {
 			return false
 		}
 	}

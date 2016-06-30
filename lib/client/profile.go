@@ -3,6 +3,7 @@ package client
 import (
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/backend"
+	"fmt"
 )
 
 // ProfileInterface has methods to work with Profile resources.
@@ -41,7 +42,7 @@ func (h *profiles) List(metadata api.ProfileMetadata) (*api.ProfileList, error) 
 
 // Get returns information about a particular profile.
 func (h *profiles) Get(metadata api.ProfileMetadata) (*api.Profile, error) {
-	if a, err := h.c.get(backend.Profile{}, metadata, h); err != nil {
+	if a, err := h.c.get(backend.Profile{}, metadata, h, h); err != nil {
 		return nil, err
 	} else {
 		h := a.(api.Profile)
@@ -51,22 +52,12 @@ func (h *profiles) Get(metadata api.ProfileMetadata) (*api.Profile, error) {
 
 // Create creates a new profile.
 func (h *profiles) Create(a *api.Profile) (*api.Profile, error) {
-	if na, err := h.c.create(*a, h); err != nil {
-		return nil, err
-	} else {
-		nh := na.(api.Profile)
-		return &nh, nil
-	}
+	return a, h.c.create(*a, h, h)
 }
 
 // Create creates a new profile.
 func (h *profiles) Update(a *api.Profile) (*api.Profile, error) {
-	if na, err := h.c.update(*a, h); err != nil {
-		return nil, err
-	} else {
-		nh := na.(api.Profile)
-		return &nh, nil
-	}
+	return a, h.c.update(*a, h, h)
 }
 
 // Delete deletes an existing profile.
@@ -76,11 +67,7 @@ func (h *profiles) Delete(metadata api.ProfileMetadata) error {
 
 // Convert a ProfileMetadata to a ProfileListInterface
 func (h *profiles) convertMetadataToListInterface(m interface{}) (backend.ListInterface, error) {
-	hm := m.(api.ProfileMetadata)
-	l := backend.ProfileListOptions{
-		Name: hm.Name,
-	}
-	return l, nil
+	panic(fmt.Errorf("profile list is overidden"))
 }
 
 // Convert a ProfileMetadata to a ProfileKeyInterface
@@ -127,4 +114,36 @@ func (h *profiles) convertBackendToAPI(b interface{}) (interface{}, error) {
 	ap.Spec.Tags = bp.Tags
 
 	return ap, nil
+}
+
+func (h *profiles) backendCreate(k backend.KeyInterface, obj interface{}) error {
+	p := obj.(backend.Profile)
+	pk := k.(backend.ProfileKey)
+	if err := h.c.backendCreate(backend.ProfileTagsKey{pk}, p.Tags); err != nil {
+		return err
+	} else if err := h.c.backendCreate(backend.ProfileLabelsKey{pk}, p.Labels); err != nil {
+		return err
+	} else {
+		return h.c.backendCreate(backend.ProfileRulesKey{pk}, p.Rules)
+	}
+}
+
+func (h *profiles) backendUpdate(k backend.KeyInterface, obj interface{}) error {
+	p := obj.(backend.Profile)
+	pk := k.(backend.ProfileKey)
+	if err := h.c.backendUpdate(backend.ProfileTagsKey{pk}, p.Tags); err != nil {
+		return err
+	} else if err := h.c.backendUpdate(backend.ProfileLabelsKey{pk}, p.Labels); err != nil {
+		return err
+	} else {
+		return h.c.backendUpdate(backend.ProfileRulesKey{pk}, p.Rules)
+	}
+}
+
+func (h *profiles) backendGet(k backend.KeyInterface, objp interface{}) (interface{}, error) {
+	if kv, err := h.c.backend.Get(k); err != nil {
+		return nil, err
+	} else {
+		return h.c.unmarshal(kv, objp)
+	}
 }

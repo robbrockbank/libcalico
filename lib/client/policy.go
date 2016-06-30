@@ -42,7 +42,7 @@ func (h *policies) List(metadata api.PolicyMetadata) (*api.PolicyList, error) {
 
 // Get returns information about a particular policy.
 func (h *policies) Get(metadata api.PolicyMetadata) (*api.Policy, error) {
-	if a, err := h.c.get(backend.Policy{}, metadata, h); err != nil {
+	if a, err := h.c.get(backend.Policy{}, metadata, h, nil); err != nil {
 		return nil, err
 	} else {
 		h := a.(api.Policy)
@@ -52,22 +52,12 @@ func (h *policies) Get(metadata api.PolicyMetadata) (*api.Policy, error) {
 
 // Create creates a new policy.
 func (h *policies) Create(a *api.Policy) (*api.Policy, error) {
-	if na, err := h.c.create(*a, h); err != nil {
-		return nil, err
-	} else {
-		nh := na.(api.Policy)
-		return &nh, nil
-	}
+	return a, h.c.create(*a, h, nil)
 }
 
 // Create creates a new policy.
 func (h *policies) Update(a *api.Policy) (*api.Policy, error) {
-	if na, err := h.c.update(*a, h); err != nil {
-		return nil, err
-	} else {
-		nh := na.(api.Policy)
-		return &nh, nil
-	}
+	return a, h.c.update(*a, h, nil)
 }
 
 // Delete deletes an existing policy.

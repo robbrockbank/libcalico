@@ -44,7 +44,7 @@ func (h *hostEndpoints) List(metadata api.HostEndpointMetadata) (*api.HostEndpoi
 
 // Get returns information about a particular host endpoint.
 func (h *hostEndpoints) Get(metadata api.HostEndpointMetadata) (*api.HostEndpoint, error) {
-	if a, err := h.c.get(backend.HostEndpoint{}, metadata, h); err != nil {
+	if a, err := h.c.get(backend.HostEndpoint{}, metadata, h, nil); err != nil {
 		return nil, err
 	} else {
 		h := a.(api.HostEndpoint)
@@ -54,22 +54,12 @@ func (h *hostEndpoints) Get(metadata api.HostEndpointMetadata) (*api.HostEndpoin
 
 // Create creates a new host endpoint.
 func (h *hostEndpoints) Create(a *api.HostEndpoint) (*api.HostEndpoint, error) {
-	if na, err := h.c.create(*a, h); err != nil {
-		return nil, err
-	} else {
-		nh := na.(api.HostEndpoint)
-		return &nh, nil
-	}
+	return a, h.c.create(*a, h, nil)
 }
 
 // Create creates a new host endpoint.
 func (h *hostEndpoints) Update(a *api.HostEndpoint) (*api.HostEndpoint, error) {
-	if na, err := h.c.update(*a, h); err != nil {
-		return nil, err
-	} else {
-		nh := na.(api.HostEndpoint)
-		return &nh, nil
-	}
+	return a, h.c.update(*a, h, nil)
 }
 
 // Delete deletes an existing host endpoint.

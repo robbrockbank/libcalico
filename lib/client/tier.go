@@ -41,7 +41,7 @@ func (h *tiers) List(metadata api.TierMetadata) (*api.TierList, error) {
 
 // Get returns information about a particular tier.
 func (h *tiers) Get(metadata api.TierMetadata) (*api.Tier, error) {
-	if a, err := h.c.get(backend.Tier{}, metadata, h); err != nil {
+	if a, err := h.c.get(backend.Tier{}, metadata, h, nil); err != nil {
 		return nil, err
 	} else {
 		h := a.(api.Tier)
@@ -51,22 +51,12 @@ func (h *tiers) Get(metadata api.TierMetadata) (*api.Tier, error) {
 
 // Create creates a new tier.
 func (h *tiers) Create(a *api.Tier) (*api.Tier, error) {
-	if na, err := h.c.create(*a, h); err != nil {
-		return nil, err
-	} else {
-		nh := na.(api.Tier)
-		return &nh, nil
-	}
+	return a, h.c.create(*a, h, nil)
 }
 
 // Create creates a new tier.
 func (h *tiers) Update(a *api.Tier) (*api.Tier, error) {
-	if na, err := h.c.update(*a, h); err != nil {
-		return nil, err
-	} else {
-		nh := na.(api.Tier)
-		return &nh, nil
-	}
+	return a, h.c.update(*a, h, nil)
 }
 
 // Delete deletes an existing tier.
