@@ -13,6 +13,7 @@ import (
 	. "github.com/projectcalico/libcalico/lib/api/unversioned"
 
 	"github.com/ghodss/yaml"
+	"github.com/golang/glog"
 	"github.com/projectcalico/libcalico/lib/common"
 )
 
@@ -72,8 +73,8 @@ func NewResource(tm TypeMetadata) (interface{}, error) {
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("Unknown resource type (%s) and/or version (%s)", itemType.Kind, itemType.APIVersion))
 	}
-	fmt.Printf("Found resource helper: %v\n", rh)
-	fmt.Printf("Type: %v\n", reflect.TypeOf(rh.resourceType))
+	glog.V(2).Infof("Found resource helper: %v\n", rh)
+	glog.V(2).Infof("Type: %v\n", reflect.TypeOf(rh.resourceType))
 
 	// Create new resource and fill in the type metadata.
 	var new reflect.Value
@@ -96,8 +97,8 @@ func NewResourceFromType(t reflect.Type) (interface{}, error) {
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("Unknown resource type %v", t))
 	}
-	fmt.Printf("Found resource helper: %v\n", rh)
-	fmt.Printf("Type: %v\n", reflect.TypeOf(rh.resourceType))
+	glog.V(2).Infof("Found resource helper: %v\n", rh)
+	glog.V(2).Infof("Type: %v\n", reflect.TypeOf(rh.resourceType))
 
 	// Create new resource and fill in the type metadata.
 	new := reflect.New(reflect.TypeOf(rh.resourceListType)).Elem()
@@ -114,8 +115,8 @@ func NewResourceListFromType(t reflect.Type) (interface{}, error) {
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("Unknown resource type %v", t))
 	}
-	fmt.Printf("Found resource helper: %v\n", rh)
-	fmt.Printf("Type: %v\n", reflect.TypeOf(rh.resourceType))
+	glog.V(2).Infof("Found resource helper: %v\n", rh)
+	glog.V(2).Infof("Type: %v\n", reflect.TypeOf(rh.resourceType))
 
 	// Create new resource and fill in the type metadata.
 	new := reflect.New(reflect.TypeOf(rh.resourceListType)).Elem()
@@ -179,7 +180,7 @@ func CreateResourceFromBytes(b []byte) (interface{}, error) {
 // Unmarshal a bytearray containing a single resource of the specified type into
 // a concrete structure for that resource type.
 func unmarshalResource(tm TypeMetadata, b []byte) (interface{}, error) {
-	fmt.Printf("Processing type %s\n", tm.Kind)
+	glog.V(2).Infof("Processing type %s\n", tm.Kind)
 	unpacked, err := NewResource(tm)
 	if err != nil {
 		return nil, err
@@ -189,12 +190,12 @@ func unmarshalResource(tm TypeMetadata, b []byte) (interface{}, error) {
 		return nil, err
 	}
 
-	fmt.Printf("Type of unpacked data: %v\n", reflect.TypeOf(unpacked))
+	glog.V(2).Infof("Type of unpacked data: %v\n", reflect.TypeOf(unpacked))
 	if err = common.Validate(unpacked); err != nil {
 		return nil, err
 	}
 
-	fmt.Printf("Unpacked: %v\n", unpacked)
+	glog.V(2).Infof("Unpacked: %v\n", unpacked)
 
 	return unpacked, nil
 }
@@ -202,10 +203,10 @@ func unmarshalResource(tm TypeMetadata, b []byte) (interface{}, error) {
 // Unmarshal a bytearray containing a list of resources of the specified type into
 // a list of concrete structures for that resource type.
 func unmarshalListOfResources(tml []TypeMetadata, b []byte) (interface{}, error) {
-	fmt.Printf("Processing list of resources\n")
+	glog.V(2).Infof("Processing list of resources\n")
 	unpacked := []interface{}{}
 	for _, tm := range tml {
-		fmt.Printf("  - processing type %s\n", tm.Kind)
+		glog.V(2).Infof("  - processing type %s\n", tm.Kind)
 		r, err := NewResource(tm)
 		if err != nil {
 			return nil, err
@@ -225,7 +226,7 @@ func unmarshalListOfResources(tml []TypeMetadata, b []byte) (interface{}, error)
 		}
 	}
 
-	fmt.Printf("Unpacked: %v\n", unpacked)
+	glog.V(2).Infof("Unpacked: %v\n", unpacked)
 
 	return unpacked, nil
 }

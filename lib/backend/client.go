@@ -4,9 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	"fmt"
-
 	etcd "github.com/coreos/etcd/client"
+	"github.com/golang/glog"
 	"github.com/projectcalico/libcalico/lib/api"
 )
 
@@ -81,8 +80,8 @@ func (c *Client) connectEtcd() error {
 // Create an entry in the datastore.  This errors if the entry already exists.
 func (c *Client) Create(d KeyValue) error {
 	key, _ := d.Key.asEtcdKey()
-	fmt.Printf("Create Key: %s\n", key)
-	fmt.Printf("Value: %s\n", d.Value)
+	glog.V(2).Infof("Create Key: %s\n", key)
+	glog.V(2).Infof("Value: %s\n", d.Value)
 	return nil
 }
 
@@ -90,15 +89,15 @@ func (c *Client) Create(d KeyValue) error {
 // not exist.
 func (c *Client) Update(d KeyValue) error {
 	key, _ := d.Key.asEtcdKey()
-	fmt.Printf("Update Key: %s\n", key)
-	fmt.Printf("Value: %s\n", d.Value)
+	glog.V(2).Infof("Update Key: %s\n", key)
+	glog.V(2).Infof("Value: %s\n", d.Value)
 	return nil
 }
 
 // Get and entry from the datastore.  This errors if the entry does not exist.
 func (c *Client) Get(k KeyInterface) (KeyValue, error) {
 	key, _ := k.asEtcdKey()
-	fmt.Printf("Get Key: %s\n", key)
+	glog.V(2).Infof("Get Key: %s\n", key)
 	return KeyValue{}, nil
 }
 
@@ -106,13 +105,13 @@ func (c *Client) Get(k KeyInterface) (KeyValue, error) {
 // no entries matching the request in the ListInterface.
 func (c *Client) List(l ListInterface) ([]KeyValue, error) {
 	key, _ := l.asEtcdKeyRegex()
-	fmt.Printf("List Key: %s\n", key)
+	glog.V(2).Infof("List Key: %s\n", key)
 	return []KeyValue{}, nil
 }
 
 // Delete an entry in the datastore.  This errors if the entry does not exists.
 func (c *Client) Delete(k KeyInterface) error {
 	key, _ := k.asEtcdKey()
-	fmt.Printf("Delete Key: %s\n", key)
+	glog.V(2).Infof("Delete Key: %s\n", key)
 	return nil
 }

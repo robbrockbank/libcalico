@@ -4,8 +4,7 @@ import (
 	"reflect"
 	"regexp"
 
-	"fmt"
-
+	"github.com/golang/glog"
 	"gopkg.in/go-playground/validator.v8"
 )
 
@@ -52,31 +51,31 @@ func init() {
 
 func validateAction(v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
 	b := []byte(field.String())
-	fmt.Printf("Validate action: %s\n", b)
+	glog.V(2).Infof("Validate action: %s\n", b)
 	return actionRegex.Match(b)
 }
 
 func validateName(v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
 	b := []byte(field.String())
-	fmt.Printf("Validate name: %s\n", b)
+	glog.V(2).Infof("Validate name: %s\n", b)
 	return nameRegex.Match(b)
 }
 
 func validateSelector(v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
 	b := []byte(field.String())
-	fmt.Printf("Validate selector: %s\n", b)
+	glog.V(2).Infof("Validate selector: %s\n", b)
 	return nameRegex.Match(b)
 }
 
 func validateTag(v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
 	b := []byte(field.String())
-	fmt.Printf("Validate tag: %s\n", b)
+	glog.V(2).Infof("Validate tag: %s\n", b)
 	return nameRegex.Match(b)
 }
 
 func validateLabels(v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
 	l := field.Interface().(map[string]string)
-	fmt.Printf("Validate labels: %s\n", l)
+	glog.V(2).Infof("Validate labels: %s\n", l)
 	for k, v := range l {
 		if nameRegex.Match([]byte(k)) || nameRegex.Match([]byte(v)) {
 			return false
@@ -87,14 +86,14 @@ func validateLabels(v *validator.Validate, topStruct reflect.Value, currentStruc
 
 func validateInterface(v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
 	b := []byte(field.String())
-	fmt.Printf("Validate interface: %s\n", b)
+	glog.V(2).Infof("Validate interface: %s\n", b)
 	return nameRegex.Match(b)
 }
 
 func validateProtocol(v *validator.Validate, structLevel *validator.StructLevel) {
-	fmt.Printf("Validate protocol")
+	glog.V(2).Infof("Validate protocol")
 	p := structLevel.CurrentStruct.Interface().(Protocol)
-	fmt.Printf("Validate protocol: %v %s %v\n", p.Type, p.StrVal, p.NumVal)
+	glog.V(2).Infof("Validate protocol: %v %s %v\n", p.Type, p.StrVal, p.NumVal)
 	if p.Type == NumOrStringNum && ((p.NumVal < 0) || (p.NumVal > 255)) {
 		structLevel.ReportError(reflect.ValueOf(p.NumVal), "Protocol", "protocol", "protocolNum")
 	} else if p.Type == NumOrStringString && !protocolRegex.Match([]byte(p.StrVal)) {
