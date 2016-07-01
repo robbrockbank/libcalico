@@ -31,6 +31,9 @@ type HostEndpointListOptions struct {
 }
 
 func (options HostEndpointListOptions) asEtcdKeyRegex() (string, error) {
+	if options.Hostname == "" {
+		return "", ErrorInsufficientIdentifiers{}
+	}
 	e := fmt.Sprintf("/calico/v1/host/%s/endpoint/%s",
 		idOrWildcard(options.Hostname),
 		idOrWildcard(options.EndpointID))

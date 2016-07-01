@@ -11,9 +11,11 @@ import (
 
 var validate *validator.Validate
 
-var nameRegex = regexp.MustCompile("[a-zA-Z0-9_-]+")
-var actionRegex = regexp.MustCompile("next-tier|allow|deny")
-var protocolRegex = regexp.MustCompile("tcp|udp|icmp|icmpv6|sctp|udplite")
+var (
+	nameRegex = regexp.MustCompile("[a-zA-Z0-9_-]+")
+	actionRegex = regexp.MustCompile("next-tier|allow|deny")
+	protocolRegex = regexp.MustCompile("tcp|udp|icmp|icmpv6|sctp|udplite")
+)
 
 func init() {
 	// Initialise static data.
@@ -40,7 +42,17 @@ func RegisterStructValidator(fn validator.StructLevelFunc, t ...interface{}) {
 }
 
 func Validate(current interface{}) error {
-	return validate.Struct(current)
+	err := validate.Struct(current)
+	if err == nil {
+		return nil
+	}
+
+	verr := ErrorValidation{}
+	for _, f := range err.(validator.ValidationErrors) {
+		verr.ErrFields = append(verr.ErrFields,
+			ErroredField{Name: f.Name, Value: f.Value})
+	}
+	return verr
 }
 
 func validateAction(v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
