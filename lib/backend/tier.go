@@ -2,7 +2,13 @@ package backend
 
 import (
 	"fmt"
+	"regexp"
 	"github.com/projectcalico/libcalico/lib/common"
+	"github.com/golang/glog"
+)
+
+var (
+	matchTier = regexp.MustCompile("^/calico/v1/policy/tier/([^/]+)/metadata$")
 )
 
 type TierKey struct {
@@ -26,10 +32,28 @@ type TierListOptions struct {
 	Name string
 }
 
-func (options TierListOptions) asEtcdKeyRegex() (string, error) {
-	e := fmt.Sprintf("/calico/v1/policy/tier/%s",
-		idOrWildcard(options.Name))
-	return e, nil
+func (options TierListOptions) asEtcdKeyRoot() string {
+	k := "/calico/v1/policy/tier"
+	if options.Name == "" {
+		return k
+	}
+	k = k + fmt.Sprintf("/%s/metadata", options.Name)
+	return k
+}
+
+func (options TierListOptions) keyFromEtcdResult(ekey string) KeyInterface {
+	glog.V(2).Infof("Get Tier key from %s", ekey)
+	r := matchTier.FindAllStringSubmatch(ekey, -1)
+	if len(r) != 1 {
+		glog.V(2).Infof("Didn't match regex")
+		return nil
+	}
+	name := r[0][1]
+	if options.Name != "" && name != options.Name {
+		glog.V(2).Infof("Didn't match name %s != %s", options.Name, name)
+		return nil
+	}
+	return TierKey{Name: name}
 }
 
 type Tier struct {

@@ -1,10 +1,12 @@
 package client
 
 import (
-	"fmt"
-
+	"encoding/json"
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/backend"
+	"fmt"
+	"sort"
+	"github.com/golang/glog"
 )
 
 // ProfileInterface has methods to work with Profile resources.
@@ -29,13 +31,13 @@ func newProfiles(c *Client) *profiles {
 // List takes a Metadata, and returns the list of profiles that match that Metadata
 // (wildcarding missing fields)
 func (h *profiles) List(metadata api.ProfileMetadata) (*api.ProfileList, error) {
-	if l, err := h.c.list(backend.Profile{}, metadata, h); err != nil {
+	if l, err := h.c.list(backend.Profile{}, metadata, h, h); err != nil {
 		return nil, err
 	} else {
 		hl := api.NewProfileList()
-		hl.Items = make([]api.Profile, len(l))
+		hl.Items = make([]api.Profile, 0, len(l))
 		for _, h := range l {
-			hl.Items = append(hl.Items, h.(api.Profile))
+			hl.Items = append(hl.Items, *h.(*api.Profile))
 		}
 		return hl, nil
 	}
@@ -68,7 +70,11 @@ func (h *profiles) Delete(metadata api.ProfileMetadata) error {
 
 // Convert a ProfileMetadata to a ProfileListInterface
 func (h *profiles) convertMetadataToListInterface(m interface{}) (backend.ListInterface, error) {
-	panic(fmt.Errorf("profile list is overidden"))
+	hm := m.(api.ProfileMetadata)
+	l := backend.ProfileListOptions{
+		Name: hm.Name,
+	}
+	return l, nil
 }
 
 // Convert a ProfileMetadata to a ProfileKeyInterface
@@ -104,7 +110,7 @@ func (h *profiles) convertAPIToBackend(a interface{}) (interface{}, error) {
 
 // Convert a Backend Profile structure to an API Profile structure
 func (h *profiles) convertBackendToAPI(b interface{}) (interface{}, error) {
-	bp := b.(backend.Profile)
+	bp := *b.(*backend.Profile)
 	ap := api.NewProfile()
 
 	ap.Metadata.Name = bp.Name
@@ -134,17 +140,91 @@ func (h *profiles) backendUpdate(k backend.KeyInterface, obj interface{}) error 
 	pk := k.(backend.ProfileKey)
 	if err := h.c.backendUpdate(backend.ProfileTagsKey{pk}, p.Tags); err != nil {
 		return err
-	} else if err := h.c.backendUpdate(backend.ProfileLabelsKey{pk}, p.Labels); err != nil {
+	} else if err := h.c.backendSet(backend.ProfileLabelsKey{pk}, p.Labels); err != nil {
 		return err
 	} else {
-		return h.c.backendUpdate(backend.ProfileRulesKey{pk}, p.Rules)
+		return h.c.backendSet(backend.ProfileRulesKey{pk}, p.Rules)
 	}
 }
 
 func (h *profiles) backendGet(k backend.KeyInterface, objp interface{}) (interface{}, error) {
-	if kv, err := h.c.backend.Get(k); err != nil {
+	pk := k.(backend.ProfileKey)
+	kvs := []backend.KeyValue{}
+	if kv, err := h.c.backend.Get(backend.ProfileTagsKey{pk}); err != nil {
 		return nil, err
 	} else {
-		return h.c.unmarshal(kv, objp)
+		kvs = append(kvs, kv)
 	}
+	if kv, err := h.c.backend.Get(backend.ProfileLabelsKey{pk}); err != nil {
+		kvs = append(kvs, kv)
+	}
+	if kv, err := h.c.backend.Get(backend.ProfileRulesKey{pk}); err != nil {
+		kvs = append(kvs, kv)
+	}
+	return h.c.unmarshalIntoNewBackendStruct(kvs, objp)
+}
+
+// Convert the list of enumerated key-values into a list of groups of key-value each
+// belonging to a single resource.
+func (h *profiles) backendListConvert(in []backend.KeyValue) [][]backend.KeyValue {
+	groups := make(map[string][]backend.KeyValue)
+	var name string
+	for _, kv := range in {
+		switch kv.Key.(type) {
+		case backend.ProfileRulesKey:
+			name = kv.Key.(backend.ProfileRulesKey).Name
+		case backend.ProfileTagsKey:
+			name = kv.Key.(backend.ProfileTagsKey).Name
+		case backend.ProfileLabelsKey:
+			name = kv.Key.(backend.ProfileLabelsKey).Name
+		default:
+			panic(fmt.Errorf("Unexpected KV type: %v", kv))
+		}
+		groups[name] = append(groups[name], kv)
+	}
+
+	// To store the keys in slice in sorted order
+	var keys []string
+	for k := range groups {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	out := make([][]backend.KeyValue, len(keys))
+	for i, k := range keys {
+		out[i] = groups[k]
+	}
+
+	glog.V(2).Infof("Sorted groups of key/values: %v", out)
+
+	return out
+}
+
+// Unmarshall a list of backend data values into a new instance of the supplied backend type.
+// Returns an interface containing the a pointer to the new instance.
+func (h *profiles) unmarshalIntoNewBackendStruct(kvs []backend.KeyValue, backendObjectp interface{}) (interface{}, error) {
+	new := backend.Profile{}
+	for _, kv := range kvs {
+		switch kv.Key.(type) {
+		case backend.ProfileRulesKey:
+			glog.V(2).Infof("Unmarshal rules: %v", string(kv.Value))
+			if err := json.Unmarshal(kv.Value, &new.Rules); err != nil {
+				return nil, err
+			}
+			new.Name = kv.Key.(backend.ProfileRulesKey).Name
+		case backend.ProfileTagsKey:
+			glog.V(2).Infof("Unmarshal tags: %v", string(kv.Value))
+			if err := json.Unmarshal(kv.Value, &new.Tags); err != nil {
+				return nil, err
+			}
+			new.Name = kv.Key.(backend.ProfileTagsKey).Name
+		case backend.ProfileLabelsKey:
+			glog.V(2).Infof("Unmarshal labels: %v", string(kv.Value))
+			if err := json.Unmarshal(kv.Value, &new.Labels); err != nil {
+				return nil, err
+			}
+			new.Name = kv.Key.(backend.ProfileLabelsKey).Name
+		}
+	}
+	return &new, nil
 }

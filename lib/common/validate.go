@@ -13,7 +13,8 @@ var validate *validator.Validate
 
 var (
 	nameRegex = regexp.MustCompile("[a-zA-Z0-9_-]+")
-	actionRegex = regexp.MustCompile("next-tier|allow|deny")
+	actionRegex = regexp.MustCompile("nextTier|allow|deny")
+	backendActionRegex = regexp.MustCompile("next-tier|allow|deny")
 	protocolRegex = regexp.MustCompile("tcp|udp|icmp|icmpv6|sctp|udplite")
 )
 
@@ -24,6 +25,7 @@ func init() {
 
 	// Register some common validators.
 	RegisterFieldValidator("action", validateAction)
+	RegisterFieldValidator("backendaction", validateBackendAction)
 	RegisterFieldValidator("name", validateName)
 	RegisterFieldValidator("selector", validateSelector)
 	RegisterFieldValidator("tag", validateTag)
@@ -59,6 +61,12 @@ func validateAction(v *validator.Validate, topStruct reflect.Value, currentStruc
 	s := field.String()
 	glog.V(2).Infof("Validate action: %s\n", s)
 	return actionRegex.MatchString(s)
+}
+
+func validateBackendAction(v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
+	s := field.String()
+	glog.V(2).Infof("Validate action: %s\n", s)
+	return backendActionRegex.MatchString(s)
 }
 
 func validateName(v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {

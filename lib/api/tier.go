@@ -27,7 +27,7 @@ func NewTier() *Tier {
 type TierList struct {
 	TypeMetadata
 	Metadata ListMetadata `json:"metadata,omitempty"`
-	Items    []Tier       `json:"items,omitempty" validate:"dive"`
+	Items    []Tier       `json:"items" validate:"dive"`
 }
 
 func NewTierList() *TierList {

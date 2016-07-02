@@ -27,13 +27,13 @@ func newTiers(c *Client) *tiers {
 // List takes a Metadata, and returns the list of tiers that match that Metadata
 // (wildcarding missing fields)
 func (h *tiers) List(metadata api.TierMetadata) (*api.TierList, error) {
-	if l, err := h.c.list(backend.Tier{}, metadata, h); err != nil {
+	if l, err := h.c.list(backend.Tier{}, metadata, h, nil); err != nil {
 		return nil, err
 	} else {
 		hl := api.NewTierList()
-		hl.Items = make([]api.Tier, len(l))
+		hl.Items = make([]api.Tier, 0, len(l))
 		for _, h := range l {
-			hl.Items = append(hl.Items, h.(api.Tier))
+			hl.Items = append(hl.Items, *h.(*api.Tier))
 		}
 		return hl, nil
 	}
@@ -102,7 +102,7 @@ func (h *tiers) convertAPIToBackend(a interface{}) (interface{}, error) {
 
 // Convert a Backend Tier structure to an API Tier structure
 func (h *tiers) convertBackendToAPI(b interface{}) (interface{}, error) {
-	bt := b.(backend.Tier)
+	bt := *b.(*backend.Tier)
 	at := api.NewTier()
 
 	at.Metadata.Name = bt.Name

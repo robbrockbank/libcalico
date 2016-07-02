@@ -31,6 +31,8 @@ type backendObjectReaderWriter interface {
 	backendCreate(key backend.KeyInterface, obj interface{}) error
 	backendUpdate(key backend.KeyInterface, obj interface{}) error
 	backendGet(key backend.KeyInterface, objp interface{}) (interface{}, error)
+	backendListConvert([]backend.KeyValue) [][]backend.KeyValue
+	unmarshalIntoNewBackendStruct(kvs []backend.KeyValue, backendObjectp interface{}) (interface{}, error)
 }
 
 // Return a new connected Client.
@@ -146,15 +148,20 @@ func (c *Client) delete(metadata interface{}, helper conversionHelper) error {
 
 // Untyped get interface for getting a list of API objects.  This is called from the typed
 // interface.
-func (c *Client) list(backendObject interface{}, metadata interface{}, helper conversionHelper) ([]interface{}, error) {
+// Returns a list of pointers to backend objects.
+func (c *Client) list(backendObject interface{}, metadata interface{}, helper conversionHelper, rw backendObjectReaderWriter) ([]interface{}, error) {
+	if rw == nil {
+		rw = c
+	}
 	if l, err := helper.convertMetadataToListInterface(metadata); err != nil {
 		return nil, err
 	} else if kvs, err := c.backend.List(l); err != nil {
 		return nil, err
 	} else {
-		as := make([]interface{}, len(kvs))
-		for _, kv := range kvs {
-			if b, err := c.unmarshal(kv, backendObject); err != nil {
+		kpr := rw.backendListConvert(kvs)
+		as := make([]interface{}, 0, len(kpr))
+		for _, kvs := range kpr {
+			if b, err := rw.unmarshalIntoNewBackendStruct(kvs, backendObject); err != nil {
 				return nil, err
 			} else if a, err := helper.convertBackendToAPI(b); err != nil {
 				return nil, err
@@ -167,12 +174,20 @@ func (c *Client) list(backendObject interface{}, metadata interface{}, helper co
 	}
 }
 
-// Unmarshall the backend object into the supplied type.
-func (c *Client) unmarshal(v backend.KeyValue, backendObjectp interface{}) (interface{}, error) {
+// Unmarshall a list of backend data values into a new instance of the supplied backend type.
+// Returns an interface containing the a pointer to the new instance.
+func (c *Client) unmarshalIntoNewBackendStruct(kvs []backend.KeyValue, backendObjectp interface{}) (interface{}, error) {
 	new := reflect.New(reflect.TypeOf(backendObjectp)).Interface()
-	return new, json.Unmarshal(v.Value, new)
+	for _, kv := range kvs {
+		if err := json.Unmarshal(kv.Value, new); err != nil {
+			return nil, err
+		}
+	}
+	return new, nil
 }
 
+// Convert the supplied object into a value string and create the object in the
+// backend client.
 func (c *Client) backendCreate(k backend.KeyInterface, obj interface{}) error {
 	if obj == nil {
 		glog.V(2).Info("Skipping empty data")
@@ -185,6 +200,8 @@ func (c *Client) backendCreate(k backend.KeyInterface, obj interface{}) error {
 	}
 }
 
+// Convert the supplied object into a value string and update the object in the
+// backend client.
 func (c *Client) backendUpdate(k backend.KeyInterface, obj interface{}) error {
 	if obj == nil {
 		glog.V(2).Info("Skipping empty data")
@@ -197,10 +214,38 @@ func (c *Client) backendUpdate(k backend.KeyInterface, obj interface{}) error {
 	}
 }
 
+// Convert the supplied object into a value string and set (create or update) the
+// object in the backend client.
+func (c *Client) backendSet(k backend.KeyInterface, obj interface{}) error {
+	if obj == nil {
+		glog.V(2).Info("Skipping empty data")
+		return nil
+	}
+	if v, err := json.Marshal(obj); err != nil {
+		return err
+	} else {
+		return c.backend.Set(backend.KeyValue{Key: k, Value: v})
+	}
+}
+
+// Get the entry from the datastore reference by the key, and unmarshal into a
+// new instance of the supplied backend structure.
 func (c *Client) backendGet(k backend.KeyInterface, objp interface{}) (interface{}, error) {
 	if kv, err := c.backend.Get(k); err != nil {
 		return nil, err
 	} else {
-		return c.unmarshal(kv, objp)
+		kvs := []backend.KeyValue{kv}
+		return c.unmarshalIntoNewBackendStruct(kvs, objp)
 	}
+}
+
+// Convert the list of enumerated key-values into a list of groups of key-value each
+// belonging to a single resource.  The default processing assumes a single key-value
+// for each resource, so there is no additional sorting required.
+func (c *Client) backendListConvert(in []backend.KeyValue) [][]backend.KeyValue {
+	out := make([][]backend.KeyValue, len(in))
+	for i, k := range in {
+		out[i] = []backend.KeyValue{k}
+	}
+	return out
 }

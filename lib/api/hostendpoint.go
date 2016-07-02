@@ -30,7 +30,7 @@ func NewHostEndpoint() *HostEndpoint {
 type HostEndpointList struct {
 	TypeMetadata
 	Metadata ListMetadata   `json:"metadata,omitempty"`
-	Items    []HostEndpoint `json:"items,omitempty" validate:"dive"`
+	Items    []HostEndpoint `json:"items" validate:"dive"`
 }
 
 func NewHostEndpointList() *HostEndpointList {

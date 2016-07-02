@@ -5,10 +5,24 @@ import (
 	"github.com/projectcalico/libcalico/lib/backend"
 )
 
+func ruleActionAPIToBackend(action string) string {
+	if action == "nextTier" {
+		return "next-tier"
+	}
+	return action
+}
+
+func ruleActionBackendToAPI(action string) string {
+	if action == "next-tier" {
+		return "nextTier"
+	}
+	return action
+}
+
 // Convert an API Rule structure to a Backend Rule structure
 func ruleAPIToBackend(ar api.Rule) backend.Rule {
 	return backend.Rule{
-		Action:   ar.Action,
+		Action:   ruleActionAPIToBackend(ar.Action),
 		ICMPCode: ar.ICMPCode,
 		ICMPType: ar.ICMPType,
 
@@ -35,7 +49,7 @@ func ruleAPIToBackend(ar api.Rule) backend.Rule {
 // Convert a Backend Rule structure to an API Rule structure
 func ruleBackendToAPI(br backend.Rule) api.Rule {
 	return api.Rule{
-		Action:   br.Action,
+		Action:   ruleActionBackendToAPI(br.Action),
 		ICMPCode: br.ICMPCode,
 		ICMPType: br.ICMPType,
 

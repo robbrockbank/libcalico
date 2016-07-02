@@ -3,7 +3,7 @@ package backend
 import . "github.com/projectcalico/libcalico/lib/common"
 
 type Rule struct {
-	Action string `json:"action" validate:"action"`
+	Action string `json:"action" validate:"backendaction"`
 
 	Protocol    *Protocol `json:"protocol,omitempty" validate:"omitempty"`
 	SrcTag      string    `json:"src_tag,omitempty" validate:"omitempty,tag"`

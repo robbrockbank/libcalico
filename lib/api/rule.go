@@ -14,9 +14,8 @@ type Rule struct {
 	ICMPType *int      `json:"icmpType,omitempty" validate:"omitempty,gte=0,lte=255"`
 	ICMPCode *int      `json:"icmpCode,omitempty" validate:"omitempty,gte=0,lte=255"`
 
-	// [smc] how do these fields work in the YAML?  I tried adding a SrcSelector to the YAML but it didn't get validated
-	Source      EntityRule
-	Destination EntityRule
+	Source      EntityRule `json:"source,omitempty" validate:"omitempty"`
+	Destination EntityRule `json:"destination,omitempty" validate:"omitempty"`
 }
 
 type EntityRule struct {

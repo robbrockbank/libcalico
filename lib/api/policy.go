@@ -33,7 +33,7 @@ func NewPolicy() *Policy {
 type PolicyList struct {
 	TypeMetadata
 	Metadata ListMetadata `json:"metadata,omitempty"`
-	Items    []Policy     `json:"items,omitempty" validate:"dive"`
+	Items    []Policy     `json:"items" validate:"dive"`
 }
 
 func NewPolicyList() *PolicyList {

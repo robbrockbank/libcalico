@@ -28,13 +28,13 @@ func newPolicies(c *Client) *policies {
 // List takes a Metadata, and returns the list of policies that match that Metadata
 // (wildcarding missing fields)
 func (h *policies) List(metadata api.PolicyMetadata) (*api.PolicyList, error) {
-	if l, err := h.c.list(backend.Policy{}, metadata, h); err != nil {
+	if l, err := h.c.list(backend.Policy{}, metadata, h, nil); err != nil {
 		return nil, err
 	} else {
 		hl := api.NewPolicyList()
-		hl.Items = make([]api.Policy, len(l))
+		hl.Items = make([]api.Policy, 0, len(l))
 		for _, h := range l {
-			hl.Items = append(hl.Items, h.(api.Policy))
+			hl.Items = append(hl.Items, *h.(*api.Policy))
 		}
 		return hl, nil
 	}
@@ -106,9 +106,9 @@ func (h *policies) convertAPIToBackend(a interface{}) (interface{}, error) {
 	return bp, nil
 }
 
-// Convert a Backend Policy structure to an API Policy structure
+// Convert a Backend Policy structure to an API Policy structure.
 func (h *policies) convertBackendToAPI(b interface{}) (interface{}, error) {
-	bp := b.(backend.Policy)
+	bp := *b.(*backend.Policy)
 	ap := api.NewPolicy()
 
 	ap.Metadata.Name = bp.Name

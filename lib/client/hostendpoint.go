@@ -30,13 +30,13 @@ func newHostEndpoints(c *Client) *hostEndpoints {
 // List takes a Metadata, and returns the list of host endpoints that match that Metadata
 // (wildcarding missing fields)
 func (h *hostEndpoints) List(metadata api.HostEndpointMetadata) (*api.HostEndpointList, error) {
-	if l, err := h.c.list(backend.HostEndpoint{}, metadata, h); err != nil {
+	if l, err := h.c.list(backend.HostEndpoint{}, metadata, h, nil); err != nil {
 		return nil, err
 	} else {
 		hl := api.NewHostEndpointList()
-		hl.Items = make([]api.HostEndpoint, len(l))
+		hl.Items = make([]api.HostEndpoint, 0, len(l))
 		for _, h := range l {
-			hl.Items = append(hl.Items, h.(api.HostEndpoint))
+			hl.Items = append(hl.Items, *h.(*api.HostEndpoint))
 		}
 		return hl, nil
 	}
@@ -121,7 +121,7 @@ func (h *hostEndpoints) convertAPIToBackend(a interface{}) (interface{}, error) 
 
 // Convert a Backend HostEndpoint structure to an API HostEndpoint structure
 func (h *hostEndpoints) convertBackendToAPI(b interface{}) (interface{}, error) {
-	bh := b.(backend.HostEndpoint)
+	bh := *b.(*backend.HostEndpoint)
 	ah := api.NewHostEndpoint()
 
 	ah.Metadata.Hostname = bh.HostEndpointKey.Hostname

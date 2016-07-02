@@ -5,6 +5,12 @@ import (
 	"fmt"
 
 	. "github.com/projectcalico/libcalico/lib/common"
+	"regexp"
+	"github.com/golang/glog"
+)
+
+var (
+	matchHostEndpoint = regexp.MustCompile("^/calico/v1/host/([^/]+)/endpoint/([^/]+)$")
 )
 
 type HostEndpointKey struct {
@@ -30,14 +36,37 @@ type HostEndpointListOptions struct {
 	EndpointID string
 }
 
-func (options HostEndpointListOptions) asEtcdKeyRegex() (string, error) {
+func (options HostEndpointListOptions) asEtcdKeyRoot() string {
+	k := "/calico/v1/host"
 	if options.Hostname == "" {
-		return "", ErrorInsufficientIdentifiers{}
+		return k
 	}
-	e := fmt.Sprintf("/calico/v1/host/%s/endpoint/%s",
-		idOrWildcard(options.Hostname),
-		idOrWildcard(options.EndpointID))
-	return e, nil
+	k = k + fmt.Sprintf("/%s/endpoint", options.Hostname)
+	if options.EndpointID == "" {
+		return k
+	}
+	k = k + fmt.Sprintf("/%s", options.EndpointID)
+	return k
+}
+
+func (options HostEndpointListOptions) keyFromEtcdResult(ekey string) KeyInterface {
+	glog.V(2).Infof("Get HostEndpoint key from %s", ekey)
+	r := matchHostEndpoint.FindAllStringSubmatch(ekey, -1)
+	if len(r) != 1 {
+		glog.V(2).Infof("Didn't match regex")
+		return nil
+	}
+	hostname := r[0][1]
+	endpointID := r[0][2]
+	if options.Hostname != "" && hostname != options.Hostname {
+		glog.V(2).Infof("Didn't match hostname %s != %s", options.Hostname, hostname)
+		return nil
+	}
+	if options.EndpointID != "" && endpointID != options.EndpointID {
+		glog.V(2).Infof("Didn't match endpointID %s != %s", options.EndpointID, endpointID)
+		return nil
+	}
+	return HostEndpointKey{Hostname: hostname, EndpointID: endpointID}
 }
 
 type HostEndpoint struct {

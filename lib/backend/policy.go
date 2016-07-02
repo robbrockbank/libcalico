@@ -3,6 +3,12 @@ package backend
 import (
 	"errors"
 	"fmt"
+	"regexp"
+	"github.com/golang/glog"
+)
+
+var (
+	matchPolicy = regexp.MustCompile("^/calico/v1/policy/tier/([^/]+)/policy/([^/]+)$")
 )
 
 type PolicyKey struct {
@@ -28,11 +34,37 @@ type PolicyListOptions struct {
 	Tier string
 }
 
-func (options PolicyListOptions) asEtcdKeyRegex() (string, error) {
-	e := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s",
-		idOrWildcard(options.Tier),
-		idOrWildcard(options.Name))
-	return e, nil
+func (options PolicyListOptions) asEtcdKeyRoot() string {
+	k := "/calico/v1/policy/tier"
+	if options.Tier == "" {
+		return k
+	}
+	k = k + fmt.Sprintf("/%s/policy", options.Tier)
+	if options.Name == "" {
+		return k
+	}
+	k = k + fmt.Sprintf("/%s", options.Name)
+	return k
+}
+
+func (options PolicyListOptions) keyFromEtcdResult(ekey string) KeyInterface {
+	glog.V(2).Infof("Get Policy key from %s", ekey)
+	r := matchPolicy.FindAllStringSubmatch(ekey, -1)
+	if len(r) != 1 {
+		glog.V(2).Infof("Didn't match regex")
+		return nil
+	}
+	tier := r[0][1]
+	name := r[0][2]
+	if options.Tier != "" && tier != options.Tier {
+		glog.V(2).Infof("Didn't match tier %s != %s", options.Tier, tier)
+		return nil
+	}
+	if options.Name != "" && name != options.Name {
+		glog.V(2).Infof("Didn't match name %s != %s", options.Name, name)
+		return nil
+	}
+	return PolicyKey{Tier: tier, Name: name}
 }
 
 type Policy struct {

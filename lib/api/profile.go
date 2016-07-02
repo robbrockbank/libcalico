@@ -10,7 +10,7 @@ type ProfileMetadata struct {
 }
 
 type ProfileSpec struct {
-	IngressRules []Rule   `json:"ingress,ommitempty" validate:"omitempty,dive"`
+	IngressRules []Rule   `json:"ingress,omitempty" validate:"omitempty,dive"`
 	EgressRules  []Rule   `json:"egress,omitempty" validate:"omitempty,dive"`
 	Tags         []string `json:"tags,omitempty" validate:"omitempty,dive,tag"`
 }

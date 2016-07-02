@@ -11,6 +11,13 @@ import (
 	"golang.org/x/net/context"
 )
 
+var (
+	etcdSetOpts = etcd.SetOptions{PrevExist: etcd.PrevIgnore}
+	etcdDeleteOpts = etcd.DeleteOptions{Recursive: true}
+	etcdGetOpts = etcd.GetOptions{}
+	etcdListOpts = etcd.GetOptions{Recursive:true, Sort:true}
+)
+
 // Interface used to calculate a datastore key.
 type KeyInterface interface {
 	asEtcdKey() (string, error)
@@ -19,7 +26,8 @@ type KeyInterface interface {
 
 // Interface used to perform datastore lookups.
 type ListInterface interface {
-	asEtcdKeyRegex() (string, error)
+	asEtcdKeyRoot() string
+	keyFromEtcdResult(key string) KeyInterface
 }
 
 // Encapsulated datastore key interface with value.
@@ -99,27 +107,62 @@ func (c *Client) Update(d KeyValue) error {
 	return convertError(err, key)
 }
 
+// Set an existing entry in the datastore.  This ignores whether an entry already
+// exists.
+func (c *Client) Set(d KeyValue) error {
+	key, _ := d.Key.asEtcdKey()
+	glog.V(2).Infof("Set Key: %s\n", key)
+	glog.V(2).Infof("Value: %s\n", d.Value)
+	_, err := c.etcdKeysAPI.Set(context.Background(), key, string(d.Value), &etcdSetOpts)
+	return convertError(err, key)
+}
+
 // Delete an entry in the datastore.  This errors if the entry does not exists.
 func (c *Client) Delete(k KeyInterface) error {
 	key, _ := k.asEtcdDeleteKey()
 	glog.V(2).Infof("Delete Key: %s\n", key)
-	_, err := c.etcdKeysAPI.Delete(context.Background(), key, &etcd.DeleteOptions{Recursive: true})
+	_, err := c.etcdKeysAPI.Delete(context.Background(), key, &etcdDeleteOpts)
 	return convertError(err, key)
 }
 
-// Get and entry from the datastore.  This errors if the entry does not exist.
+// Get an entry from the datastore.  This errors if the entry does not exist.
 func (c *Client) Get(k KeyInterface) (KeyValue, error) {
 	key, _ := k.asEtcdKey()
 	glog.V(2).Infof("Get Key: %s\n", key)
-	return KeyValue{}, nil
+	if results, err := c.etcdKeysAPI.Get(context.Background(), key, &etcdGetOpts); err != nil {
+		return KeyValue{}, convertError(err, key)
+	} else {
+		return KeyValue{Key: k, Value: []byte(results.Node.Value)}, nil
+	}
 }
 
 // List entries in the datastore.  This may return an empty list of there are
 // no entries matching the request in the ListInterface.
 func (c *Client) List(l ListInterface) ([]KeyValue, error) {
-	key, _ := l.asEtcdKeyRegex()
+	// To list entries, we enumerate from the common root based on the supplied
+	// IDs, and then filter the results.
+	key := l.asEtcdKeyRoot()
 	glog.V(2).Infof("List Key: %s\n", key)
-	return []KeyValue{}, nil
+	if results, err := c.etcdKeysAPI.Get(context.Background(), key, &etcdListOpts); err != nil {
+		return nil, err
+	} else {
+		return filterListNode(results.Node, l), nil
+	}
+}
+
+// Process a node returned from a list to filter results based on the List type and to
+// compile and return the required results.
+func filterListNode(n *etcd.Node, l ListInterface) []KeyValue {
+	kvs := []KeyValue{}
+	if n.Dir {
+		for _, node := range n.Nodes {
+			kvs = append(kvs, filterListNode(node, l)...)
+		}
+	} else if k := l.keyFromEtcdResult(n.Key); k != nil {
+		kvs = append(kvs, KeyValue{Key: k, Value: []byte(n.Value)})
+	}
+	glog.V(2).Infof("Returning: %v", kvs)
+	return kvs
 }
 
 func convertError(err error, key string) error {
