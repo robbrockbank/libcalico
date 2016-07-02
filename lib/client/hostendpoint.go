@@ -136,3 +136,9 @@ func (h *hostEndpoints) convertBackendToAPI(b interface{}) (interface{}, error) 
 
 	return ah, nil
 }
+
+func (h *hostEndpoints) copyKeyValues(kvs []backend.KeyValue, b interface{}) {
+	bh := b.(*backend.HostEndpoint)
+	k := kvs[0].Key.(backend.HostEndpointKey)
+	bh.HostEndpointKey = k
+}

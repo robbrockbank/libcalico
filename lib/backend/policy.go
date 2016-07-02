@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	"github.com/golang/glog"
+	"github.com/projectcalico/libcalico/lib/common"
 )
 
 var (
@@ -37,10 +38,7 @@ type PolicyListOptions struct {
 
 func (options PolicyListOptions) asEtcdKeyRoot() string {
 	k := "/calico/v1/policy/tier"
-	if options.Tier == "" {
-		return k
-	}
-	k = k + fmt.Sprintf("/%s/policy", options.Tier)
+	k = k + fmt.Sprintf("/%s/policy", common.TierOrDefault(options.Tier))
 	if options.Name == "" {
 		return k
 	}
@@ -55,7 +53,7 @@ func (options PolicyListOptions) keyFromEtcdResult(ekey string) KeyInterface {
 		glog.V(2).Infof("Didn't match regex")
 		return nil
 	}
-	tier := r[0][1]
+	tier := common.TierOrBlank(r[0][1])
 	name := r[0][2]
 	if options.Tier != "" && tier != options.Tier {
 		glog.V(2).Infof("Didn't match tier %s != %s", options.Tier, tier)

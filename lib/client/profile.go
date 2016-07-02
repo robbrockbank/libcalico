@@ -212,20 +212,30 @@ func (h *profiles) unmarshalIntoNewBackendStruct(kvs []backend.KeyValue, backend
 			if err := json.Unmarshal(kv.Value, &new.Rules); err != nil {
 				return nil, err
 			}
-			new.Name = kv.Key.(backend.ProfileRulesKey).Name
 		case backend.ProfileTagsKey:
 			glog.V(2).Infof("Unmarshal tags: %v", string(kv.Value))
 			if err := json.Unmarshal(kv.Value, &new.Tags); err != nil {
 				return nil, err
 			}
-			new.Name = kv.Key.(backend.ProfileTagsKey).Name
 		case backend.ProfileLabelsKey:
 			glog.V(2).Infof("Unmarshal labels: %v", string(kv.Value))
 			if err := json.Unmarshal(kv.Value, &new.Labels); err != nil {
 				return nil, err
 			}
-			new.Name = kv.Key.(backend.ProfileLabelsKey).Name
 		}
 	}
 	return &new, nil
+}
+
+func (h *profiles) copyKeyValues(kvs []backend.KeyValue, b interface{}) {
+	bp := b.(*backend.Profile)
+	kv := kvs[0]
+	switch kv.Key.(type) {
+	case backend.ProfileRulesKey:
+		bp.ProfileKey = kv.Key.(backend.ProfileRulesKey).ProfileKey
+	case backend.ProfileTagsKey:
+		bp.ProfileKey = kv.Key.(backend.ProfileTagsKey).ProfileKey
+	case backend.ProfileLabelsKey:
+		bp.ProfileKey = kv.Key.(backend.ProfileLabelsKey).ProfileKey
+	}
 }

@@ -1,9 +1,17 @@
 package client
 
 import (
+	"fmt"
+
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/backend"
 	"github.com/projectcalico/libcalico/lib/common"
+)
+
+var (
+	defaultTier = api.Tier{
+		Metadata: api.TierMetadata{Name: common.DefaultTierName},
+	}
 )
 
 // PolicyInterface has methods to work with Policy resources.
@@ -52,6 +60,18 @@ func (h *policies) Get(metadata api.PolicyMetadata) (*api.Policy, error) {
 
 // Create creates a new policy.
 func (h *policies) Create(a *api.Policy) (*api.Policy, error) {
+	// Before creating the policy, check that the tier exists, and if this is the
+	// default tier, create it if it doesn't.
+	if a.Metadata.Tier == "" {
+		if _, err := h.c.Tiers().Create(&defaultTier); err != nil {
+			if _, ok := err.(common.ErrorResourceAlreadyExists); !ok {
+				return nil, err
+			}
+		}
+	} else if _, err := h.c.Tiers().Get(api.TierMetadata{Name: a.Metadata.Tier}); err != nil {
+		return nil, common.ErrorResourceDoesNotExist{Name: fmt.Sprintf("Tier '%s'", a.Metadata.Tier)}
+	}
+
 	return a, h.c.create(*a, h, nil)
 }
 
@@ -120,4 +140,10 @@ func (h *policies) convertBackendToAPI(b interface{}) (interface{}, error) {
 	ap.Spec.Selector = bp.Selector
 
 	return ap, nil
+}
+
+func (h *policies) copyKeyValues(kvs []backend.KeyValue, b interface{}) {
+	bp := b.(*backend.Policy)
+	k := kvs[0].Key.(backend.PolicyKey)
+	bp.PolicyKey = k
 }

@@ -23,6 +23,7 @@ type conversionHelper interface {
 	convertBackendToAPI(interface{}) (interface{}, error)
 	convertMetadataToKeyInterface(interface{}) (backend.KeyInterface, error)
 	convertMetadataToListInterface(interface{}) (backend.ListInterface, error)
+	copyKeyValues([]backend.KeyValue, interface{})
 }
 
 // Interface used to read and write a single backend object to the backend client.
@@ -163,10 +164,13 @@ func (c *Client) list(backendObject interface{}, metadata interface{}, helper co
 		for _, kvs := range kpr {
 			if b, err := rw.unmarshalIntoNewBackendStruct(kvs, backendObject); err != nil {
 				return nil, err
-			} else if a, err := helper.convertBackendToAPI(b); err != nil {
-				return nil, err
 			} else {
-				as = append(as, a)
+				helper.copyKeyValues(kvs, b)
+				if a, err := helper.convertBackendToAPI(b); err != nil {
+					return nil, err
+				} else {
+					as = append(as, a)
+				}
 			}
 		}
 

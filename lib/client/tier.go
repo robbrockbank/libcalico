@@ -44,8 +44,8 @@ func (h *tiers) Get(metadata api.TierMetadata) (*api.Tier, error) {
 	if a, err := h.c.get(backend.Tier{}, metadata, h, nil); err != nil {
 		return nil, err
 	} else {
-		h := a.(api.Tier)
-		return &h, nil
+		h := a.(*api.Tier)
+		return h, nil
 	}
 }
 
@@ -110,4 +110,10 @@ func (h *tiers) convertBackendToAPI(b interface{}) (interface{}, error) {
 	at.Spec.Order = bt.Order
 
 	return at, nil
+}
+
+func (h *tiers) copyKeyValues(kvs []backend.KeyValue, b interface{}) {
+	bp := b.(*backend.Tier)
+	k := kvs[0].Key.(backend.TierKey)
+	bp.TierKey = k
 }
