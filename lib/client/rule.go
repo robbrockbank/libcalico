@@ -23,8 +23,12 @@ func ruleActionBackendToAPI(action string) string {
 func ruleAPIToBackend(ar api.Rule) backend.Rule {
 	return backend.Rule{
 		Action:   ruleActionAPIToBackend(ar.Action),
+		Protocol: ar.Protocol,
 		ICMPCode: ar.ICMPCode,
 		ICMPType: ar.ICMPType,
+		NotProtocol: ar.NotProtocol,
+		NotICMPCode: ar.NotICMPCode,
+		NotICMPType: ar.NotICMPType,
 
 		SrcTag:      ar.Source.Tag,
 		SrcNet:      ar.Source.Net,
@@ -50,8 +54,12 @@ func ruleAPIToBackend(ar api.Rule) backend.Rule {
 func ruleBackendToAPI(br backend.Rule) api.Rule {
 	return api.Rule{
 		Action:   ruleActionBackendToAPI(br.Action),
+		Protocol: br.Protocol,
 		ICMPCode: br.ICMPCode,
 		ICMPType: br.ICMPType,
+		NotProtocol: br.NotProtocol,
+		NotICMPCode: br.NotICMPCode,
+		NotICMPType: br.NotICMPType,
 
 		Source: api.EntityRule{
 			Tag:         br.SrcTag,

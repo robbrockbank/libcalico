@@ -171,13 +171,13 @@ func (h *profiles) backendListConvert(in []backend.KeyValue) [][]backend.KeyValu
 	groups := make(map[string][]backend.KeyValue)
 	var name string
 	for _, kv := range in {
-		switch kv.Key.(type) {
+		switch t:= kv.Key.(type) {
 		case backend.ProfileRulesKey:
-			name = kv.Key.(backend.ProfileRulesKey).Name
+			name = t.Name
 		case backend.ProfileTagsKey:
-			name = kv.Key.(backend.ProfileTagsKey).Name
+			name = t.Name
 		case backend.ProfileLabelsKey:
-			name = kv.Key.(backend.ProfileLabelsKey).Name
+			name = t.Name
 		default:
 			panic(fmt.Errorf("Unexpected KV type: %v", kv))
 		}
@@ -230,12 +230,12 @@ func (h *profiles) unmarshalIntoNewBackendStruct(kvs []backend.KeyValue, backend
 func (h *profiles) copyKeyValues(kvs []backend.KeyValue, b interface{}) {
 	bp := b.(*backend.Profile)
 	kv := kvs[0]
-	switch kv.Key.(type) {
+	switch t := kv.Key.(type) {
 	case backend.ProfileRulesKey:
-		bp.ProfileKey = kv.Key.(backend.ProfileRulesKey).ProfileKey
+		bp.ProfileKey = t.ProfileKey
 	case backend.ProfileTagsKey:
-		bp.ProfileKey = kv.Key.(backend.ProfileTagsKey).ProfileKey
+		bp.ProfileKey = t.ProfileKey
 	case backend.ProfileLabelsKey:
-		bp.ProfileKey = kv.Key.(backend.ProfileLabelsKey).ProfileKey
+		bp.ProfileKey = t.ProfileKey
 	}
 }

@@ -12,10 +12,10 @@ import (
 var validate *validator.Validate
 
 var (
-	nameRegex          = regexp.MustCompile("[a-zA-Z0-9_-]+")
-	actionRegex        = regexp.MustCompile("nextTier|allow|deny")
-	backendActionRegex = regexp.MustCompile("next-tier|allow|deny")
-	protocolRegex      = regexp.MustCompile("tcp|udp|icmp|icmpv6|sctp|udplite")
+	nameRegex          = regexp.MustCompile("^[a-zA-Z0-9_.-]+$")
+	actionRegex        = regexp.MustCompile("^(nextTier|allow|deny)$")
+	backendActionRegex = regexp.MustCompile("^(next-tier|allow|deny)$")
+	protocolRegex      = regexp.MustCompile("^(tcp|udp|icmp|icmpv6|sctp|udplite)$")
 )
 
 func init() {
@@ -114,8 +114,8 @@ func validateProtocol(v *validator.Validate, structLevel *validator.StructLevel)
 	p := structLevel.CurrentStruct.Interface().(Protocol)
 	glog.V(2).Infof("Validate protocol: %v %s %v\n", p.Type, p.StrVal, p.NumVal)
 	if p.Type == NumOrStringNum && ((p.NumVal < 1) || (p.NumVal > 255)) {
-		structLevel.ReportError(reflect.ValueOf(p.NumVal), "Protocol", "protocol", "protocolNum")
+		structLevel.ReportError(reflect.ValueOf(p.NumVal), "Protocol", "protocol", "protocol number invalid")
 	} else if p.Type == NumOrStringString && !protocolRegex.MatchString(p.StrVal) {
-		structLevel.ReportError(reflect.ValueOf(p.StrVal), "Protocol", "protocol", "protocolStr")
+		structLevel.ReportError(reflect.ValueOf(p.StrVal), "Protocol", "protocol", "protocol name invalid")
 	}
 }

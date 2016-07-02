@@ -14,6 +14,10 @@ type Rule struct {
 	ICMPType *int      `json:"icmpType,omitempty" validate:"omitempty,gte=0,lte=255"`
 	ICMPCode *int      `json:"icmpCode,omitempty" validate:"omitempty,gte=0,lte=255"`
 
+	NotProtocol *Protocol `json:"!protocol,omitempty" validate:"omitempty"`
+	NotICMPType *int      `json:"!icmpType,omitempty" validate:"omitempty,gte=0,lte=255"`
+	NotICMPCode *int      `json:"!icmpCode,omitempty" validate:"omitempty,gte=0,lte=255"`
+
 	Source      EntityRule `json:"source,omitempty" validate:"omitempty"`
 	Destination EntityRule `json:"destination,omitempty" validate:"omitempty"`
 }
