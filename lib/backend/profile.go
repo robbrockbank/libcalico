@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+
 	"github.com/golang/glog"
 )
 
@@ -112,4 +113,3 @@ type ProfileRules struct {
 	InboundRules  []Rule `json:"inbound_rules,omitempty" validate:"omitempty,dive"`
 	OutboundRules []Rule `json:"outbound_rules,omitempty" validate:"omitempty,dive"`
 }
-

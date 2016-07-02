@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 
-	. "github.com/projectcalico/libcalico/lib/common"
 	"regexp"
+
 	"github.com/golang/glog"
+	. "github.com/projectcalico/libcalico/lib/common"
 )
 
 var (

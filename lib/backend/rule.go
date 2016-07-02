@@ -14,8 +14,8 @@ type Rule struct {
 	DstSelector string    `json:"dst_selector,omitempty" validate:"omitempty,selector"`
 	DstNet      *IPNet    `json:"dst_net,omitempty" validate:"omitempty"`
 	DstPorts    []int     `json:"dst_ports,omitempty" validate:"omitempty,dive,gte=0,lte=65535"`
-	ICMPType *int `json:"icmp_type,omitempty" validate:"omitempty,gte=1,lte=255"`
-	ICMPCode *int `json:"icmp_code,omitempty" validate:"omitempty,gte=1,lte=255"`
+	ICMPType    *int      `json:"icmp_type,omitempty" validate:"omitempty,gte=1,lte=255"`
+	ICMPCode    *int      `json:"icmp_code,omitempty" validate:"omitempty,gte=1,lte=255"`
 
 	NotProtocol    *Protocol `json:"!protocol,omitempty" validate:"omitempty"`
 	NotSrcTag      string    `json:"!src_tag,omitempty" validate:"omitempty,tag"`

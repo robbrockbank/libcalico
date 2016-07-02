@@ -12,10 +12,10 @@ import (
 )
 
 var (
-	etcdSetOpts = etcd.SetOptions{PrevExist: etcd.PrevIgnore}
+	etcdSetOpts    = etcd.SetOptions{PrevExist: etcd.PrevIgnore}
 	etcdDeleteOpts = etcd.DeleteOptions{Recursive: true}
-	etcdGetOpts = etcd.GetOptions{}
-	etcdListOpts = etcd.GetOptions{Recursive:true, Sort:true}
+	etcdGetOpts    = etcd.GetOptions{}
+	etcdListOpts   = etcd.GetOptions{Recursive: true, Sort: true}
 )
 
 // Interface used to calculate a datastore key.

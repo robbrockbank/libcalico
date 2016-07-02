@@ -3,8 +3,9 @@ package backend
 import (
 	"fmt"
 	"regexp"
-	"github.com/projectcalico/libcalico/lib/common"
+
 	"github.com/golang/glog"
+	"github.com/projectcalico/libcalico/lib/common"
 )
 
 var (

@@ -2,11 +2,12 @@ package client
 
 import (
 	"encoding/json"
-	"github.com/projectcalico/libcalico/lib/api"
-	"github.com/projectcalico/libcalico/lib/backend"
 	"fmt"
 	"sort"
+
 	"github.com/golang/glog"
+	"github.com/projectcalico/libcalico/lib/api"
+	"github.com/projectcalico/libcalico/lib/backend"
 )
 
 // ProfileInterface has methods to work with Profile resources.
