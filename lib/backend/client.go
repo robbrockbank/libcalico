@@ -77,6 +77,13 @@ func (c *Client) connectEtcd() error {
 	cfg := etcd.Config{
 		Endpoints: etcdLocation,
 		Transport: etcd.DefaultTransport}
+
+	// Plumb through the username and password if both are configured.
+	if c.config.EtcdUsername != "" && c.config.EtcdPassword != "" {
+		cfg.Username = c.config.EtcdUsername
+		cfg.Password = c.config.EtcdPassword
+	}
+
 	client, err := etcd.New(cfg)
 	if err != nil {
 		return err
