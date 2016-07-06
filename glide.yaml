@@ -1,0 +1,5 @@
+package: github.com/projectcalico/libcalico
+import:
+- package: github.com/docopt/docopt-go
+- package: github.com/ghodss/yaml
+- package: github.com/golang/glog
