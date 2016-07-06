@@ -171,7 +171,7 @@ func (h *profiles) backendListConvert(in []backend.KeyValue) [][]backend.KeyValu
 	groups := make(map[string][]backend.KeyValue)
 	var name string
 	for _, kv := range in {
-		switch t:= kv.Key.(type) {
+		switch t := kv.Key.(type) {
 		case backend.ProfileRulesKey:
 			name = t.Name
 		case backend.ProfileTagsKey:

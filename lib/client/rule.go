@@ -22,10 +22,10 @@ func ruleActionBackendToAPI(action string) string {
 // Convert an API Rule structure to a Backend Rule structure
 func ruleAPIToBackend(ar api.Rule) backend.Rule {
 	return backend.Rule{
-		Action:   ruleActionAPIToBackend(ar.Action),
-		Protocol: ar.Protocol,
-		ICMPCode: ar.ICMPCode,
-		ICMPType: ar.ICMPType,
+		Action:      ruleActionAPIToBackend(ar.Action),
+		Protocol:    ar.Protocol,
+		ICMPCode:    ar.ICMPCode,
+		ICMPType:    ar.ICMPType,
 		NotProtocol: ar.NotProtocol,
 		NotICMPCode: ar.NotICMPCode,
 		NotICMPType: ar.NotICMPType,
@@ -53,10 +53,10 @@ func ruleAPIToBackend(ar api.Rule) backend.Rule {
 // Convert a Backend Rule structure to an API Rule structure
 func ruleBackendToAPI(br backend.Rule) api.Rule {
 	return api.Rule{
-		Action:   ruleActionBackendToAPI(br.Action),
-		Protocol: br.Protocol,
-		ICMPCode: br.ICMPCode,
-		ICMPType: br.ICMPType,
+		Action:      ruleActionBackendToAPI(br.Action),
+		Protocol:    br.Protocol,
+		ICMPCode:    br.ICMPCode,
+		ICMPType:    br.ICMPType,
 		NotProtocol: br.NotProtocol,
 		NotICMPCode: br.NotICMPCode,
 		NotICMPType: br.NotICMPType,

@@ -1,19 +1,41 @@
-[![Circle CI](https://circleci.com/gh/projectcalico/libcalico.svg?style=svg)](https://circleci.com/gh/projectcalico/libcalico) [![Coverage Status](https://coveralls.io/repos/projectcalico/libcalico/badge.svg?branch=master&service=github)](https://coveralls.io/github/projectcalico/libcalico?branch=master)
-# libcalico
+# Calicoctl
+This repository contains a GO version of the calicoctl binary and the libcalico library.
 
-Libcalico is a library for interacting with the Calico data model. It also contains code for working with veths.
-* It's written in Python (though ports into other languages would be welcomed as PRs)
-* It currently just talks to etcd as the backend datastore.
+## Building calicoctl
+Assuming you have already installed **go v1.6+**, perform the following simple steps to get building:
+
+1. [Install Glide](https://github.com/Masterminds/glide#install)
+
+2. Clone this repository to your Go project path: 
+    ```
+    git clone git@github.com:projectcalico/calicoctl.git $GOPATH/src/github.com/projectcalico/calicoctl
+    ``` 
+
+3. Switch to your project directory:
+    ```
+    cd $GOPATH/src/github.com/projectcalico/calicoctl
+    ```
+
+4. Populate the `vendor/` directory in the project's root with this project's dependencies:
+    ```
+    glide install
+    ```
+
+5. Build calicoctl:
+    ```
+    go build -o calicoctl calicoctl.go
+    ```
+
+6. Run your built binary:
+    ```
+    ./calicoctl --help
+    ```
 
 
-It's currently focused on the the container side of Calico, though again PRs are welcomed to make it more general.
 
-## Running tests
+A dockerized build of calicoctl is available which builds calicoctl in a CentOS 6.6 container.
 
-To run tests for libcalico:
-
-1. [Install Docker](http://docs.docker.com/installation/).
-2. At the root of the libcalico directory, run:
-
-        make test
-[![Analytics](https://calico-ga-beacon.appspot.com/UA-52125893-3/libcalico/README.md?pixel)](https://github.com/igrigorik/ga-beacon)
+Run:
+    ```
+    ./build-binary.sh
+    ```

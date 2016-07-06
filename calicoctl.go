@@ -4,9 +4,10 @@ import (
 	"flag"
 	"fmt"
 
+	"os"
+
 	"github.com/docopt/docopt-go"
 	"github.com/projectcalico/libcalico/commands"
-	"os"
 )
 
 func main() {
@@ -19,7 +20,7 @@ func main() {
     version        Display the version of calicoctl.
 
 See 'calicoctl <command> --help' to read about a specific subcommand.`
-	var err error;
+	var err error
 	doc := commands.EtcdIntro + usage
 
 	if os.Getenv("GLOG") != "" {
