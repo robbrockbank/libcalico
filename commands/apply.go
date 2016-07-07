@@ -25,7 +25,7 @@ Examples:
   cat policy.json | calicoctl apply -f -
 
 Options:
-  -f --filename=<FILENAME>     Filename to use to create the resource.  If set to "-" loads from stdin.
+  -f --filename=<FILENAME>     Filename to use to apply the resource.  If set to "-" loads from stdin.
   -c --config=<CONFIG>         Filename containing connection configuration in YAML or JSON format.
                                [default: /etc/calico/calicoctl.cfg]
 `
