@@ -5,10 +5,12 @@ import (
 	"strings"
 
 	etcd "github.com/coreos/etcd/client"
+	"github.com/coreos/etcd/pkg/transport"
 	"github.com/golang/glog"
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/common"
 	"golang.org/x/net/context"
+	"time"
 )
 
 var (
@@ -16,6 +18,7 @@ var (
 	etcdDeleteOpts = etcd.DeleteOptions{Recursive: true}
 	etcdGetOpts    = etcd.GetOptions{}
 	etcdListOpts   = etcd.GetOptions{Recursive: true, Sort: true}
+	clientTimeout  = 30 * time.Second
 )
 
 // Interface used to calculate a datastore key.
@@ -74,9 +77,21 @@ func (c *Client) connectEtcd() error {
 	}
 
 	// Create the etcd client
+	tls := transport.TLSInfo{
+		CAFile:   c.config.EtcdCACertFile,
+		CertFile: c.config.EtcdCertFile,
+		KeyFile:  c.config.EtcdKeyFile,
+	}
+	transport, err := transport.NewTransport(tls, clientTimeout)
+	if err != nil {
+		return err
+	}
+
 	cfg := etcd.Config{
 		Endpoints: etcdLocation,
-		Transport: etcd.DefaultTransport}
+		Transport: transport,
+		HeaderTimeoutPerRequest: clientTimeout,
+	}
 
 	// Plumb through the username and password if both are configured.
 	if c.config.EtcdUsername != "" && c.config.EtcdPassword != "" {
@@ -94,6 +109,7 @@ func (c *Client) connectEtcd() error {
 	c.connected = true
 	return nil
 }
+
 
 // Create an entry in the datastore.  This errors if the entry already exists.
 func (c *Client) Create(d KeyValue) error {

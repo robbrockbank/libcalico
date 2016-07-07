@@ -1,5 +1,5 @@
 hash: 4f9e929b35b52581f2078dc231ad683dc85bebea57efb1caa5f29a1fe4cd92af
-updated: 2016-07-06T14:48:18.413963884-07:00
+updated: 2016-07-06T15:49:22.877456574-07:00
 imports:
 - name: github.com/cloudfoundry-incubator/candiedyaml
   version: 99c3df83b51532e3615f851d8c2dbb638f5313bf
@@ -7,8 +7,19 @@ imports:
   version: 1c9e0a0e33051fed6c05c141e6fcbfe5c7f2a899
   subpackages:
   - client
+  - pkg/transport
   - pkg/pathutil
   - pkg/types
+  - pkg/fileutil
+  - pkg/tlsutil
+- name: github.com/coreos/go-systemd
+  version: 4fdcc47482107227bd1ed258e5b7bfbc82c9512a
+  subpackages:
+  - journal
+- name: github.com/coreos/pkg
+  version: a48e304ff9331be6d5df352b6b47bd1395ab5dd7
+  subpackages:
+  - capnslog
 - name: github.com/docopt/docopt-go
   version: 784ddc588536785e7299f7272f39101f7faccc3f
 - name: github.com/ghodss/yaml
