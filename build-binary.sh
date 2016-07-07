@@ -15,5 +15,5 @@
 
 set -e
 
-docker build -t calicoctl-build -f build/Dockerfile .
-docker run --rm -v `pwd`:/libcalico calicoctl-build /libcalico/build/build.sh
+docker build -t calicoctl-build -f build-calicoctl/Dockerfile .
+docker run --rm -v `pwd`:/libcalico calicoctl-build /libcalico/build-calicoctl/build.sh
