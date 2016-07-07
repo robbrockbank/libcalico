@@ -1,7 +1,6 @@
 package backend
 
 import (
-	"errors"
 	"fmt"
 
 	"regexp"
@@ -21,7 +20,7 @@ type HostEndpointKey struct {
 
 func (key HostEndpointKey) asEtcdKey() (string, error) {
 	if key.Hostname == "" || key.EndpointID == "" {
-		return "", errors.New("insufficient identifiers")
+		return "", ErrorInsufficientIdentifiers{}
 	}
 	e := fmt.Sprintf("/calico/v1/host/%s/endpoint/%s",
 		key.Hostname, key.EndpointID)

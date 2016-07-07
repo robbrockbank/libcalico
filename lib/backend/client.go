@@ -113,44 +113,59 @@ func (c *Client) connectEtcd() error {
 
 // Create an entry in the datastore.  This errors if the entry already exists.
 func (c *Client) Create(d KeyValue) error {
-	key, _ := d.Key.asEtcdKey()
+	key, err := d.Key.asEtcdKey()
+	if err != nil {
+		return err
+	}
 	glog.V(2).Infof("Create Key: %s\n", key)
 	glog.V(2).Infof("Value: %s\n", d.Value)
-	_, err := c.etcdKeysAPI.Create(context.Background(), key, string(d.Value))
+	_, err = c.etcdKeysAPI.Create(context.Background(), key, string(d.Value))
 	return convertError(err, key)
 }
 
 // Update an existing entry in the datastore.  This errors if the entry does
 // not exist.
 func (c *Client) Update(d KeyValue) error {
-	key, _ := d.Key.asEtcdKey()
+	key, err := d.Key.asEtcdKey()
+	if err != nil {
+		return err
+	}
 	glog.V(2).Infof("Update Key: %s\n", key)
 	glog.V(2).Infof("Value: %s\n", d.Value)
-	_, err := c.etcdKeysAPI.Update(context.Background(), key, string(d.Value))
+	_, err = c.etcdKeysAPI.Update(context.Background(), key, string(d.Value))
 	return convertError(err, key)
 }
 
 // Set an existing entry in the datastore.  This ignores whether an entry already
 // exists.
 func (c *Client) Apply(d KeyValue) error {
-	key, _ := d.Key.asEtcdKey()
+	key, err := d.Key.asEtcdKey()
+	if err != nil {
+		return err
+	}
 	glog.V(2).Infof("Set Key: %s\n", key)
 	glog.V(2).Infof("Value: %s\n", d.Value)
-	_, err := c.etcdKeysAPI.Set(context.Background(), key, string(d.Value), &etcdSetOpts)
+	_, err = c.etcdKeysAPI.Set(context.Background(), key, string(d.Value), &etcdSetOpts)
 	return convertError(err, key)
 }
 
 // Delete an entry in the datastore.  This errors if the entry does not exists.
 func (c *Client) Delete(k KeyInterface) error {
-	key, _ := k.asEtcdDeleteKey()
+	key, err := k.asEtcdDeleteKey()
+	if err != nil {
+		return err
+	}
 	glog.V(2).Infof("Delete Key: %s\n", key)
-	_, err := c.etcdKeysAPI.Delete(context.Background(), key, &etcdDeleteOpts)
+	_, err = c.etcdKeysAPI.Delete(context.Background(), key, &etcdDeleteOpts)
 	return convertError(err, key)
 }
 
 // Get an entry from the datastore.  This errors if the entry does not exist.
 func (c *Client) Get(k KeyInterface) (KeyValue, error) {
-	key, _ := k.asEtcdKey()
+	key, err := k.asEtcdKey()
+	if err != nil {
+		return KeyValue{}, err
+	}
 	glog.V(2).Infof("Get Key: %s\n", key)
 	if results, err := c.etcdKeysAPI.Get(context.Background(), key, &etcdGetOpts); err != nil {
 		return KeyValue{}, convertError(err, key)

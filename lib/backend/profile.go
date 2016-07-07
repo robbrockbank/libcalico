@@ -1,11 +1,11 @@
 package backend
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 
 	"github.com/golang/glog"
+	"github.com/projectcalico/libcalico/lib/common"
 )
 
 var (
@@ -21,7 +21,7 @@ type ProfileKey struct {
 
 func (key ProfileKey) asEtcdKey() (string, error) {
 	if key.Name == "" {
-		return "", errors.New("insufficient identifiers")
+		return "", common.ErrorInsufficientIdentifiers{}
 	}
 	e := fmt.Sprintf("/calico/v1/policy/profile/%s", key.Name)
 	return e, nil

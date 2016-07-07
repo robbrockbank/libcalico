@@ -42,6 +42,8 @@ See 'calicoctl <command> --help' to read about a specific subcommand.`
 			err = commands.Create(args)
 		case "replace":
 			err = commands.Replace(args)
+		case "apply":
+			err = commands.Apply(args)
 		case "delete":
 			err = commands.Delete(args)
 		case "get":

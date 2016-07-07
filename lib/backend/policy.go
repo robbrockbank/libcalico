@@ -1,7 +1,6 @@
 package backend
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 
@@ -20,7 +19,7 @@ type PolicyKey struct {
 
 func (key PolicyKey) asEtcdKey() (string, error) {
 	if key.Name == "" || key.Tier == "" {
-		return "", errors.New("insufficient identifiers")
+		return "", common.ErrorInsufficientIdentifiers{}
 	}
 	e := fmt.Sprintf("/calico/v1/policy/tier/%s/policy/%s",
 		key.Tier, key.Name)
