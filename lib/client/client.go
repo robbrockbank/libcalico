@@ -31,6 +31,7 @@ type conversionHelper interface {
 type backendObjectReaderWriter interface {
 	backendCreate(key backend.KeyInterface, obj interface{}) error
 	backendUpdate(key backend.KeyInterface, obj interface{}) error
+	backendApply(key backend.KeyInterface, obj interface{}) error
 	backendGet(key backend.KeyInterface, objp interface{}) (interface{}, error)
 	backendListConvert([]backend.KeyValue) [][]backend.KeyValue
 	unmarshalIntoNewBackendStruct(kvs []backend.KeyValue, backendObjectp interface{}) (interface{}, error)
@@ -114,6 +115,24 @@ func (c *Client) update(apiObject interface{}, helper conversionHelper, rw backe
 		return err
 	} else {
 		err = rw.backendUpdate(k, b)
+		return err
+	}
+}
+
+// Untyped interface for applying an API object.  This is called from the
+// typed interface.
+func (c *Client) apply(apiObject interface{}, helper conversionHelper, rw backendObjectReaderWriter) error {
+	if rw == nil {
+		rw = c
+	}
+	// All API objects have a Metadata, so extract it.
+	metadata := reflect.ValueOf(apiObject).FieldByName("Metadata").Interface()
+	if k, err := helper.convertMetadataToKeyInterface(metadata); err != nil {
+		return err
+	} else if b, err := helper.convertAPIToBackend(apiObject); err != nil {
+		return err
+	} else {
+		err = rw.backendApply(k, b)
 		return err
 	}
 }
@@ -218,9 +237,9 @@ func (c *Client) backendUpdate(k backend.KeyInterface, obj interface{}) error {
 	}
 }
 
-// Convert the supplied object into a value string and set (create or update) the
+// Convert the supplied object into a value string and apply (create or update) the
 // object in the backend client.
-func (c *Client) backendSet(k backend.KeyInterface, obj interface{}) error {
+func (c *Client) backendApply(k backend.KeyInterface, obj interface{}) error {
 	if obj == nil {
 		glog.V(2).Info("Skipping empty data")
 		return nil
@@ -228,7 +247,7 @@ func (c *Client) backendSet(k backend.KeyInterface, obj interface{}) error {
 	if v, err := json.Marshal(obj); err != nil {
 		return err
 	} else {
-		return c.backend.Set(backend.KeyValue{Key: k, Value: v})
+		return c.backend.Apply(backend.KeyValue{Key: k, Value: v})
 	}
 }
 

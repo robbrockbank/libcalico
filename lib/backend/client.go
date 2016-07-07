@@ -4,13 +4,14 @@ import (
 	"errors"
 	"strings"
 
+	"time"
+
 	etcd "github.com/coreos/etcd/client"
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/golang/glog"
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/common"
 	"golang.org/x/net/context"
-	"time"
 )
 
 var (
@@ -88,8 +89,8 @@ func (c *Client) connectEtcd() error {
 	}
 
 	cfg := etcd.Config{
-		Endpoints: etcdLocation,
-		Transport: transport,
+		Endpoints:               etcdLocation,
+		Transport:               transport,
 		HeaderTimeoutPerRequest: clientTimeout,
 	}
 
@@ -109,7 +110,6 @@ func (c *Client) connectEtcd() error {
 	c.connected = true
 	return nil
 }
-
 
 // Create an entry in the datastore.  This errors if the entry already exists.
 func (c *Client) Create(d KeyValue) error {
@@ -132,7 +132,7 @@ func (c *Client) Update(d KeyValue) error {
 
 // Set an existing entry in the datastore.  This ignores whether an entry already
 // exists.
-func (c *Client) Set(d KeyValue) error {
+func (c *Client) Apply(d KeyValue) error {
 	key, _ := d.Key.asEtcdKey()
 	glog.V(2).Infof("Set Key: %s\n", key)
 	glog.V(2).Infof("Value: %s\n", d.Value)

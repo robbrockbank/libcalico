@@ -51,9 +51,9 @@ Options:
 		} else if results.numResources == 1 {
 			fmt.Printf("Failed to create '%s' resource: %v\n", results.singleKind, results.err)
 		} else if results.singleKind != "" {
-			fmt.Printf("Failed to any create '%s' resources: %v\n", results.singleKind, results.err)
+			fmt.Printf("Failed to create any '%s' resources: %v\n", results.singleKind, results.err)
 		} else {
-			fmt.Printf("Failed to any create 'resources: %v\n", results.err)
+			fmt.Printf("Failed to create any resources: %v\n", results.err)
 		}
 	} else if results.err == nil {
 		if results.singleKind != "" {

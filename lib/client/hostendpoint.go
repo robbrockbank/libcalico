@@ -14,6 +14,7 @@ type HostEndpointInterface interface {
 	Get(api.HostEndpointMetadata) (*api.HostEndpoint, error)
 	Create(*api.HostEndpoint) (*api.HostEndpoint, error)
 	Update(*api.HostEndpoint) (*api.HostEndpoint, error)
+	Apply(*api.HostEndpoint) (*api.HostEndpoint, error)
 	Delete(api.HostEndpointMetadata) error
 }
 
@@ -60,6 +61,11 @@ func (h *hostEndpoints) Create(a *api.HostEndpoint) (*api.HostEndpoint, error) {
 // Create creates a new host endpoint.
 func (h *hostEndpoints) Update(a *api.HostEndpoint) (*api.HostEndpoint, error) {
 	return a, h.c.update(*a, h, nil)
+}
+
+// Create creates a new host endpoint.
+func (h *hostEndpoints) Apply(a *api.HostEndpoint) (*api.HostEndpoint, error) {
+	return a, h.c.apply(*a, h, nil)
 }
 
 // Delete deletes an existing host endpoint.

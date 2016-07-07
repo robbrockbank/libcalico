@@ -20,6 +20,7 @@ type PolicyInterface interface {
 	Get(api.PolicyMetadata) (*api.Policy, error)
 	Create(*api.Policy) (*api.Policy, error)
 	Update(*api.Policy) (*api.Policy, error)
+	Apply(*api.Policy) (*api.Policy, error)
 	Delete(api.PolicyMetadata) error
 }
 
@@ -78,6 +79,23 @@ func (h *policies) Create(a *api.Policy) (*api.Policy, error) {
 // Create creates a new policy.
 func (h *policies) Update(a *api.Policy) (*api.Policy, error) {
 	return a, h.c.update(*a, h, nil)
+}
+
+// Create creates a new policy.
+func (h *policies) Apply(a *api.Policy) (*api.Policy, error) {
+	// Before creating the policy, check that the tier exists, and if this is the
+	// default tier, create it if it doesn't.
+	if a.Metadata.Tier == "" {
+		if _, err := h.c.Tiers().Create(&defaultTier); err != nil {
+			if _, ok := err.(common.ErrorResourceAlreadyExists); !ok {
+				return nil, err
+			}
+		}
+	} else if _, err := h.c.Tiers().Get(api.TierMetadata{Name: a.Metadata.Tier}); err != nil {
+		return nil, common.ErrorResourceDoesNotExist{Name: fmt.Sprintf("Tier '%s'", a.Metadata.Tier)}
+	}
+
+	return a, h.c.apply(*a, h, nil)
 }
 
 // Delete deletes an existing policy.

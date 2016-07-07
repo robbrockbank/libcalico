@@ -11,6 +11,7 @@ type TierInterface interface {
 	Get(api.TierMetadata) (*api.Tier, error)
 	Create(*api.Tier) (*api.Tier, error)
 	Update(*api.Tier) (*api.Tier, error)
+	Apply(*api.Tier) (*api.Tier, error)
 	Delete(api.TierMetadata) error
 }
 
@@ -57,6 +58,11 @@ func (h *tiers) Create(a *api.Tier) (*api.Tier, error) {
 // Create creates a new tier.
 func (h *tiers) Update(a *api.Tier) (*api.Tier, error) {
 	return a, h.c.update(*a, h, nil)
+}
+
+// Create creates a new tier.
+func (h *tiers) Apply(a *api.Tier) (*api.Tier, error) {
+	return a, h.c.apply(*a, h, nil)
 }
 
 // Delete deletes an existing tier.

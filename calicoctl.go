@@ -15,6 +15,8 @@ func main() {
 
     create         Create a resource by filename or stdin.
     replace        Replace a resource by filename or stdin.
+    apply          Apply a resource by filename or stdin.  This creates a resource if
+                   it does not exist, and replaces a resource if it does exists.
     delete         Delete a resource identified by file, stdin or resource type and name.
     get            Get a resource identified by file, stdin or resource type and name.
     version        Display the version of calicoctl.

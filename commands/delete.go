@@ -59,9 +59,9 @@ Options:
 		} else if results.numResources == 1 {
 			fmt.Printf("Failed to delete '%s' resource: %v\n", results.singleKind, results.err)
 		} else if results.singleKind != "" {
-			fmt.Printf("Failed to any delete '%s' resources: %v\n", results.singleKind, results.err)
+			fmt.Printf("Failed to delete any '%s' resources: %v\n", results.singleKind, results.err)
 		} else {
-			fmt.Printf("Failed to any delete 'resources: %v\n", results.err)
+			fmt.Printf("Failed to delete any resources: %v\n", results.err)
 		}
 	} else if results.err == nil {
 		if results.singleKind != "" {

@@ -16,6 +16,7 @@ type ProfileInterface interface {
 	Get(api.ProfileMetadata) (*api.Profile, error)
 	Create(*api.Profile) (*api.Profile, error)
 	Update(*api.Profile) (*api.Profile, error)
+	Apply(*api.Profile) (*api.Profile, error)
 	Delete(api.ProfileMetadata) error
 }
 
@@ -59,9 +60,14 @@ func (h *profiles) Create(a *api.Profile) (*api.Profile, error) {
 	return a, h.c.create(*a, h, h)
 }
 
-// Create creates a new profile.
+// Update updates an existing profile.
 func (h *profiles) Update(a *api.Profile) (*api.Profile, error) {
 	return a, h.c.update(*a, h, h)
+}
+
+// Apply creates a new or replaces an existing profile.
+func (h *profiles) Apply(a *api.Profile) (*api.Profile, error) {
+	return a, h.c.apply(*a, h, h)
 }
 
 // Delete deletes an existing profile.
@@ -141,10 +147,22 @@ func (h *profiles) backendUpdate(k backend.KeyInterface, obj interface{}) error 
 	pk := k.(backend.ProfileKey)
 	if err := h.c.backendUpdate(backend.ProfileTagsKey{pk}, p.Tags); err != nil {
 		return err
-	} else if err := h.c.backendSet(backend.ProfileLabelsKey{pk}, p.Labels); err != nil {
+	} else if err := h.c.backendApply(backend.ProfileLabelsKey{pk}, p.Labels); err != nil {
 		return err
 	} else {
-		return h.c.backendSet(backend.ProfileRulesKey{pk}, p.Rules)
+		return h.c.backendApply(backend.ProfileRulesKey{pk}, p.Rules)
+	}
+}
+
+func (h *profiles) backendApply(k backend.KeyInterface, obj interface{}) error {
+	p := obj.(backend.Profile)
+	pk := k.(backend.ProfileKey)
+	if err := h.c.backendApply(backend.ProfileTagsKey{pk}, p.Tags); err != nil {
+		return err
+	} else if err := h.c.backendApply(backend.ProfileLabelsKey{pk}, p.Labels); err != nil {
+		return err
+	} else {
+		return h.c.backendApply(backend.ProfileRulesKey{pk}, p.Rules)
 	}
 }
 
