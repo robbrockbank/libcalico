@@ -81,7 +81,7 @@ func (c *Client) connectEtcd() error {
 	// takes precedence if both are specified.
 	etcdLocation := []string{}
 	if c.config.EtcdAuthority != "" {
-		etcdLocation = []string{"http://" + c.config.EtcdAuthority}
+		etcdLocation = []string{c.config.EtcdScheme + "://" + c.config.EtcdAuthority}
 	}
 	if c.config.EtcdEndpoints != "" {
 		etcdLocation = strings.Split(c.config.EtcdEndpoints, ",")
