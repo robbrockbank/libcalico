@@ -14,5 +14,8 @@
 
 /*
 Package client implements the northbound client used to manage Calico configuration.
+
+TODO:  See comment in backend doc.  We should remove the need to marshal and unmarshal the
+TODO:  backend data in this client.  The backend client should know how to do that.
  */
 package client

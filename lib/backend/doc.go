@@ -14,5 +14,12 @@
 
 /*
 Package backend implements the backend data store client and associated backend data type.
+
+TODO: At the moment, the backend data structures include keys and list interfaces that allow the
+TODO: backend client to set and get data for each backend type.  However, the backend client
+TODO: interface actually uses byte arrays to read and write meaning the marshaling and unmarshaling
+TODO: is currently done by the calling code.  This doesn't feel right.  This client should be able
+TODO: to marshal and unmarshal.  So perhaps the KeyValue needs to be a KeyObject or some such thing.
  */
+
 package backend
