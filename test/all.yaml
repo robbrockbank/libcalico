@@ -50,7 +50,7 @@
   metadata:
     name: profile1
   spec:
-    tags: [a, b, c, a1]
+    tags: [a, b, c, a1, update]
     rules:
       ingress:
         - action: deny

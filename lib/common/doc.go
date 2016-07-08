@@ -12,11 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package commands
-
-const (
-	EtcdIntro = `Set the ETCD server access information in the environment variables
-or supply details in a config file.
-
-`
-)
+/*
+Package common implements a set of common function and type definitions used by
+both the northbound and southbound interfaces.
+ */
+package common
