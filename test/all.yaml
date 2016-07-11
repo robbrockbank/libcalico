@@ -49,6 +49,9 @@
   kind: profile
   metadata:
     name: profile1
+    labels:
+      type: database
+      THING4: VALUE10/2-F
   spec:
     tags: [a, b, c, a1, update]
     rules:
@@ -56,5 +59,4 @@
         - action: deny
       egress:
         - action: deny
-    labels:
-      type: database
+
