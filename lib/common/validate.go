@@ -94,7 +94,7 @@ func validateSelector(v *validator.Validate, topStruct reflect.Value, currentStr
 	glog.V(2).Infof("Validate selector: %s\n", s)
 	_, err := selector.Parse(s)
 	if err != nil {
-		glog.Errorf("Selector %#v was invalid: %v", s, err)
+		glog.V(2).Infof("Selector %#v was invalid: %v", s, err)
 		return false
 	}
 	return true

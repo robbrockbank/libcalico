@@ -19,7 +19,7 @@
         source:
           tag: web
           net: 1.2.3.4/10
-          selector:
+          selector: has(THING_THING8)
           ports: [1,2,3,4]
         destination:
           tag: database

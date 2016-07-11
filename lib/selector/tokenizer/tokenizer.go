@@ -52,7 +52,7 @@ type Token struct {
 }
 
 const (
-	identifierExpr = `[a-zA-Z_./-][a-zA-Z_./-0-9]*`
+	identifierExpr = `[a-zA-Z_./-][a-zA-Z0-9_./-]*`
 	hasExpr        = `has\(\s*(` + identifierExpr + `)\s*\)`
 	allExpr        = `all\(\s*\)`
 	notInExpr      = `not\s*in\b`
