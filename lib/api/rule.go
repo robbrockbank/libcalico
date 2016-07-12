@@ -40,12 +40,12 @@ type EntityRule struct {
 	Tag      string `json:"tag,omitempty" validate:"omitempty,tag"`
 	Net      *IPNet `json:"net,omitempty" validate:"omitempty"`
 	Selector string `json:"selector,omitempty" validate:"omitempty,selector"`
-	Ports    []int  `json:"ports,omitempty" validate:"omitempty,dive,gte=0,lte=65535"`
+	Ports    []Port `json:"ports,omitempty" validate:"omitempty,dive"`
 
 	NotTag      string `json:"!tag,omitempty" validate:"omitempty,tag"`
 	NotNet      *IPNet `json:"!net,omitempty" validate:"omitempty"`
 	NotSelector string `json:"!selector,omitempty" validate:"omitempty,selector"`
-	NotPorts    []int  `json:"!ports,omitempty" validate:"omitempty,dive,gte=0,lte=65535"`
+	NotPorts    []Port `json:"!ports,omitempty" validate:"omitempty,dive"`
 }
 
 // Register v1 structure validators to validate cross-field dependencies in any of the

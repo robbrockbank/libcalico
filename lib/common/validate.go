@@ -17,6 +17,8 @@ package common
 import (
 	"reflect"
 	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/golang/glog"
 	"github.com/projectcalico/libcalico/lib/selector"
@@ -49,6 +51,7 @@ func init() {
 	RegisterFieldValidator("order", validateOrder)
 
 	RegisterStructValidator(validateProtocol, Protocol{})
+	RegisterStructValidator(validatePort, Port{})
 }
 
 func RegisterFieldValidator(key string, fn validator.Func) {
@@ -139,5 +142,41 @@ func validateProtocol(v *validator.Validate, structLevel *validator.StructLevel)
 		structLevel.ReportError(reflect.ValueOf(p.NumVal), "Protocol", "protocol", "protocol number invalid")
 	} else if p.Type == NumOrStringString && !protocolRegex.MatchString(p.StrVal) {
 		structLevel.ReportError(reflect.ValueOf(p.StrVal), "Protocol", "protocol", "protocol name invalid")
+	}
+}
+
+func validatePort(v *validator.Validate, structLevel *validator.StructLevel) {
+	glog.V(2).Infof("Validate port")
+	p := structLevel.CurrentStruct.Interface().(Port)
+	glog.V(2).Infof("Validate port: %v %s %v\n", p.Type, p.StrVal, p.NumVal)
+	if p.Type == NumOrStringNum && ((p.NumVal < 0) || (p.NumVal > 65535)) {
+		structLevel.ReportError(reflect.ValueOf(p.NumVal), "Port", "port", "port number invalid")
+		return
+	} else if p.Type == NumOrStringString {
+		ports := strings.Split(p.StrVal, ":")
+		if len(ports) > 2 {
+			structLevel.ReportError(reflect.ValueOf(p.StrVal), "Port", "port", "port range invalid")
+			return
+		}
+		first := 0
+		for _, port := range ports {
+			glog.V(2).Infof("Validate range, checking port %s\n", port)
+			num, err := strconv.Atoi(port)
+			if err != nil {
+				structLevel.ReportError(reflect.ValueOf(p.StrVal), "Port", "port", "port range invalid")
+				return
+			}
+
+			if num < 0 || num > 65535 {
+				structLevel.ReportError(reflect.ValueOf(p.StrVal), "Port", "port", "port number invalid")
+				return
+			}
+
+			if num < first {
+				structLevel.ReportError(reflect.ValueOf(p.StrVal), "Port", "port", "port range invalid")
+				return
+			}
+			first = num
+		}
 	}
 }
