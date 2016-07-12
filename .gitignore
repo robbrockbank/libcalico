@@ -10,7 +10,7 @@ cover
 calicobuild.created
 caliconode.created
 calico_containers/pycalico.egg-info/
-calicoctl
-calicoctl-*
+calicoctl/calicoctl
+calicoctl/calicoctl-*
 vendor
 .idea
