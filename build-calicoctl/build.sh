@@ -23,7 +23,7 @@ mkdir -p $GOPATH/src/github.com/projectcalico/
 cp -r /libcalico $GOPATH/src/github.com/projectcalico/
 
 cd $GOPATH/src/github.com/projectcalico/libcalico
-rm -rf vendor calicoctl
+rm -rf vendor calicoctl/calicoctl
 glide install
 
 REVISION=$(git rev-parse HEAD)
@@ -35,14 +35,15 @@ else
 fi
 DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-sed -i "s/__BUILD_DATE__/${DATE}/" commands/build_info.go
-sed -i "s/__GIT_REVISION__/${REVISION}/" commands/build_info.go
-sed -i "s/__GIT_DESCRIPTION__/${DESCRIPTION}/" commands/build_info.go
+sed -i "s/__BUILD_DATE__/${DATE}/" calicoctl/commands/build_info.go
+sed -i "s/__GIT_REVISION__/${REVISION}/" calicoctl/commands/build_info.go
+sed -i "s/__GIT_DESCRIPTION__/${DESCRIPTION}/" calicoctl/commands/build_info.go
 
-go build -o calicoctl calicoctl.go
-cp calicoctl /libcalico/calicoctl-$DESCRIPTION
-cd /libcalico
+cd calicoctl
+go build
+cp calicoctl /libcalico/calicoctl/calicoctl-$DESCRIPTION
+cd /libcalico/calicoctl
 ln -sf calicoctl-$DESCRIPTION calicoctl
 
 echo
-echo "Binary calicoctl-$DESCRIPTION created"
+echo "Binary calicoctl/calicoctl-$DESCRIPTION created"

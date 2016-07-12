@@ -102,7 +102,7 @@ func ruleBackendToAPI(br backend.Rule) api.Rule {
 // Convert an API Rule structure slice to a Backend Rule structure slice
 func rulesAPIToBackend(ars []api.Rule) []backend.Rule {
 	if ars == nil {
-		return nil
+		return []backend.Rule{}
 	}
 
 	brs := make([]backend.Rule, len(ars))

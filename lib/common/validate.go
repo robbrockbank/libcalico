@@ -46,6 +46,7 @@ func init() {
 	RegisterFieldValidator("tag", validateTag)
 	RegisterFieldValidator("labels", validateLabels)
 	RegisterFieldValidator("interface", validateInterface)
+	RegisterFieldValidator("order", validateOrder)
 
 	RegisterStructValidator(validateProtocol, Protocol{})
 }
@@ -122,6 +123,12 @@ func validateInterface(v *validator.Validate, topStruct reflect.Value, currentSt
 	b := []byte(field.String())
 	glog.V(2).Infof("Validate interface: %s\n", b)
 	return nameRegex.Match(b)
+}
+
+func validateOrder(v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
+	f := field.Interface()
+	glog.V(2).Infof("Validate order: %v\n", f)
+	return f != nil
 }
 
 func validateProtocol(v *validator.Validate, structLevel *validator.StructLevel) {

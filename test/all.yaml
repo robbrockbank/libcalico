@@ -36,6 +36,13 @@
           "!ports": [100]
     selector:
 - apiVersion: v1
+  kind: policy
+  metadata:
+    name: policy2
+    tier: tier2
+  spec:
+    order: 0
+- apiVersion: v1
   kind: hostEndpoint
   metadata:
     name: endpoint1
@@ -45,6 +52,7 @@
   spec:
     interface: eth0
     profiles: [prof1, prof2]
+    expectedIPs: [1.2.3.4, "00:bb::aa"]
 - apiVersion: v1
   kind: profile
   metadata:

@@ -28,7 +28,7 @@ type PolicyMetadata struct {
 }
 
 type PolicySpec struct {
-	Order        *float32 `json:"order,omitempty"`
+	Order        *float32 `json:"order" validate:"order"`
 	IngressRules []Rule   `json:"ingress,omitempty" validate:"omitempty,dive"`
 	EgressRules  []Rule   `json:"egress,omitempty" validate:"omitempty,dive"`
 	Selector     string   `json:"selector" validate:"selector"`

@@ -15,8 +15,6 @@
 package client
 
 import (
-	"net"
-
 	"github.com/projectcalico/libcalico/lib/api"
 	"github.com/projectcalico/libcalico/lib/backend"
 	. "github.com/projectcalico/libcalico/lib/common"
@@ -119,7 +117,7 @@ func (h *hostEndpoints) convertAPIToBackend(a interface{}) (interface{}, error) 
 	var ipv4Addrs []IP
 	var ipv6Addrs []IP
 	for _, ip := range ah.Spec.ExpectedIPs {
-		if len(ip.IP) == net.IPv4len {
+		if ip.To4() != nil {
 			ipv4Addrs = append(ipv4Addrs, ip)
 		} else {
 			ipv6Addrs = append(ipv6Addrs, ip)
