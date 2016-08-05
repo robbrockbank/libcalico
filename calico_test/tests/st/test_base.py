@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
+import re
 import subprocess
+from netaddr import IPAddress
 from unittest import TestCase
 
 from tests.st.utils.utils import (get_ip, ETCD_SCHEME, ETCD_CA, ETCD_CERT,
@@ -43,6 +45,9 @@ class TestBase(TestCase):
         # Delete /calico if it exists. This ensures each test has an empty data
         # store at start of day.
         self.curl_etcd("calico", options=["-XDELETE"])
+
+        # Remove any tunl IP address if one is configured on the host.
+        self.remove_tunl_ip()
 
         # Log a newline to ensure that the first log appears on its own line.
         logger.info("")
@@ -114,3 +119,27 @@ class TestBase(TestCase):
                 shell=True)
 
         return json.loads(rc.strip())
+
+    def remove_tunl_ip(self):
+        """
+        Remove tunl IP address if assigned.
+        :return:
+        """
+        try:
+            output = subprocess.check_output(["ip", "addr", "show", "tunl0"])
+        except subprocess.CalledProcessError:
+            return
+
+        logger.info("Output from tunl0 query:\n%s" % output)
+        match = re.search(r'inet ([\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3})', output)
+        if not match:
+            return
+
+        ip = str(IPAddress(match.group(1)))
+
+        try:
+            output = subprocess.check_output(["ip", "addr", "del", ip, "dev", "tunl0"])
+        except subprocess.CalledProcessError:
+            return
+
+        logger.info("Output from removing tunl0 IP %s:\n%s" % (ip, output))
